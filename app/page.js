@@ -31,6 +31,7 @@ export default function Home() {
           <Button variant="contained" color="secondary" startIcon={<EmailIcon />}>
             Contact
           </Button>
+          <Button variant="contained" color="secondary" startIcon={<EmailIcon />}>hello ayush</Button>
         </Stack>
 
         <Paper elevation={3} sx={{ p: 3, mt: 4 }}>
