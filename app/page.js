@@ -10,6 +10,7 @@ export default function Home() {
   return (
     <Container maxWidth="lg">
       <Box sx={{ my: 4 }}>
+        {/* trial comment */}
         <Typography variant="h3" component="h1" gutterBottom color="primary">
           Welcome to ApplyForMe
         </Typography>
