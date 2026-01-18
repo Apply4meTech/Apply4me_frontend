@@ -1,0 +1,177 @@
+'use client';
+
+import React from 'react';
+import { Box, Container, Typography } from '@mui/material';
+
+export default function JobSearchingCard() {
+  return (
+    <Container maxWidth="lg">
+      <Box
+        sx={{
+          position: 'relative',
+          marginTop: { xs: '-4rem', md: '-6rem' },
+          zIndex: 10,
+        }}
+      >
+        <Box
+          sx={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: { xs: '1rem', md: '1.5rem' },
+            padding: { xs: '2rem', md: '3rem', lg: '4rem' },
+            boxShadow: '0 0.625rem 1.5rem rgba(0, 0, 0, 0.15)',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', lg: 'row' },
+              gap: { xs: '2rem', lg: '3rem' },
+              alignItems: { xs: 'flex-start', lg: 'center' },
+            }}
+          >
+            {/* Left Side - Text Content */}
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                component="h2"
+                sx={{
+                  fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem', lg: '3.5rem' },
+                  fontWeight: 700,
+                  color: '#000000',
+                  marginBottom: '1.5rem',
+                  fontFamily: 'inherit',
+                  lineHeight: 1.2,
+                }}
+              >
+                Job Searching is a Full-Time Job
+              </Typography>
+
+              <Typography
+                component="p"
+                sx={{
+                  fontSize: { xs: '1rem', md: '1.125rem' },
+                  color: '#000000',
+                  lineHeight: 1.7,
+                  fontFamily: 'inherit',
+                }}
+              >
+                It takes the average professional between{' '}
+                <Box
+                  component="span"
+                  sx={{
+                    color: '#3B82F6',
+                    fontWeight: 600,
+                  }}
+                >
+                  80 to 120 hours
+                </Box>{' '}
+                to land a new role. Stop spending your evenings and weekends filling out repetitive forms.
+              </Typography>
+            </Box>
+
+            {/* Right Side - Average Time Spent Card */}
+            <Box
+              sx={{
+                backgroundColor: '#FFFFFF',
+                border: '0.125rem solid #EF4444',
+                borderRadius: '1rem',
+                padding: { xs: '1.5rem', md: '2rem' },
+                minWidth: { xs: '100%', lg: '18rem' },
+                maxWidth: { xs: '100%', lg: '20rem' },
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  marginBottom: '1rem',
+                }}
+              >
+                {/* Hourglass Icon */}
+                <Box
+                  sx={{
+                    width: { xs: '2rem', md: '2.5rem' },
+                    height: { xs: '2rem', md: '2.5rem' },
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <svg
+                    width="100%"
+                    height="100%"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M6 2H18V4L14 8C14 10 16 11 16 12C16 13 14 14 14 16L18 20V22H6V20L10 16C10 14 8 13 8 12C8 11 10 10 10 8L6 4V2Z"
+                      fill="#EF4444"
+                    />
+                  </svg>
+                </Box>
+                <Box>
+                  <Typography
+                    component="div"
+                    sx={{
+                      fontSize: { xs: '0.75rem', md: '0.875rem' },
+                      color: '#000000',
+                      fontFamily: 'inherit',
+                      marginBottom: '0.25rem',
+                    }}
+                  >
+                    Average Time Spent
+                  </Typography>
+                  <Typography
+                    component="div"
+                    sx={{
+                      fontSize: { xs: '1.5rem', md: '1.75rem' },
+                      fontWeight: 700,
+                      color: '#000000',
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    100+ Hours
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Progress Bar */}
+              <Box sx={{ marginTop: '1rem' }}>
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: '0.5rem',
+                    backgroundColor: '#F3F4F6',
+                    borderRadius: '0.25rem',
+                    overflow: 'hidden',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: '65%',
+                      height: '100%',
+                      backgroundColor: '#EF4444',
+                      borderRadius: '0.25rem',
+                    }}
+                  />
+                </Box>
+                <Typography
+                  component="div"
+                  sx={{
+                    fontSize: '0.75rem',
+                    color: '#9CA3AF',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  Time lost on applications
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    </Container>
+  );
+}

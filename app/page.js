@@ -4,6 +4,13 @@ import React from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import Header from '../components/Header';
 import Button from '../components/Button';
+import JobSearchingCard from '../components/landingPageComponents/jobSearchingcCard/JobSearchingCard';
+import StatisticsSection from '../components/landingPageComponents/StatisticsSection/StatisticsSection';
+import SixStepCards from '../components/landingPageComponents/6stepCards/6stepCards';
+import ROICalculator from '../components/landingPageComponents/ROICalculator/ROICalculator';
+import SuccessStories from '../components/landingPageComponents/SuccessStories/SuccessStories';
+import CTASection from '../components/landingPageComponents/CTASection/CTASection';
+import Footer from '../components/Footer/Footer';
 
 export default function Home() {
   return (
@@ -17,16 +24,13 @@ export default function Home() {
     >
       <Header />
 
-      {/* Hero Section */}
+      {/* Hero Section with Blue Gradient Background */}
       <Box
         component="main"
         sx={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
+          position: 'relative',
           padding: { xs: '3rem 1.5rem', md: '5rem 2rem' },
+          paddingBottom: { xs: '8rem', md: '12rem' },
           textAlign: 'center',
         }}
       >
@@ -141,7 +145,40 @@ export default function Home() {
             </Typography>
           </Box>
         </Container>
+
       </Box>
+
+      <Box sx={{  minHeight: '100vh',
+        background: '#F1F2F4',
+        display: 'flex',
+        flexDirection: 'column',}}>
+
+     
+      <JobSearchingCard />
+
+      {/* Statistics Section */}
+      <StatisticsSection />
+      </Box>
+
+      <Box sx={{  minHeight: '100vh',
+        background: '#F1F2F4',
+        display: 'flex',
+        flexDirection: 'column',}}>
+          <SixStepCards />
+        </Box>
+
+      {/* ROI Calculator Section */}
+      <ROICalculator />
+
+      {/* Success Stories Section */}
+      <SuccessStories />
+
+      {/* CTA Section */}
+      <CTASection />
+
+      {/* Footer */}
+      <Footer />
+
     </Box>
   );
 }
