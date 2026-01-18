@@ -22,8 +22,6 @@ export default function Home() {
           flexDirection: 'column',
         }}
       >
-
-        {/* Hero Section with Blue Gradient Background */}
         <Box
           component="main"
           sx={{
