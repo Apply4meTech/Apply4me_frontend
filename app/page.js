@@ -73,7 +73,7 @@ export default function Home() {
               The premium concierge service that applies to jobs for you. Reclaim your time and accelerate your career with expert-led applications.
             </Typography>
 
-            {/* CTA Buttons */}
+            
             <Box
               sx={{
                 display: 'flex',
