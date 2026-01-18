@@ -79,7 +79,7 @@ export default function Footer() {
               textAlign: { xs: 'center', md: 'center' },
             }}
           >
-            ©2024 Apply For Me Inc. All rights reserved.
+            ©2026 Apply For Me Inc. All rights reserved.
           </Typography>
 
           {/* Right Side - Social Media Icons */}

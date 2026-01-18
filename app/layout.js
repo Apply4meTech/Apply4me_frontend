@@ -1,8 +1,7 @@
 import { Roboto, Manrope } from "next/font/google";
 import "./globals.css";
 import ThemeRegistry from "../components/ThemeRegistry";
-import Header from "../components/Header";
-import Footer from "../components/Footer/Footer";
+import StoreProvider from "../store/StoreProvider";
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
@@ -19,7 +18,7 @@ const manrope = Manrope({
 });
 
 export const metadata = {
-  title: "APPLY FOR ME About Us - Arctic Light Theme",
+  title: "APPLY FOR ME",
   description: "ApplyForMe Frontend Application",
 };
 
@@ -33,11 +32,11 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className={`${roboto.className} ${manrope.variable}`}>
-        <ThemeRegistry>
-          <Header />
-          {children}
-          <Footer />
-        </ThemeRegistry>
+        <StoreProvider>
+          <ThemeRegistry>
+            {children}
+          </ThemeRegistry>
+        </StoreProvider>
       </body>
     </html>
   );
