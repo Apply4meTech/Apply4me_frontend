@@ -9,6 +9,7 @@ import SixStepCards from '../components/landingPageComponents/6stepCards/6stepCa
 import ROICalculator from '../components/landingPageComponents/ROICalculator/ROICalculator';
 import SuccessStories from '../components/landingPageComponents/SuccessStories/SuccessStories';
 import CTASection from '../components/landingPageComponents/CTASection/CTASection';
+import MainLayout from '../components/layouts/MainLayout';
 
 export default function Home() {
   return (
@@ -54,140 +55,125 @@ export default function Home() {
               </Box>
             </Typography>
 
-              {/* Description */}
-              <Typography
-                component="p"
-                sx={{
-                  fontSize: { xs: '1.125rem', md: '1.25rem' },
-                  color: '#CBD5E1',
-                  maxWidth: '42rem',
-                  margin: '0 auto',
-                  lineHeight: 1.75,
-                  fontWeight: 300,
-                  fontFamily: 'inherit',
-                }}
-              >
-                The premium concierge service that applies to jobs for you. Reclaim your time and accelerate your career with expert-led applications.
-              </Typography>
-            </Box>
+            {/* Description */}
+            <Typography
+              component="p"
+              sx={{
+                fontSize: { xs: '1rem', md: '1.25rem' },
+                color: '#FFFFFF',
+                maxWidth: '42rem',
+                margin: '0 auto 3rem',
+                lineHeight: 1.6,
+                opacity: 0.9,
+                fontFamily: 'inherit',
+              }}
+            >
+              The premium concierge service that applies to jobs for you. Reclaim your time and accelerate your career with expert-led applications.
+            </Typography>
 
             {/* CTA Buttons */}
             <Box
               sx={{
                 display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' },
                 gap: '1rem',
                 justifyContent: 'center',
-                alignItems: 'center',
-                marginTop: '1rem',
+                flexWrap: 'wrap',
+                marginBottom: '4rem',
               }}
             >
-              <Button 
-                variant="primary"
-                sx={{
-                  minWidth: { xs: '100%', sm: '12.5rem' },
-                  fontSize: '1rem',
-                  fontWeight: 700,
-                  padding: '1rem 2rem',
-                }}
-              >
-                Start Free Trial
-              </Button>
-              <Button 
-                variant="secondary"
-                sx={{
-                  minWidth: { xs: '100%', sm: '12.5rem' },
-                  fontSize: '1rem',
-                  fontWeight: 700,
-                  padding: '1rem 2rem',
-                }}
-              >
-                Book Strategy Call
-              </Button>
+              <Button variant="primary">Start Free Trial</Button>
+              <Button variant="secondary">Book Strategy Call</Button>
             </Box>
 
             {/* Social Proof */}
             <Box
               sx={{
-                marginTop: '2rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '0.5rem',
-                fontSize: { xs: '0.875rem', md: '0.875rem' },
-                color: '#94A3B8',
+                gap: '0.75rem',
               }}
             >
               
               <Box
                 sx={{
                   display: 'flex',
+                  gap: '-0.5rem',
                   marginRight: '0.5rem',
-                  '& > *:not(:first-of-type)': {
-                    marginLeft: '-0.5rem',
-                  },
                 }}
               >
                 {[1, 2, 3].map((index) => (
                   <Box
                     key={index}
                     sx={{
-                      width: '2rem',
-                      height: '2rem',
+                      width: { xs: '2rem', md: '2.5rem' },
+                      height: { xs: '2rem', md: '2.5rem' },
                       borderRadius: '50%',
-                      backgroundColor: '#D1D5DB',
-                      border: '0.125rem solid #1E293B',
+                      backgroundColor: index === 1 ? '#60A5FA' : '#FFFFFF',
+                      border: '0.125rem solid #FFFFFF',
+                      marginLeft: index > 1 ? '-0.5rem' : '0',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
-                  />
+                  >
+                    {index === 1 && (
+                      <Box
+                        sx={{
+                          width: '60%',
+                          height: '60%',
+                          backgroundColor: '#FFFFFF',
+                          borderRadius: '50%',
+                        }}
+                      />
+                    )}
+                  </Box>
                 ))}
               </Box>
               <Typography
                 component="span"
                 sx={{
-                  color: '#94A3B8',
-                  fontSize: '0.875rem',
+                  color: '#FFFFFF',
+                  fontSize: { xs: '0.875rem', md: '1rem' },
                   fontFamily: 'inherit',
                 }}
               >
                 Trusted by 2,000+ Job Seekers
               </Typography>
             </Box>
-          </Box>
-        </Container>
+          </Container>
 
-      </Box>
+        </Box>
 
-      <Box sx={{
-        background: '#EDF2F7',
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
+        <Box sx={{  minHeight: '100vh',
+          background: '#F1F2F4',
+          display: 'flex',
+          flexDirection: 'column',}}>
+
+       
         <JobSearchingCard />
 
         {/* Statistics Section */}
         <StatisticsSection />
+        </Box>
+
+        <Box sx={{  minHeight: '100vh',
+          background: '#F1F2F4',
+          display: 'flex',
+          flexDirection: 'column',}}>
+            <SixStepCards />
+          </Box>
+
+        {/* ROI Calculator Section */}
+        <ROICalculator />
+
+        {/* Success Stories Section */}
+        <SuccessStories />
+
+        {/* CTA Section */}
+        <CTASection />
+
       </Box>
-
-      <Box sx={{
-        background: '#EDF2F7',
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-        <SixStepCards />
-      </Box>
-
-      {/* ROI Calculator Section */}
-      <ROICalculator />
-
-      {/* Success Stories Section */}
-      <SuccessStories />
-
-      {/* CTA Section */}
-      <CTASection />
-
-    </Box>
+    </MainLayout>
   );
 }
