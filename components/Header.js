@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Box, Container } from '@mui/material';
+import { Box, Container, useMediaQuery, useTheme, Drawer } from '@mui/material';
 import Button from './Button';
 
 const Header = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down(650));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -87,7 +89,7 @@ const Header = () => {
             component="h2"
             sx={{
               color: '#FFFFFF',
-              fontSize: '1.25rem',
+              fontSize: isMobile ? '1rem' : '1.25rem',
               fontWeight: 700,
               lineHeight: 1.2,
               letterSpacing: '0.025em',
@@ -168,23 +170,104 @@ const Header = () => {
         </Box>
       </Box>
 
-      {/* Mobile Menu Dropdown */}
-      {mobileMenuOpen && (
+      {/* Mobile Menu Drawer */}
+      <Drawer
+        anchor="left"
+        open={mobileMenuOpen}
+        onClose={toggleMobileMenu}
+        sx={{
+          display: { xs: 'block', lg: 'none' },
+          '& .MuiDrawer-paper': {
+            width: { xs: '280px', sm: '320px' },
+            backgroundColor: 'rgba(15, 23, 42, 0.98)',
+            backdropFilter: 'blur(30px)',
+            WebkitBackdropFilter: 'blur(30px)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+          },
+        }}
+      >
         <Box
           sx={{
-            display: { xs: 'block', md: 'none' },
-            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-            borderTop: '0.0625rem solid rgba(255, 255, 255, 0.1)',
-            padding: '1.5rem',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            paddingTop: 0,
+            paddingX: '1.5rem',
+            paddingBottom: '1.5rem',
           }}
         >
+          {/* Logo and Text at Top - Aligned with Header */}
+          <Box
+            sx={{
+              paddingTop: { xs: '1rem', md: '1rem' },
+              paddingBottom: { xs: '1rem', md: '1rem' },
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            }}
+          >
+            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1rem',
+              }}
+            >
+            <Box
+              sx={{
+                width: '32px',
+                height: '32px',
+                color: '#2563EB',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <svg
+                className="w-full h-full"
+                fill="none"
+                viewBox="0 0 48 48"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clipRule="evenodd"
+                  d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z"
+                  fill="currentColor"
+                  fillRule="evenodd"
+                />
+                <path
+                  clipRule="evenodd"
+                  d="M24 8.18819L33.4123 11.574L24 15.2071L14.5877 11.574L24 8.18819ZM9 15.8487L21 20.4805V37.6263L9 32.9945V15.8487ZM27 37.6263V20.4805L39 15.8487V32.9945L27 37.6263ZM25.354 2.29885C24.4788 1.98402 23.5212 1.98402 22.646 2.29885L4.98454 8.65208C3.7939 9.08038 3 10.2097 3 11.475V34.3663C3 36.0196 4.01719 37.5026 5.55962 38.098L22.9197 44.7987C23.6149 45.0671 24.3851 45.0671 25.0803 44.7987L42.4404 38.098C43.9828 37.5026 45 36.0196 45 34.3663V11.475C45 10.2097 44.2061 9.08038 43.0155 8.65208L25.354 2.29885Z"
+                  fill="currentColor"
+                  fillRule="evenodd"
+                />
+              </svg>
+            </Box>
+            <Box
+              component="h2"
+              sx={{
+                color: '#FFFFFF',
+                fontSize: isMobile ? '1rem' : '1.25rem',
+                fontWeight: 700,
+                lineHeight: 1.2,
+                letterSpacing: '0.025em',
+                margin: 0,
+              }}
+            >
+              APPLY FOR ME
+            </Box>
+            </Link>
+          </Box>
+
+          {/* Menu Items */}
           <Box
             sx={{
               display: 'flex',
               flexDirection: 'column',
               gap: '1.5rem',
-              maxWidth: 'lg',
-              margin: '0 auto',
+              flex: 1,
+              paddingTop: '1.5rem',
             }}
           >
             {navLinks.map((link) => (
@@ -195,9 +278,10 @@ const Header = () => {
                 style={{
                   color: '#FFFFFF',
                   textDecoration: 'none',
-                  fontSize: '1rem',
+                  fontSize: isMobile ? '0.875rem' : '1rem',
                   fontWeight: 400,
                   transition: 'opacity 0.3s ease',
+                  padding: '0.5rem 0',
                 }}
                 onMouseEnter={(e) => (e.target.style.opacity = '0.7')}
                 onMouseLeave={(e) => (e.target.style.opacity = '1')}
@@ -205,14 +289,16 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
-            <Box sx={{ marginTop: '0.5rem' }}>
-              <Button variant="primary" fullWidth>
-                Get Started
-              </Button>
-            </Box>
+          </Box>
+
+          {/* CTA Button at Bottom */}
+          <Box sx={{ marginTop: 'auto', paddingTop: '1.5rem' }}>
+            <Button variant="primary" fullWidth onClick={() => setMobileMenuOpen(false)}>
+              Get Started
+            </Button>
           </Box>
         </Box>
-      )}
+      </Drawer>
     </Box>
   );
 };

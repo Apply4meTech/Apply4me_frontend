@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Box, Container, Typography, Button, Grid, Paper } from '@mui/material';
+import { Box, Container, Typography, Button, Grid, Paper, useMediaQuery, useTheme } from '@mui/material';
 import {
   ArrowForward,
   Visibility,
@@ -18,6 +18,9 @@ import {
 import Link from 'next/link';
 
 export default function AboutUs() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down(650));
+
   return (
     <Box
       sx={{
@@ -54,26 +57,16 @@ export default function AboutUs() {
             overflow: 'hidden',
           }}
         >
-          {/* Gradient overlays */}
+          {/* Gradient overlay */}
           <Box
             sx={{
               position: 'absolute',
               top: 0,
               right: 0,
-              width: '75%',
+              width: '100%',
               height: '100%',
               background:
                 'radial-gradient(circle at top right, rgba(37,99,235,0.25), transparent 60%)',
-            }}
-          />
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: '-20%',
-              left: '-20%',
-              width: '80%',
-              height: '80%',
-              opacity: 0.9,
             }}
           />
 
@@ -93,7 +86,7 @@ export default function AboutUs() {
               <Typography
                 component="h1"
                 sx={{
-                  fontSize: { xs: '2.25rem', md: '3rem', lg: '3.75rem' },
+                  fontSize: isMobile ? '1.75rem' : { xs: '2.25rem', md: '3rem', lg: '3.75rem' },
                   fontWeight: 900,
                   lineHeight: 1.2,
                   letterSpacing: '-0.02em',
@@ -118,7 +111,7 @@ export default function AboutUs() {
               <Typography
                 sx={{
                   color: '#CBD5E1',
-                  fontSize: { xs: '1.125rem', md: '1.25rem' },
+                  fontSize: isMobile ? '0.875rem' : { xs: '1.125rem', md: '1.25rem' },
                   maxWidth: '672px',
                   mx: 'auto',
                   lineHeight: 1.75,
@@ -211,8 +204,8 @@ export default function AboutUs() {
               border: '1px solid rgba(255, 255, 255, 0.9)',
               backdropFilter: 'blur(30px)',
               WebkitBackdropFilter: 'blur(30px)',
-              borderRadius: '24px',
-              p: { xs: 4, md: 6 },
+              borderRadius: isMobile ? '16px' : '24px',
+              p: isMobile ? 2.5 : { xs: 4, md: 6 },
               position: 'relative',
               overflow: 'hidden',
               boxShadow: '0 20px 40px -10px rgba(30, 41, 59, 0.08)',
@@ -286,13 +279,13 @@ export default function AboutUs() {
                   gap: '1rem',
                 }}
               >
-                <Typography sx={{ fontSize: '1.125rem', lineHeight: 1.75 }}>
+                <Typography sx={{ fontSize: isMobile ? '0.875rem' : '1.125rem', lineHeight: 1.75 }}>
                   It started with a simple frustration: spending hours entering
                   the same resume data into antiquated applicant tracking
                   systems, only to be ghosted. We realized that the most
                   talented professionals were being buried under busy work.
                 </Typography>
-                <Typography sx={{ fontSize: '1.125rem', lineHeight: 1.75 }}>
+                <Typography sx={{ fontSize: isMobile ? '0.875rem' : '1.125rem', lineHeight: 1.75 }}>
                   <Box component="strong" sx={{ fontWeight: 700 }}>
                     APPLY FOR ME
                   </Box>{' '}
@@ -310,8 +303,8 @@ export default function AboutUs() {
         <Box
           sx={{
             width: '100%',
-            px: { xs: 1, sm: 1.5, md: 2.5 },
-            mb: { xs: 6, md: 6 },
+            px: isMobile ? 2 : { xs: 1, sm: 1.5, md: 2.5 },
+            mb: isMobile ? 4 : { xs: 6, md: 6 },
             maxWidth: '1200px',
             mx: 'auto',
           }}
@@ -320,7 +313,7 @@ export default function AboutUs() {
             sx={{
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-              gap: '2rem',
+              gap: isMobile ? '1.25rem' : '2rem',
             }}
           >
             <Paper
@@ -330,8 +323,8 @@ export default function AboutUs() {
                 border: '1px solid rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(30px)',
                 WebkitBackdropFilter: 'blur(30px)',
-                borderRadius: '16px',
-                p: { xs: 4, md: 5 },
+                borderRadius: isMobile ? '12px' : '16px',
+                p: isMobile ? 2.5 : { xs: 4, md: 5 },
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
@@ -361,7 +354,7 @@ export default function AboutUs() {
               <Typography
                 component="h3"
                 sx={{
-                  fontSize: '1.5rem',
+                  fontSize: isMobile ? '1.125rem' : '1.5rem',
                   fontWeight: 700,
                   color: '#1E293B',
                   mb: 1,
@@ -374,7 +367,7 @@ export default function AboutUs() {
                   color: '#0F172A',
                   opacity: 0.7,
                   lineHeight: 1.75,
-                  fontSize: '1.125rem',
+                  fontSize: isMobile ? '0.875rem' : '1.125rem',
                 }}
               >
                 To democratize access to career opportunities by removing the
@@ -389,8 +382,8 @@ export default function AboutUs() {
                 border: '1px solid rgba(255, 255, 255, 0.9)',
                 backdropFilter: 'blur(30px)',
                 WebkitBackdropFilter: 'blur(30px)',
-                borderRadius: '16px',
-                p: { xs: 4, md: 5 },
+                borderRadius: isMobile ? '12px' : '16px',
+                p: isMobile ? 2.5 : { xs: 4, md: 5 },
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
@@ -420,7 +413,7 @@ export default function AboutUs() {
               <Typography
                 component="h3"
                 sx={{
-                  fontSize: '1.5rem',
+                  fontSize: isMobile ? '1.125rem' : '1.5rem',
                   fontWeight: 700,
                   color: '#1E293B',
                   mb: 1,
@@ -433,7 +426,7 @@ export default function AboutUs() {
                   color: '#0F172A',
                   opacity: 0.7,
                   lineHeight: 1.75,
-                  fontSize: '1.125rem',
+                  fontSize: isMobile ? '0.875rem' : '1.125rem',
                 }}
               >
                 We envision a world where hiring is human again. A future
@@ -449,8 +442,8 @@ export default function AboutUs() {
           sx={{
             width: '100%',
             backgroundColor: 'rgba(255, 255, 255, 0.5)',
-            py: { xs: 6, md: 6 },
-            px: { xs: 1, sm: 1.5, md: 2.5 },
+            py: isMobile ? 4 : { xs: 6, md: 6 },
+            px: isMobile ? 2 : { xs: 1, sm: 1.5, md: 2.5 },
             position: 'relative',
           }}
         >
@@ -463,11 +456,11 @@ export default function AboutUs() {
             }}
           />
           <Box sx={{ maxWidth: '1200px', mx: 'auto' }}>
-            <Box sx={{ textAlign: 'center', mb: 8 }}>
+            <Box sx={{ textAlign: 'center', mb: isMobile ? 4 : 8 }}>
               <Typography
                 component="h2"
                 sx={{
-                  fontSize: { xs: '1.875rem', md: '2.25rem' },
+                  fontSize: isMobile ? '1.375rem' : { xs: '1.875rem', md: '2.25rem' },
                   fontWeight: 700,
                   color: '#1E293B',
                   mb: 1,
@@ -478,7 +471,7 @@ export default function AboutUs() {
               <Typography
                 sx={{
                   color: '#64748B',
-                  fontSize: '1.125rem',
+                  fontSize: isMobile ? '0.875rem' : '1.125rem',
                   maxWidth: '672px',
                   mx: 'auto',
                 }}
@@ -491,15 +484,15 @@ export default function AboutUs() {
               sx={{
                 display: 'grid',
                 gridTemplateColumns: { xs: '1fr', md: 'repeat(12, 1fr)' },
-                gap: '1rem',
+                gap: isMobile ? '1.5rem' : '1rem',
               }}
             >
               <Paper
                 elevation={0}
                 sx={{
                   backgroundColor: '#FFFFFF',
-                  borderRadius: '12px',
-                  p: 4,
+                  borderRadius: isMobile ? '8px' : '12px',
+                  p: isMobile ? 2.5 : 4,
                   boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                   border: '1px solid #F1F5F9',
                   transition: 'box-shadow 0.3s',
@@ -532,7 +525,7 @@ export default function AboutUs() {
                     <Typography
                       component="h3"
                       sx={{
-                        fontSize: '1.25rem',
+                        fontSize: isMobile ? '1rem' : '1.25rem',
                         fontWeight: 700,
                         color: '#1E293B',
                         mb: 1,
@@ -544,6 +537,7 @@ export default function AboutUs() {
                       sx={{
                         color: '#475569',
                         lineHeight: 1.75,
+                        fontSize: isMobile ? '0.8125rem' : 'inherit',
                       }}
                     >
                       Mass spamming resume blasts gets you blacklisted.
@@ -587,7 +581,7 @@ export default function AboutUs() {
                 <Typography
                   component="h3"
                   sx={{
-                    fontSize: '1.25rem',
+                    fontSize: isMobile ? '1rem' : '1.25rem',
                     fontWeight: 700,
                     color: '#1E293B',
                   }}
@@ -598,6 +592,7 @@ export default function AboutUs() {
                   sx={{
                     color: '#475569',
                     lineHeight: 1.75,
+                    fontSize: isMobile ? '0.8125rem' : 'inherit',
                   }}
                 >
                   You should be prepping for interviews and negotiating
@@ -637,7 +632,7 @@ export default function AboutUs() {
                 <Typography
                   component="h3"
                   sx={{
-                    fontSize: '1.25rem',
+                    fontSize: isMobile ? '1rem' : '1.25rem',
                     fontWeight: 700,
                     color: '#1E293B',
                   }}
@@ -648,6 +643,7 @@ export default function AboutUs() {
                   sx={{
                     color: '#475569',
                     lineHeight: 1.75,
+                    fontSize: isMobile ? '0.8125rem' : 'inherit',
                   }}
                 >
                   We don't play the numbers game blindly. Targeted
@@ -688,7 +684,7 @@ export default function AboutUs() {
                 <Typography
                   component="h3"
                   sx={{
-                    fontSize: '1.25rem',
+                    fontSize: isMobile ? '1rem' : '1.25rem',
                     fontWeight: 700,
                     color: '#1E293B',
                   }}
@@ -699,6 +695,7 @@ export default function AboutUs() {
                   sx={{
                     color: '#475569',
                     lineHeight: 1.75,
+                    fontSize: isMobile ? '0.8125rem' : 'inherit',
                   }}
                 >
                   No black boxes. You see every job we find, every application
@@ -738,7 +735,7 @@ export default function AboutUs() {
                 <Typography
                   component="h3"
                   sx={{
-                    fontSize: '1.25rem',
+                    fontSize: isMobile ? '1rem' : '1.25rem',
                     fontWeight: 700,
                     color: '#1E293B',
                   }}
@@ -749,6 +746,7 @@ export default function AboutUs() {
                   sx={{
                     color: '#475569',
                     lineHeight: 1.75,
+                    fontSize: isMobile ? '0.8125rem' : 'inherit',
                   }}
                 >
                   Job searching is isolating. We provide the team, the
@@ -763,8 +761,8 @@ export default function AboutUs() {
         <Box
           sx={{
             width: '100%',
-            px: { xs: 1, sm: 1.5, md: 2.5 },
-            py: { xs: 6, md: 6 },
+            px: isMobile ? 2 : { xs: 1, sm: 1.5, md: 2.5 },
+            py: isMobile ? 4 : { xs: 6, md: 6 },
             maxWidth: '1200px',
             mx: 'auto',
           }}
@@ -774,14 +772,14 @@ export default function AboutUs() {
               display: 'flex',
               flexDirection: { xs: 'column', md: 'row' },
               alignItems: 'center',
-              gap: { xs: 6, md: 8, lg: 10 },
+              gap: isMobile ? 4 : { xs: 6, md: 8, lg: 10 },
             }}
           >
             <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
               <Typography
                 component="h2"
                 sx={{
-                  fontSize: { xs: '1.875rem', md: '2.25rem' },
+                  fontSize: isMobile ? '1.375rem' : { xs: '1.875rem', md: '2.25rem' },
                   fontWeight: 700,
                   color: '#1E293B',
                 }}
@@ -790,7 +788,7 @@ export default function AboutUs() {
               </Typography>
               <Typography
                 sx={{
-                  fontSize: '1.125rem',
+                  fontSize: isMobile ? '0.875rem' : '1.125rem',
                   color: '#475569',
                 }}
               >
@@ -820,7 +818,7 @@ export default function AboutUs() {
                     <Typography
                       component="h4"
                       sx={{
-                        fontSize: '1.25rem',
+                        fontSize: isMobile ? '1rem' : '1.25rem',
                         fontWeight: 700,
                         color: '#1E293B',
                         mb: 0.5,
@@ -828,7 +826,7 @@ export default function AboutUs() {
                     >
                       Real Trained Human Assistants
                     </Typography>
-                    <Typography sx={{ color: '#475569' }}>
+                    <Typography sx={{ color: '#475569', fontSize: isMobile ? '0.8125rem' : 'inherit' }}>
                       Every account is assigned a dedicated US-based job search
                       assistant who learns your preferences.
                     </Typography>
@@ -856,7 +854,7 @@ export default function AboutUs() {
                     <Typography
                       component="h4"
                       sx={{
-                        fontSize: '1.25rem',
+                        fontSize: isMobile ? '1rem' : '1.25rem',
                         fontWeight: 700,
                         color: '#1E293B',
                         mb: 0.5,
@@ -864,7 +862,7 @@ export default function AboutUs() {
                     >
                       Tailored Applications
                     </Typography>
-                    <Typography sx={{ color: '#475569' }}>
+                    <Typography sx={{ color: '#475569', fontSize: isMobile ? '0.8125rem' : 'inherit' }}>
                       We don't just autofill. We customize responses to "Why do
                       you want to work here?" questions based on your profile.
                     </Typography>
@@ -892,7 +890,7 @@ export default function AboutUs() {
                     <Typography
                       component="h4"
                       sx={{
-                        fontSize: '1.25rem',
+                        fontSize: isMobile ? '1rem' : '1.25rem',
                         fontWeight: 700,
                         color: '#1E293B',
                         mb: 0.5,
@@ -900,7 +898,7 @@ export default function AboutUs() {
                     >
                       Data-Driven Strategy
                     </Typography>
-                    <Typography sx={{ color: '#475569' }}>
+                    <Typography sx={{ color: '#475569', fontSize: isMobile ? '0.8125rem' : 'inherit' }}>
                       We analyze which resume versions are performing best and
                       pivot your strategy in real-time.
                     </Typography>
@@ -1052,7 +1050,7 @@ export default function AboutUs() {
             <Typography
               component="h2"
               sx={{
-                fontSize: '1.875rem',
+                fontSize: isMobile ? '1.375rem' : '1.875rem',
                 fontWeight: 700,
                 color: '#1E293B',
               }}
@@ -1133,8 +1131,8 @@ export default function AboutUs() {
           sx={{
             width: '100%',
             backgroundColor: '#1E293B',
-            py: { xs: 6, md: 6 },
-            px: { xs: 1, sm: 1.5, md: 2.5 },
+            py: isMobile ? 4 : { xs: 6, md: 6 },
+            px: isMobile ? 2 : { xs: 1, sm: 1.5, md: 2.5 },
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -1161,7 +1159,7 @@ export default function AboutUs() {
             <Typography
               component="h2"
               sx={{
-                fontSize: { xs: '2.25rem', md: '3rem' },
+                fontSize: isMobile ? '1.75rem' : { xs: '2.25rem', md: '3rem' },
                 fontWeight: 900,
                 color: '#FFFFFF',
                 mb: 3,
@@ -1173,7 +1171,7 @@ export default function AboutUs() {
             <Typography
               sx={{
                 color: '#CBD5E1',
-                fontSize: '1.125rem',
+                fontSize: isMobile ? '0.875rem' : '1.125rem',
                 mb: 4,
                 maxWidth: '576px',
                 mx: 'auto',
