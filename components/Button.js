@@ -19,11 +19,17 @@ const StyledButton = styled('button')(({ variant, fullWidth }) => ({
   justifyContent: 'center',
   textDecoration: 'none',
   ...(variant === 'primary' && {
-    backgroundColor: '#3B82F6',
+    background: 'linear-gradient(135deg, #2563EB 0%, #1E3A8A 100%)',
     color: '#FFFFFF',
+    border: '1px solid transparent',
+    borderRadius: '0.75rem',
+    fontWeight: 700,
+    fontSize: '0.875rem',
+    padding: '0.625rem 1.25rem',
+    boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)',
     '&:hover': {
-      backgroundColor: '#2563EB',
-      transform: 'translateY(-0.0625rem)',
+      filter: 'brightness(1.1)',
+      boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.3)',
     },
   }),
   ...(variant === 'secondary' && {

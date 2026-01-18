@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Box, Container, Typography } from '@mui/material';
-import Header from '../components/Header';
 import Button from '../components/Button';
 import JobSearchingCard from '../components/landingPageComponents/jobSearchingcCard/JobSearchingCard';
 import StatisticsSection from '../components/landingPageComponents/StatisticsSection/StatisticsSection';
@@ -10,7 +9,6 @@ import SixStepCards from '../components/landingPageComponents/6stepCards/6stepCa
 import ROICalculator from '../components/landingPageComponents/ROICalculator/ROICalculator';
 import SuccessStories from '../components/landingPageComponents/SuccessStories/SuccessStories';
 import CTASection from '../components/landingPageComponents/CTASection/CTASection';
-import Footer from '../components/Footer/Footer';
 
 export default function Home() {
   return (
@@ -22,7 +20,6 @@ export default function Home() {
         flexDirection: 'column',
       }}
     >
-      <Header />
 
       {/* Hero Section with Blue Gradient Background */}
       <Box
@@ -175,9 +172,6 @@ export default function Home() {
 
       {/* CTA Section */}
       <CTASection />
-
-      {/* Footer */}
-      <Footer />
 
     </Box>
   );

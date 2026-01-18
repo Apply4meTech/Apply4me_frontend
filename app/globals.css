@@ -3,3 +3,35 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+/* @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap'); */
+
+:root {
+  --font-manrope: 'Manrope', sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #EDF2F7;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #94A3B8;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748B;
+}
+
+body {
+  font-family: var(--font-manrope), 'Manrope', 'Roboto', sans-serif;
+}
+
+.MuiTypography-root {
+  font-family: inherit;
+}
