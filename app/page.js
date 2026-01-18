@@ -94,7 +94,7 @@ export default function Home() {
                 gap: '0.75rem',
               }}
             >
-              {/* Avatar Icons */}
+              
               <Box
                 sx={{
                   display: 'flex',
