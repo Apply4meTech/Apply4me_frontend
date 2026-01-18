@@ -35,7 +35,7 @@ export default function Home() {
         }}
       >
         <Container maxWidth="lg">
-          {/* Main Headline */}
+          
           <Typography
             component="h1"
             sx={{
