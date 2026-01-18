@@ -1,53 +1,147 @@
 'use client';
 
-import { Button, Container, Typography, Box, Paper, Stack } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import SettingsIcon from '@mui/icons-material/Settings';
-import PersonIcon from '@mui/icons-material/Person';
-import EmailIcon from '@mui/icons-material/Email';
+import React from 'react';
+import { Box, Container, Typography } from '@mui/material';
+import Header from '../components/Header';
+import Button from '../components/Button';
 
 export default function Home() {
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ my: 4 }}>
-        {/* trial comment */}
-        {/* trial comment2 */}
-        <Typography variant="h3" component="h1" gutterBottom color="primary">
-          Welcome to ApplyForMe
-        </Typography>
-        
-        <Typography variant="h5" component="h2" gutterBottom sx={{ mt: 3, mb: 2 }}>
-          Material UI Icons Example
-        </Typography>
-        
-        <Stack direction="row" spacing={2} sx={{ mb: 4 }}>
-          <Button variant="contained" startIcon={<HomeIcon />}>
-            Home
-          </Button>
-          <Button variant="outlined" startIcon={<SettingsIcon />}>
-            Settings
-          </Button>
-          <Button variant="text" startIcon={<PersonIcon />}>
-            Profile
-          </Button>
-          <Button variant="contained" color="secondary" startIcon={<EmailIcon />}>
-            Contact
-          </Button>
-        </Stack>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: 'linear-gradient(180deg, #1E3A8A 0%, #0F172A 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <Header />
 
-        <Paper elevation={3} sx={{ p: 3, mt: 4 }}>
-          <Typography variant="h6" gutterBottom>
-            Material UI Components
+      {/* Hero Section */}
+      <Box
+        component="main"
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: { xs: '3rem 1.5rem', md: '5rem 2rem' },
+          textAlign: 'center',
+        }}
+      >
+        <Container maxWidth="lg">
+          {/* Main Headline */}
+          <Typography
+            component="h1"
+            sx={{
+              fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem', lg: '5.5rem' },
+              fontWeight: 700,
+              color: '#FFFFFF',
+              lineHeight: 1.1,
+              marginBottom: '1.5rem',
+              fontFamily: 'inherit',
+            }}
+          >
+            Land Interviews Without{' '}
+            <Box
+              component="span"
+              sx={{
+                color: '#60A5FA',
+              }}
+            >
+              Applying Yourself
+            </Box>
           </Typography>
-          <Typography variant="body1" paragraph>
-            This is a Paper component with elevation. Material UI is now properly configured
-            with theme support and icons.
+
+          {/* Description */}
+          <Typography
+            component="p"
+            sx={{
+              fontSize: { xs: '1rem', md: '1.25rem' },
+              color: '#FFFFFF',
+              maxWidth: '42rem',
+              margin: '0 auto 3rem',
+              lineHeight: 1.6,
+              opacity: 0.9,
+              fontFamily: 'inherit',
+            }}
+          >
+            The premium concierge service that applies to jobs for you. Reclaim your time and accelerate your career with expert-led applications.
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            You can now use any Material UI components and icons throughout your application.
-          </Typography>
-        </Paper>
+
+          {/* CTA Buttons */}
+          <Box
+            sx={{
+              display: 'flex',
+              gap: '1rem',
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+              marginBottom: '4rem',
+            }}
+          >
+            <Button variant="primary">Start Free Trial</Button>
+            <Button variant="secondary">Book Strategy Call</Button>
+          </Box>
+
+          {/* Social Proof */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.75rem',
+            }}
+          >
+            {/* Avatar Icons */}
+            <Box
+              sx={{
+                display: 'flex',
+                gap: '-0.5rem',
+                marginRight: '0.5rem',
+              }}
+            >
+              {[1, 2, 3].map((index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    width: { xs: '2rem', md: '2.5rem' },
+                    height: { xs: '2rem', md: '2.5rem' },
+                    borderRadius: '50%',
+                    backgroundColor: index === 1 ? '#60A5FA' : '#FFFFFF',
+                    border: '0.125rem solid #FFFFFF',
+                    marginLeft: index > 1 ? '-0.5rem' : '0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {index === 1 && (
+                    <Box
+                      sx={{
+                        width: '60%',
+                        height: '60%',
+                        backgroundColor: '#FFFFFF',
+                        borderRadius: '50%',
+                      }}
+                    />
+                  )}
+                </Box>
+              ))}
+            </Box>
+            <Typography
+              component="span"
+              sx={{
+                color: '#FFFFFF',
+                fontSize: { xs: '0.875rem', md: '1rem' },
+                fontFamily: 'inherit',
+              }}
+            >
+              Trusted by 2,000+ Job Seekers
+            </Typography>
+          </Box>
+        </Container>
       </Box>
-    </Container>
+    </Box>
   );
 }
