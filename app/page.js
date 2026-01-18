@@ -12,80 +12,47 @@ import CTASection from '../components/landingPageComponents/CTASection/CTASectio
 
 export default function Home() {
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        backgroundColor: '#EDF2F7',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-
-      {/* Hero Section with Blue Gradient Background */}
+    <MainLayout>
       <Box
-        component="main"
         sx={{
-          position: 'relative',
-          padding: { xs: '6rem 1rem', sm: '6rem 2.5rem', md: '6rem 2.5rem' },
-          paddingBottom: { xs: '8rem', md: '8rem' },
-          textAlign: 'center',
-          backgroundColor: '#1E293B',
-          width: '100%',
-          overflow: 'hidden',
+          minHeight: '100vh',
+          background: 'linear-gradient(180deg, #1E3A8A 0%, #0F172A 100%)',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
-        {/* Background Gradients */}
         <Box
+          component="main"
           sx={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            width: '75%',
-            height: '100%',
-            background: 'radial-gradient(circle at top right, rgba(37, 99, 235, 0.25), transparent 60%)',
-            pointerEvents: 'none',
+            position: 'relative',
+            padding: { xs: '3rem 1.5rem', md: '5rem 2rem' },
+            paddingBottom: { xs: '8rem', md: '12rem' },
+            textAlign: 'center',
           }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            width: '50%',
-            height: '50%',
-            background: 'radial-gradient(circle at bottom left, rgba(30, 58, 138, 0.3), transparent 60%)',
-            pointerEvents: 'none',
-          }}
-        />
-
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', padding: { xs: '0 1rem', sm: '0' } }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <Typography
-                component="h1"
+        >
+          <Container maxWidth="lg">
+            
+            <Typography
+              component="h1"
+              sx={{
+                fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4.5rem', lg: '5.5rem' },
+                fontWeight: 700,
+                color: '#FFFFFF',
+                lineHeight: 1.1,
+                marginBottom: '1.5rem',
+                fontFamily: 'inherit',
+              }}
+            >
+              Land Interviews Without{' '}
+              <Box
+                component="span"
                 sx={{
-                  fontSize: { xs: '2.25rem', md: '3rem', lg: '3.75rem' },
-                  fontWeight: 900,
-                  color: '#FFFFFF',
-                  lineHeight: 1.2,
-                  letterSpacing: '-0.02em',
-                  fontFamily: 'inherit',
+                  color: '#60A5FA',
                 }}
               >
-                Land Interviews Without{' '}
-                <Box
-                  component="span"
-                  sx={{
-                    display: { xs: 'block', md: 'inline' },
-                    background: 'linear-gradient(135deg, #93C5FD 0%, #FFFFFF 50%, #BFDBFE 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
-                  Applying Yourself
-                </Box>
-              </Typography>
+                Applying Yourself
+              </Box>
+            </Typography>
 
               {/* Description */}
               <Typography
@@ -151,7 +118,7 @@ export default function Home() {
                 color: '#94A3B8',
               }}
             >
-              {/* Avatar Icons */}
+              
               <Box
                 sx={{
                   display: 'flex',
