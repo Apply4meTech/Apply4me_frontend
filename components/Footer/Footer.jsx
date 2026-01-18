@@ -1,10 +1,13 @@
 'use client';
 
 import React from 'react';
-import { Box, Container, Typography } from '@mui/material';
+import { Box, Container, Typography, useMediaQuery, useTheme } from '@mui/material';
 import Link from 'next/link';
 
 export default function Footer() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down(650));
+
   return (
     <Box
       component="footer"
@@ -56,7 +59,7 @@ export default function Footer() {
               component="span"
               sx={{
                 color: '#1F2937',
-                fontSize: { xs: '1rem', md: '1.25rem' },
+                fontSize: isMobile ? '0.875rem' : { xs: '1rem', md: '1.25rem' },
                 fontWeight: 600,
                 letterSpacing: '0.05em',
                 fontFamily: 'inherit',
@@ -70,7 +73,7 @@ export default function Footer() {
           <Typography
             component="p"
             sx={{
-              fontSize: { xs: '0.875rem', md: '1rem' },
+              fontSize: isMobile ? '0.75rem' : { xs: '0.875rem', md: '1rem' },
               color: '#374151',
               fontFamily: 'inherit',
               textAlign: { xs: 'center', md: 'center' },
