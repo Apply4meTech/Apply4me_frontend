@@ -48,7 +48,7 @@ export default function SixStepCards() {
         <Typography
           component="h2"
           sx={{
-            fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem', lg: '3.5rem' },
+            fontSize: { xs: '1.875rem', md: '2.25rem' },
             fontWeight: 700,
             color: '#1F2937',
             textAlign: 'center',
@@ -63,12 +63,12 @@ export default function SixStepCards() {
         <Typography
           component="p"
           sx={{
-            fontSize: { xs: '1rem', md: '1.125rem' },
+            fontSize: '1.125rem',
             color: '#6B7280',
             textAlign: 'center',
             maxWidth: '42rem',
             margin: '0 auto 3rem',
-            lineHeight: 1.6,
+            lineHeight: 1.75,
             fontFamily: 'inherit',
           }}
         >
@@ -135,7 +135,7 @@ export default function SixStepCards() {
               <Typography
                 component="h3"
                 sx={{
-                  fontSize: { xs: '1.125rem', md: '1.25rem' },
+                  fontSize: '1.25rem',
                   fontWeight: 700,
                   color: '#1F2937',
                   fontFamily: 'inherit',
@@ -149,9 +149,9 @@ export default function SixStepCards() {
               <Typography
                 component="p"
                 sx={{
-                  fontSize: { xs: '0.875rem', md: '1rem' },
+                  fontSize: '1.125rem',
                   color: '#6B7280',
-                  lineHeight: 1.6,
+                  lineHeight: 1.75,
                   fontFamily: 'inherit',
                 }}
               >

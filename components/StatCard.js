@@ -32,8 +32,8 @@ export default function StatCard({ number, title, description }) {
       <Typography
         component="div"
         sx={{
-          fontSize: { xs: '1rem', md: '1.125rem' },
-          fontWeight: 600,
+          fontSize: '1.125rem',
+          fontWeight: 700,
           color: '#000000',
           fontFamily: 'inherit',
         }}
@@ -43,7 +43,7 @@ export default function StatCard({ number, title, description }) {
       <Typography
         component="div"
         sx={{
-          fontSize: { xs: '0.875rem', md: '0.9375rem' },
+          fontSize: '0.875rem',
           color: '#6B7280',
           fontFamily: 'inherit',
         }}

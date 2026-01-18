@@ -15,18 +15,42 @@ export default function JobSearchingCard() {
       >
         <Box
           sx={{
-            backgroundColor: '#FFFFFF',
+            background: 'rgba(255, 255, 255, 0.7)',
+            border: '1px solid rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(30px)',
+            WebkitBackdropFilter: 'blur(30px)',
             borderRadius: { xs: '1rem', md: '1.5rem' },
             padding: { xs: '2rem', md: '3rem', lg: '4rem' },
-            boxShadow: '0 0.625rem 1.5rem rgba(0, 0, 0, 0.15)',
+            position: 'relative',
+            overflow: 'hidden',
+            boxShadow: '0 20px 40px -10px rgba(30, 41, 59, 0.08)',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: 'rgba(255, 255, 255, 0.5)',
           }}
         >
+          {/* Decorative blur circle effect */}
+          <Box
+            sx={{
+              position: 'absolute',
+              right: '-80px',
+              top: '-80px',
+              width: '256px',
+              height: '256px',
+              backgroundColor: 'rgba(37, 99, 235, 0.1)',
+              filter: 'blur(64px)',
+              borderRadius: '50%',
+              pointerEvents: 'none',
+            }}
+          />
           <Box
             sx={{
               display: 'flex',
               flexDirection: { xs: 'column', lg: 'row' },
               gap: { xs: '2rem', lg: '3rem' },
               alignItems: { xs: 'flex-start', lg: 'center' },
+              position: 'relative',
+              zIndex: 1,
             }}
           >
             {/* Left Side - Text Content */}
@@ -34,7 +58,7 @@ export default function JobSearchingCard() {
               <Typography
                 component="h2"
                 sx={{
-                  fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem', lg: '3.5rem' },
+                  fontSize: { xs: '1.875rem', md: '2.25rem' },
                   fontWeight: 700,
                   color: '#000000',
                   marginBottom: '1.5rem',
@@ -48,9 +72,9 @@ export default function JobSearchingCard() {
               <Typography
                 component="p"
                 sx={{
-                  fontSize: { xs: '1rem', md: '1.125rem' },
+                  fontSize: '1.125rem',
                   color: '#000000',
-                  lineHeight: 1.7,
+                  lineHeight: 1.75,
                   fontFamily: 'inherit',
                 }}
               >
@@ -111,28 +135,29 @@ export default function JobSearchingCard() {
                   </svg>
                 </Box>
                 <Box>
-                  <Typography
-                    component="div"
-                    sx={{
-                      fontSize: { xs: '0.75rem', md: '0.875rem' },
-                      color: '#000000',
-                      fontFamily: 'inherit',
-                      marginBottom: '0.25rem',
-                    }}
-                  >
-                    Average Time Spent
-                  </Typography>
-                  <Typography
-                    component="div"
-                    sx={{
-                      fontSize: { xs: '1.5rem', md: '1.75rem' },
-                      fontWeight: 700,
-                      color: '#000000',
-                      fontFamily: 'inherit',
-                    }}
-                  >
-                    100+ Hours
-                  </Typography>
+                    <Typography
+                      component="div"
+                      sx={{
+                        fontSize: '0.875rem',
+                        color: '#000000',
+                        fontFamily: 'inherit',
+                        marginBottom: '0.25rem',
+                        fontWeight: 600,
+                      }}
+                    >
+                      Average Time Spent
+                    </Typography>
+                    <Typography
+                      component="div"
+                      sx={{
+                        fontSize: '1.5rem',
+                        fontWeight: 700,
+                        color: '#000000',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      100+ Hours
+                    </Typography>
                 </Box>
               </Box>
 

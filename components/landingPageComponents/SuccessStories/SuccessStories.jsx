@@ -100,7 +100,7 @@ export default function SuccessStories() {
     <Box
       sx={{
         padding: { xs: '3rem 1.5rem', md: '5rem 2rem' },
-        backgroundColor: '#F1F2F4',
+        backgroundColor: '#EDF2F7',
       }}
     >
       <Container maxWidth="lg">
@@ -108,7 +108,7 @@ export default function SuccessStories() {
         <Typography
           component="h2"
           sx={{
-            fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem', lg: '3.5rem' },
+            fontSize: { xs: '1.875rem', md: '2.25rem' },
             fontWeight: 700,
             color: '#1F2937',
             textAlign: 'center',
@@ -188,10 +188,10 @@ export default function SuccessStories() {
               <Typography
                 component="p"
                 sx={{
-                  fontSize: { xs: '0.875rem', md: '1rem' },
+                  fontSize: '1.125rem',
                   color: '#374151',
                   fontStyle: 'italic',
-                  lineHeight: 1.7,
+                  lineHeight: 1.75,
                   fontFamily: 'inherit',
                   flex: 1,
                 }}

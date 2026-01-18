@@ -29,7 +29,9 @@
 }
 
 body {
-  font-family: var(--font-manrope), 'Manrope', 'Roboto', sans-serif;
+  font-family: var(--font-manrope), 'Manrope', sans-serif;
+  background-color: #EDF2F7;
+  color: #0F172A;
 }
 
 .MuiTypography-root {

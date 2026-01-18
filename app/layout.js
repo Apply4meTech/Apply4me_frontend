@@ -2,6 +2,8 @@ import { Roboto, Manrope } from "next/font/google";
 import "./globals.css";
 import ThemeRegistry from "../components/ThemeRegistry";
 import StoreProvider from "../store/StoreProvider";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer/Footer";
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
@@ -31,7 +33,7 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body className={`${roboto.className} ${manrope.variable}`}>
+      <body className={manrope.className} style={{ fontFamily: 'var(--font-manrope), Manrope, sans-serif' }}>
         <StoreProvider>
           <ThemeRegistry>
             {children}
