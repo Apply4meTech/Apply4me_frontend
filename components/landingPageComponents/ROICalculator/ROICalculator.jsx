@@ -26,29 +26,33 @@ export default function ROICalculator() {
     <Box
       sx={{
         padding: { xs: '3rem 1.5rem', md: '5rem 2rem' },
-        backgroundColor: '#F1F2F4',
+        backgroundColor: '#EDF2F7',
       }}
     >
       <Container maxWidth="lg">
         <Box
           sx={{
             display: 'flex',
+            backgroundColor: '#FFFFFF',
+            borderRadius: '1rem',
+            padding: { xs: '1.5rem', md: '2.5rem' },
+            boxShadow: '0 0.125rem 0.5rem rgba(0, 0, 0, 0.1)',
             flexDirection: { xs: 'column', lg: 'row' },
             gap: { xs: '1.5rem', md: '2rem' },
-            alignItems: 'stretch',
+            alignItems: 'stretch', 
+            
+            display:'flex',
+
           }}
         >
           {/* Left Card - ROI Calculator */}
           <Box
             sx={{
-              flex: 1,
-              backgroundColor: '#FFFFFF',
-              borderRadius: '1rem',
-              padding: { xs: '1.5rem', md: '2.5rem' },
-              boxShadow: '0 0.125rem 0.5rem rgba(0, 0, 0, 0.1)',
+              flex:0.6,
               display: 'flex',
               flexDirection: 'column',
               gap: '1.5rem',
+            
             }}
           >
             {/* ROI Calculator Label */}
@@ -61,7 +65,6 @@ export default function ROICalculator() {
                 color: '#3B82F6',
                 padding: { xs: '0.5rem 1rem', md: '0.625rem 1.25rem' },
                 borderRadius: '1.5rem',
-                width: 'fit-content',
                 fontSize: { xs: '0.75rem', md: '0.875rem' },
                 fontWeight: 600,
                 fontFamily: 'inherit',
@@ -89,7 +92,7 @@ export default function ROICalculator() {
             <Typography
               component="h2"
               sx={{
-                fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' },
+                fontSize: { xs: '1.875rem', md: '2.25rem' },
                 fontWeight: 700,
                 color: '#1F2937',
                 fontFamily: 'inherit',
@@ -103,9 +106,9 @@ export default function ROICalculator() {
             <Typography
               component="p"
               sx={{
-                fontSize: { xs: '0.875rem', md: '1rem' },
+                fontSize: '1.125rem',
                 color: '#6B7280',
-                lineHeight: 1.6,
+                lineHeight: 1.75,
                 fontFamily: 'inherit',
               }}
             >
@@ -206,97 +209,127 @@ export default function ROICalculator() {
           {/* Right Card - Estimated Savings */}
           <Box
             sx={{
-              flex: { xs: 1, lg: '0 0 20rem' },
-              backgroundColor: '#1E3A8A',
+              flex: { xs: 1, md: 0.4 },
+              backgroundColor: '#1E293B',
               borderRadius: '1rem',
               padding: { xs: '2rem', md: '2.5rem' },
+              paddingBottom: { xs: '2.375rem', md: '2.875rem' },
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
-              minHeight: { xs: 'auto', lg: '100%' },
+              minHeight: { xs: 'auto', md: '60%' },
+              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1)',
+              position: 'relative',
+              overflow: 'hidden',
+              maxHeight:'350px',
+              margin:'auto'
             }}
           >
-            {/* Header */}
-            <Typography
-              component="h3"
-              sx={{
-                fontSize: { xs: '0.875rem', md: '1rem' },
-                fontWeight: 600,
-                color: '#FFFFFF',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                fontFamily: 'inherit',
-                marginBottom: '1.5rem',
-              }}
-            >
-              ESTIMATED SAVINGS
-            </Typography>
-
-            {/* Savings Amount */}
-            <Box sx={{ marginBottom: '1.5rem' }}>
-              <Typography
-                component="div"
-                sx={{
-                  fontSize: { xs: '3rem', sm: '4rem', md: '5rem' },
-                  fontWeight: 700,
-                  color: '#FFFFFF',
-                  fontFamily: 'inherit',
-                  lineHeight: 1,
-                }}
-              >
-                ${calculatedSavings.toLocaleString()}+
-              </Typography>
-            </Box>
-
-            {/* Hours Saved */}
+            {/* Blue gradient in bottom right corner */}
             <Box
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                marginBottom: '1.5rem',
+                position: 'absolute',
+                bottom: '0.375rem',
+                right: 0,
+                width: '100%',
+                height: '100%',
+                background: 'linear-gradient(to top left, rgba(37, 99, 235, 0.3) 0%, rgba(37, 99, 235, 0.15) 30%, transparent 60%)',
+                clipPath: 'polygon(100% 100%, 100% 70%, 0% 100%)',
+                pointerEvents: 'none',
+                zIndex: 0,
               }}
-            >
+            />
+
+           
+            <Box sx={{ position: 'relative', zIndex: 2 }}>
+              {/* Header */}
               <Typography
-                component="span"
+                component="h3"
                 sx={{
-                  fontSize: { xs: '1rem', md: '1.125rem' },
-                  fontWeight: 600,
-                  color: '#10B981',
+                  fontSize: '0.875rem',
+                  fontWeight: 700,
+                  color: '#94A3B8',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
                   fontFamily: 'inherit',
+                  marginBottom: '1.5rem',
                 }}
               >
-                {hoursSaved}+ Hours Saved
+                ESTIMATED SAVINGS
               </Typography>
-              <svg
-                width="1.25rem"
-                height="1.25rem"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M7 17L17 7M17 7H7M17 7V17"
-                  stroke="#10B981"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </Box>
 
-            {/* Disclaimer */}
-            <Typography
-              component="p"
-              sx={{
-                fontSize: { xs: '0.75rem', md: '0.875rem' },
-                color: '#E5E7EB',
-                fontFamily: 'inherit',
-                lineHeight: 1.5,
-              }}
-            >
-              Based on average application time of {hoursSaved} hours at your entered rate.
-            </Typography>
+              {/* Savings Amount */}
+              <Box sx={{ marginBottom: '1.5rem' }}>
+                <Typography
+                  component="div"
+                  sx={{
+                    fontSize: { xs: '3rem', sm: '4rem', md: '4.5rem' },
+                    fontWeight: 700,
+                    color: '#FFFFFF',
+                    fontFamily: 'inherit',
+                    lineHeight: 1,
+                  }}
+                >
+                  ${calculatedSavings.toLocaleString()}+
+                </Typography>
+              </Box>
+
+              {/* Hours Saved - Green Pill */}
+              <Box
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                  color: '#10B981',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '9999px',
+                  border: '1px solid rgba(16, 185, 129, 0.2)',
+                  marginBottom: '1.5rem',
+                  width: 'fit-content',
+                }}
+              >
+                <svg
+                  width="1rem"
+                  height="1rem"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M7 17L17 7M17 7H7M17 7V17"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <Typography
+                  component="span"
+                  sx={{
+                    fontSize: '0.875rem',
+                    fontWeight: 700,
+                    color: '#10B981',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  {hoursSaved}+ Hours Saved
+                </Typography>
+              </Box>
+
+              {/* Disclaimer */}
+              <Typography
+                component="p"
+                sx={{
+                  fontSize: '0.75rem',
+                  color: '#94A3B8',
+                  fontFamily: 'inherit',
+                  lineHeight: 1.5,
+                }}
+              >
+                Based on average application time of {hoursSaved} hours at your entered rate.
+              </Typography>
+            </Box>
           </Box>
         </Box>
       </Container>

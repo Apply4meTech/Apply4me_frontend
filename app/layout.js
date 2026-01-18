@@ -32,7 +32,7 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body className={`${roboto.className} ${manrope.variable}`}>
+      <body className={manrope.className} style={{ fontFamily: 'var(--font-manrope), Manrope, sans-serif' }}>
         <ThemeRegistry>
           <Header />
           {children}

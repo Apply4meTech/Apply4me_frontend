@@ -13,7 +13,7 @@ const Header = () => {
   };
 
   const navLinks = [
-    { href: '/about-us', label: 'About Us' },
+    { href: '/', label: 'How it Works' },
     { href: '/pricing', label: 'Pricing' },
     { href: '/success-stories', label: 'Success Stories' },
     { href: '/login', label: 'Login' },
@@ -139,7 +139,7 @@ const Header = () => {
           </Box>
 
           {/* CTA Button */}
-          <Button variant="primary">Get Started</Button>
+          <Button variant="primary">Start Free Trial</Button>
         </Box>
 
         {/* Mobile Menu Button */}
@@ -207,7 +207,7 @@ const Header = () => {
             ))}
             <Box sx={{ marginTop: '0.5rem' }}>
               <Button variant="primary" fullWidth>
-                Get Started
+                Start Free Trial
               </Button>
             </Box>
           </Box>
