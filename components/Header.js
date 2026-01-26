@@ -1,25 +1,35 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Box, Container, useMediaQuery, useTheme, Drawer } from '@mui/material';
+import { useSelector } from 'react-redux';
 import Button from './Button';
 
 const Header = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down(650));
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
   const navLinks = [
-    { href: '/', label: 'How it Works' },
+    { href: '/about-us', label: 'About Us' },
     { href: '/pricing', label: 'Pricing' },
-    { href: '/success-stories', label: 'Success Stories' },
-    { href: '/login', label: 'Login' },
+    ...(isAuthenticated ? [] : [{ href: '/login', label: 'Login' }]),
   ];
+
+  const isActiveLink = (href) => {
+    if (href === '/') {
+      return pathname === '/';
+    }
+    return pathname?.startsWith(href);
+  };
 
   return (
     <Box
@@ -40,7 +50,7 @@ const Header = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: { xs: '1rem', md: '1rem 2.5rem' },
+          padding: { xs: '0.75rem 1rem', md: '0.75rem 2.5rem' },
           width: '100%',
         }}
       >
@@ -117,31 +127,42 @@ const Header = () => {
               gap: '2.25rem',
             }}
           >
-            {navLinks.map((link, index) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                style={{
-                  color: index === 0 ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)',
-                  textDecoration: 'none',
-                  fontSize: index === 0 ? '1rem' : '0.875rem',
-                  fontWeight: index === 0 ? 700 : 500,
-                  transition: 'color 0.3s ease',
-                }}
-                onMouseEnter={(e) => {
-                  if (index !== 0) e.target.style.color = '#2563EB';
-                }}
-                onMouseLeave={(e) => {
-                  if (index !== 0) e.target.style.color = 'rgba(255, 255, 255, 0.7)';
-                }}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = isActiveLink(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  style={{
+                    color: isActive ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)',
+                    textDecoration: 'none',
+                    fontSize: isActive ? '1rem' : '0.875rem',
+                    fontWeight: isActive ? 700 : 500,
+                    transition: 'color 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) e.target.style.color = '#FFFFFF';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) e.target.style.color = 'rgba(255, 255, 255, 0.7)';
+                  }}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </Box>
 
           {/* CTA Button */}
-          <Button variant="primary">Start Free Trial</Button>
+          {isAuthenticated ? (
+            <Link href="/dashboard" style={{ textDecoration: 'none' }}>
+              <Button variant="primary">Dashboard</Button>
+            </Link>
+          ) : (
+            <Link href="/signup" style={{ textDecoration: 'none' }}>
+              <Button variant="primary">Signup</Button>
+            </Link>
+          )}
         </Box>
 
         {/* Mobile Menu Button */}
@@ -270,32 +291,49 @@ const Header = () => {
               paddingTop: '1.5rem',
             }}
           >
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                style={{
-                  color: '#FFFFFF',
-                  textDecoration: 'none',
-                  fontSize: isMobile ? '0.875rem' : '1rem',
-                  fontWeight: 400,
-                  transition: 'opacity 0.3s ease',
-                  padding: '0.5rem 0',
-                }}
-                onMouseEnter={(e) => (e.target.style.opacity = '0.7')}
-                onMouseLeave={(e) => (e.target.style.opacity = '1')}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = isActiveLink(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{
+                    color: isActive ? '#2563EB' : '#FFFFFF',
+                    textDecoration: 'none',
+                    fontSize: isMobile ? '0.875rem' : '1rem',
+                    fontWeight: isActive ? 700 : 400,
+                    transition: 'opacity 0.3s ease',
+                    padding: '0.5rem 0',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) e.target.style.opacity = '0.7';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) e.target.style.opacity = '1';
+                  }}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </Box>
 
           {/* CTA Button at Bottom */}
           <Box sx={{ marginTop: 'auto', paddingTop: '1.5rem' }}>
-            <Button variant="primary" fullWidth onClick={() => setMobileMenuOpen(false)}>
-              Get Started
-            </Button>
+            {isAuthenticated ? (
+              <Link href="/dashboard" style={{ textDecoration: 'none', width: '100%', display: 'block' }} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="primary" fullWidth>
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/signup" style={{ textDecoration: 'none', width: '100%', display: 'block' }} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="primary" fullWidth>
+                  Signup
+                </Button>
+              </Link>
+            )}
           </Box>
         </Box>
       </Drawer>

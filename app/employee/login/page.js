@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Formik, Form } from 'formik';
 import * as yup from 'yup';
 import { setLoading, loginSuccess, loginFailure, clearError } from '../../../store/authSlice';
+import MainLayout from '../../../components/layouts/MainLayout';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
 
@@ -51,8 +52,9 @@ export default function EmployeeLoginPage() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f8fafc', p: 2 }}>
-      <Box sx={{ maxWidth: 440, width: '100%', bgcolor: 'white', p: 4, borderRadius: '16px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
+    <MainLayout>
+      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#f8fafc', p: 2 }}>
+        <Box sx={{ maxWidth: 440, width: '100%', bgcolor: 'white', p: 4, borderRadius: '16px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a', mb: 1 }}>
             Employee Login
@@ -173,8 +175,9 @@ export default function EmployeeLoginPage() {
             </Form>
           )}
         </Formik>
+        </Box>
       </Box>
-    </Box>
+    </MainLayout>
   );
 }
 

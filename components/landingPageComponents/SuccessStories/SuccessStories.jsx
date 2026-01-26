@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Box, Container, Typography } from '@mui/material';
+import CompanyLogos from '../../CompanyLogos';
 
 const testimonials = [
   {
@@ -96,6 +97,41 @@ export default function SuccessStories() {
     });
   };
 
+  const [headingVisible, setHeadingVisible] = useState(false);
+  const [cardsVisible, setCardsVisible] = useState(false);
+  const headingRef = useRef(null);
+  const cardsRef = useRef(null);
+
+  useEffect(() => {
+    const headingObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHeadingVisible(true);
+          headingObserver.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    const cardsObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setCardsVisible(true);
+          cardsObserver.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    if (headingRef.current) headingObserver.observe(headingRef.current);
+    if (cardsRef.current) cardsObserver.observe(cardsRef.current);
+
+    return () => {
+      if (headingRef.current) headingObserver.unobserve(headingRef.current);
+      if (cardsRef.current) cardsObserver.unobserve(cardsRef.current);
+    };
+  }, []);
+
   return (
     <Box
       sx={{
@@ -106,6 +142,7 @@ export default function SuccessStories() {
       <Container maxWidth="lg">
         {/* Heading */}
         <Typography
+          ref={headingRef}
           component="h2"
           sx={{
             fontSize: { xs: '1.875rem', md: '2.25rem' },
@@ -114,6 +151,9 @@ export default function SuccessStories() {
             textAlign: 'center',
             marginBottom: { xs: '2rem', md: '3rem' },
             fontFamily: 'inherit',
+            opacity: headingVisible ? 1 : 0,
+            transform: headingVisible ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
           }}
         >
           Success Stories
@@ -121,48 +161,61 @@ export default function SuccessStories() {
 
         {/* Slider Container */}
         <Box
-          ref={scrollContainerRef}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
+          ref={cardsRef}
           sx={{
-            display: 'flex',
-            overflowX: { xs: 'auto', md: 'visible' },
-            scrollSnapType: { xs: 'x mandatory', md: 'none' },
-            scrollBehavior: 'smooth',
-            gap: { xs: '1.5rem', md: '2rem' },
-            paddingBottom: { xs: '1rem', md: '0' },
-            cursor: { xs: isDragging ? 'grabbing' : 'grab', md: 'default' },
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            '&::-webkit-scrollbar': {
-              display: 'none',
-            },
+            opacity: cardsVisible ? 1 : 0,
+            transform: cardsVisible ? 'translateY(0)' : 'translateY(30px)',
+            transition: 'opacity 0.6s ease-out 0.2s, transform 0.6s ease-out 0.2s',
           }}
         >
-          {testimonials.map((testimonial) => (
-            <Box
-              key={testimonial.id}
-              sx={{
-                minWidth: { xs: '85%', sm: '70%', md: 'calc(33.333% - 1.33rem)', lg: 'calc(33.333% - 1.33rem)' },
-                maxWidth: { xs: '85%', sm: '70%', md: 'calc(33.333% - 1.33rem)', lg: 'calc(33.333% - 1.33rem)' },
-                width: { md: 'calc(33.333% - 1.33rem)' },
-                scrollSnapAlign: { xs: 'start', md: 'none' },
-                flexShrink: 0,
-                backgroundColor: '#FFFFFF',
-                borderRadius: '1rem',
-                padding: { xs: '1.5rem', md: '2rem' },
-                boxShadow: '0 0.125rem 0.5rem rgba(0, 0, 0, 0.1)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem',
-              }}
-            >
+          <Box
+            ref={scrollContainerRef}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            sx={{
+              display: 'flex',
+              overflowX: { xs: 'auto', md: 'visible' },
+              scrollSnapType: { xs: 'x mandatory', md: 'none' },
+              scrollBehavior: 'smooth',
+              gap: { xs: '1.5rem', md: '2rem' },
+              paddingBottom: { xs: '1rem', md: '0' },
+              cursor: { xs: isDragging ? 'grabbing' : 'grab', md: 'default' },
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              '&::-webkit-scrollbar': {
+                display: 'none',
+              },
+            }}
+          >
+            {testimonials.map((testimonial, index) => (
+              <Box
+                key={testimonial.id}
+                sx={{
+                  minWidth: { xs: '85%', sm: '70%', md: 'calc(33.333% - 1.33rem)', lg: 'calc(33.333% - 1.33rem)' },
+                  maxWidth: { xs: '85%', sm: '70%', md: 'calc(33.333% - 1.33rem)', lg: 'calc(33.333% - 1.33rem)' },
+                  width: { md: 'calc(33.333% - 1.33rem)' },
+                  scrollSnapAlign: { xs: 'start', md: 'none' },
+                  flexShrink: 0,
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '1rem',
+                  padding: { xs: '1.5rem', md: '2rem' },
+                  boxShadow: '0 0.125rem 0.5rem rgba(0, 0, 0, 0.1)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                  transition: 'transform 0.4s ease, box-shadow 0.4s ease',
+                  '&:hover': {
+                    transform: 'translateY(-0.5rem)',
+                    boxShadow: '0 0.5rem 1.5rem rgba(0, 0, 0, 0.15)',
+                  },
+                }}
+              >
               {/* Star Rating */}
               <Box
                 sx={{
@@ -278,7 +331,26 @@ export default function SuccessStories() {
                 </Box>
               </Box>
             </Box>
-          ))}
+            ))}
+          </Box>
+        </Box>
+
+        {/* Company Logos Section */}
+        <Box sx={{ mt: { xs: '4rem', md: '5rem' } }}>
+          <Typography
+            component="h3"
+            sx={{
+              fontSize: { xs: '1.25rem', md: '1.5rem' },
+              fontWeight: 700,
+              color: '#1F2937',
+              textAlign: 'center',
+              marginBottom: { xs: '2rem', md: '3rem' },
+              fontFamily: 'inherit',
+            }}
+          >
+            Our Clients Get Hired At
+          </Typography>
+          <CompanyLogos title="Our Clients Get Hired At" />
         </Box>
       </Container>
     </Box>

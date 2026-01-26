@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 
 const steps = [
@@ -37,46 +37,91 @@ const steps = [
 ];
 
 export default function SixStepCards() {
+  const [headingVisible, setHeadingVisible] = useState(false);
+  const [cardsVisible, setCardsVisible] = useState(false);
+  const headingRef = useRef(null);
+  const cardsRef = useRef(null);
+
+  useEffect(() => {
+    const headingObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHeadingVisible(true);
+          headingObserver.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    const cardsObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setCardsVisible(true);
+          cardsObserver.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    if (headingRef.current) headingObserver.observe(headingRef.current);
+    if (cardsRef.current) cardsObserver.observe(cardsRef.current);
+
+    return () => {
+      if (headingRef.current) headingObserver.unobserve(headingRef.current);
+      if (cardsRef.current) cardsObserver.unobserve(cardsRef.current);
+    };
+  }, []);
+
   return (
     <Box
       sx={{
-        padding: { xs: '3rem 1.5rem', md: '5rem 2rem' },
+        padding: { xs: '2rem 1.5rem', md: '3rem 2rem' },
+        paddingTop: { xs: '1rem', md: '2rem' },
       }}
     >
       <Container maxWidth="lg">
         {/* Heading */}
-        <Typography
-          component="h2"
-          sx={{
-            fontSize: { xs: '1.875rem', md: '2.25rem' },
-            fontWeight: 700,
-            color: '#1F2937',
-            textAlign: 'center',
-            marginBottom: '1rem',
-            fontFamily: 'inherit',
-          }}
-        >
-          How We Get You Hired
-        </Typography>
+        <Box ref={headingRef}>
+          <Typography
+            component="h2"
+            sx={{
+              fontSize: { xs: '1.875rem', md: '2.25rem' },
+              fontWeight: 700,
+              color: '#1F2937',
+              textAlign: 'center',
+              marginBottom: '1rem',
+              fontFamily: 'inherit',
+              opacity: headingVisible ? 1 : 0,
+              transform: headingVisible ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
+            }}
+          >
+            How We Get You Hired
+          </Typography>
 
-        {/* Subtitle */}
-        <Typography
-          component="p"
-          sx={{
-            fontSize: '1.125rem',
-            color: '#6B7280',
-            textAlign: 'center',
-            maxWidth: '42rem',
-            margin: '0 auto 3rem',
-            lineHeight: 1.75,
-            fontFamily: 'inherit',
-          }}
-        >
-          Our proven 6-step process takes you from application to offer letter without the stress.
-        </Typography>
+          {/* Subtitle */}
+          <Typography
+            component="p"
+            sx={{
+              fontSize: '1.125rem',
+              color: '#6B7280',
+              textAlign: 'center',
+              maxWidth: '42rem',
+              margin: '0 auto 3rem',
+              lineHeight: 1.75,
+              fontFamily: 'inherit',
+              opacity: headingVisible ? 1 : 0,
+              transform: headingVisible ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'opacity 0.6s ease-out 0.2s, transform 0.6s ease-out 0.2s',
+            }}
+          >
+            Our proven 6-step process takes you from application to offer letter without the stress.
+          </Typography>
+        </Box>
 
         {/* Cards Grid */}
         <Box
+          ref={cardsRef}
           sx={{
             display: 'grid',
             gridTemplateColumns: {
@@ -87,7 +132,7 @@ export default function SixStepCards() {
             gap: { xs: '1.5rem', md: '2rem' },
           }}
         >
-          {steps.map((step) => (
+          {steps.map((step, index) => (
             <Box
               key={step.number}
               sx={{
@@ -98,10 +143,13 @@ export default function SixStepCards() {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '1rem',
-                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                transition: 'transform 0.4s ease, box-shadow 0.4s ease, opacity 0.4s ease',
+                opacity: cardsVisible ? 1 : 0,
+                transform: cardsVisible ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.95)',
+                transitionDelay: `${index * 0.1}s`,
                 '&:hover': {
-                  transform: 'translateY(-0.25rem)',
-                  boxShadow: '0 0.25rem 0.75rem rgba(0, 0, 0, 0.15)',
+                  transform: 'translateY(-0.5rem) scale(1.02)',
+                  boxShadow: '0 0.5rem 1.5rem rgba(0, 0, 0, 0.15)',
                 },
               }}
             >

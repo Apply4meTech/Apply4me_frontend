@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Box, Container, Typography, Button, Grid, Paper, useMediaQuery, useTheme } from '@mui/material';
 import {
   ArrowForward,
@@ -16,10 +16,20 @@ import {
   QueryStats,
 } from '@mui/icons-material';
 import Link from 'next/link';
+import CompanyLogos from '../CompanyLogos';
+import { useScrollAnimation } from '../../hooks/useScrollAnimation';
 
 export default function AboutUs() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down(650));
+  
+  // Animation refs
+  const [heroRef, heroVisible] = useScrollAnimation();
+  const [originRef, originVisible] = useScrollAnimation();
+  const [missionRef, missionVisible] = useScrollAnimation();
+  const [valuesRef, valuesVisible] = useScrollAnimation();
+  const [processRef, processVisible] = useScrollAnimation();
+  const [logosRef, logosVisible] = useScrollAnimation();
 
   return (
     <Box
@@ -71,6 +81,7 @@ export default function AboutUs() {
           />
 
           <Box
+            ref={heroRef}
             sx={{
               maxWidth: '1000px',
               width: '100%',
@@ -80,6 +91,9 @@ export default function AboutUs() {
               textAlign: 'center',
               position: 'relative',
               zIndex: 10,
+              opacity: heroVisible ? 1 : 0,
+              transform: heroVisible ? 'translateY(0)' : 'translateY(30px)',
+              transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
             }}
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', px: 1 }}>
@@ -134,6 +148,8 @@ export default function AboutUs() {
               }}
             >
               <Button
+                component={Link}
+                href="/signup"
                 sx={{
                   width: { xs: '100%', sm: 'auto' },
                   px: 4,
@@ -157,6 +173,8 @@ export default function AboutUs() {
                 <ArrowForward sx={{ fontSize: '1rem' }} />
               </Button>
               <Button
+                component={Link}
+                href="/#success-stories"
                 variant="outlined"
                 sx={{
                   width: { xs: '100%', sm: 'auto' },
@@ -186,6 +204,7 @@ export default function AboutUs() {
 
         {/* Glass Card Section - Our Origin */}
         <Box
+          ref={originRef}
           sx={{
             width: '100%',
             px: { xs: 1, sm: 1.5, md: 2.5 },
@@ -195,6 +214,9 @@ export default function AboutUs() {
             position: 'relative',
             maxWidth: '1000px',
             mx: 'auto',
+            opacity: originVisible ? 1 : 0,
+            transform: originVisible ? 'translateY(0)' : 'translateY(40px)',
+            transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
           }}
         >
           <Paper
@@ -301,12 +323,16 @@ export default function AboutUs() {
 
         {/* Mission & Vision Cards */}
         <Box
+          ref={missionRef}
           sx={{
             width: '100%',
             px: isMobile ? 2 : { xs: 1, sm: 1.5, md: 2.5 },
             mb: isMobile ? 4 : { xs: 6, md: 6 },
             maxWidth: '1200px',
             mx: 'auto',
+            opacity: missionVisible ? 1 : 0,
+            transform: missionVisible ? 'translateY(0)' : 'translateY(40px)',
+            transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
           }}
         >
           <Box
@@ -1038,12 +1064,16 @@ export default function AboutUs() {
 
         {/* Trusted By Section */}
         <Box
+          ref={logosRef}
           sx={{
             width: '100%',
             px: { xs: 1, sm: 1.5, md: 2.5 },
             mb: { xs: 6, md: 6 },
             maxWidth: '1200px',
             mx: 'auto',
+            opacity: logosVisible ? 1 : 0,
+            transform: logosVisible ? 'translateY(0)' : 'translateY(40px)',
+            transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
           }}
         >
           <Box sx={{ textAlign: 'center', mb: 6 }}>
@@ -1058,7 +1088,7 @@ export default function AboutUs() {
               Trusted by Hundreds of Professionals
             </Typography>
             <Link
-              href="/success-stories"
+              href="/#success-stories"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -1073,57 +1103,7 @@ export default function AboutUs() {
               <ArrowForward sx={{ fontSize: '0.875rem' }} />
             </Link>
           </Box>
-          <Box
-            sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: { xs: 5, md: 10 },
-              opacity: 0.6,
-              filter: 'grayscale(100%)',
-              transition: 'all 0.5s',
-              '&:hover': {
-                filter: 'grayscale(0%)',
-              },
-            }}
-          >
-            {['TECHCORP', 'GlobalSoft', 'Nexus', 'FutureScale', 'Innovate'].map(
-              (company, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 0.5,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: '32px',
-                      height: '32px',
-                      backgroundColor: '#1E293B',
-                      borderRadius: index === 1 || index === 2 ? '50%' : '4px',
-                      transform: index === 3 ? 'rotate(45deg)' : 'none',
-                      border:
-                        index === 2 ? '4px solid #1E293B' : 'none',
-                      borderBottom: index === 4 ? '4px solid #1E293B' : 'none',
-                    }}
-                  />
-                  <Typography
-                    sx={{
-                      fontWeight: 700,
-                      fontSize: '1.25rem',
-                      color: '#1E293B',
-                      fontStyle: index === 1 ? 'italic' : 'normal',
-                    }}
-                  >
-                    {company}
-                  </Typography>
-                </Box>
-              )
-            )}
-          </Box>
+          <CompanyLogos title="Our Clients Get Hired At" />
         </Box>
 
         {/* Final CTA Section */}
@@ -1181,6 +1161,8 @@ export default function AboutUs() {
               job seekers first.
             </Typography>
             <Button
+              component={Link}
+              href="/signup"
               sx={{
                 backgroundColor: '#2563EB',
                 color: '#FFFFFF',

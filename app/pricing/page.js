@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Box, Container, Typography, ToggleButton, ToggleButtonGroup, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
@@ -8,10 +8,20 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ROICalculator from '@/components/landingPageComponents/ROICalculator/ROICalculator';
 import Button from '@/components/Button';
 import MainLayout from '../../components/layouts/MainLayout';
+import CompanyLogos from '../../components/CompanyLogos';
+import { useScrollAnimation } from '../../hooks/useScrollAnimation';
 
 export default function Pricing() {
   const [billingPeriod, setBillingPeriod] = useState('monthly');
   const [expandedFaq, setExpandedFaq] = useState(null);
+  
+  // Animation refs
+  const [heroRef, heroVisible] = useScrollAnimation();
+  const [plansRef, plansVisible] = useScrollAnimation();
+  const [tableRef, tableVisible] = useScrollAnimation();
+  const [roiRef, roiVisible] = useScrollAnimation();
+  const [logosRef, logosVisible] = useScrollAnimation();
+  const [faqRef, faqVisible] = useScrollAnimation();
 
   const handleBillingChange = (event, newPeriod) => {
     if (newPeriod !== null) {
@@ -89,49 +99,75 @@ export default function Pricing() {
         {/* Hero Section with Dark Blue Background */}
         <Box
           sx={{
-            background: 'linear-gradient(180deg, #1E3A8A 0%, #0F172A 100%)',
-            paddingTop: { xs: '4rem', md: '6rem' },
-            paddingBottom: { xs: '8rem', md: '10rem' },
-            paddingX: { xs: '1.5rem', md: '2rem' },
+            backgroundColor: '#1E293B',
+            paddingTop: { xs: '5rem', md: '5rem' },
+            paddingBottom: { xs: '10rem', md: '10rem' },
+            paddingX: { xs: '1rem', sm: '2.5rem' },
             position: 'relative',
+            overflow: 'hidden',
           }}
         >
-          <Container maxWidth="lg">
-            {/* Headline */}
-            <Typography
-              component="h1"
+          {/* Gradient overlay matching About Us */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '100%',
+              height: '100%',
+              background:
+                'radial-gradient(circle at top right, rgba(37,99,235,0.25), transparent 60%)',
+            }}
+          />
+          <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10 }}>
+            <Box
+              ref={heroRef}
               sx={{
-                fontSize: { xs: '2.5rem', md: '3.5rem', lg: '4rem' },
-                fontWeight: 700,
-                color: '#FFFFFF',
-                marginBottom: '1rem',
-                textAlign: 'center',
-                fontFamily: 'inherit',
-                lineHeight: 1.2,
+                opacity: heroVisible ? 1 : 0,
+                transform: heroVisible ? 'translateY(0)' : 'translateY(30px)',
+                transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
               }}
             >
-              Invest in Your{' '}
-              <Box component="span" sx={{ color: '#60A5FA' }}>
-                Career Acceleration.
-              </Box>
-            </Typography>
+              {/* Headline */}
+              <Typography
+                component="h1"
+                sx={{
+                  fontSize: { xs: '1.75rem', md: '2.25rem', lg: '3rem' },
+                  fontWeight: 900,
+                  color: '#FFFFFF',
+                  marginBottom: '1rem',
+                  textAlign: 'center',
+                  fontFamily: 'inherit',
+                  lineHeight: 1.2,
+                  letterSpacing: '-0.02em',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                }}
+              >
+                Invest in Your{' '}
+                <Box component="span" sx={{ color: '#60A5FA' }}>
+                  Career Acceleration.
+                </Box>
+              </Typography>
 
-            {/* Sub-headline */}
-            <Typography
-              component="p"
-              sx={{
-                fontSize: { xs: '1rem', md: '1.125rem' },
-                color: '#FFFFFF',
-                textAlign: 'center',
-                marginBottom: '3rem',
-                opacity: 0.9,
-                fontFamily: 'inherit',
-                maxWidth: '48rem',
-                marginX: 'auto',
-              }}
-            >
-              Choose the plan that fits your goals. Start landing interviews this week.
-            </Typography>
+              {/* Sub-headline */}
+              <Typography
+                component="p"
+                sx={{
+                  fontSize: { xs: '0.875rem', md: '1rem' },
+                  color: '#CBD5E1',
+                  textAlign: 'center',
+                  marginBottom: '3rem',
+                  opacity: 0.9,
+                  fontFamily: 'inherit',
+                  maxWidth: '48rem',
+                  marginX: 'auto',
+                  lineHeight: 1.75,
+                  fontWeight: 300,
+                }}
+              >
+                Choose the plan that fits your goals. Start landing interviews this week.
+              </Typography>
+            </Box>
 
             {/* Billing Toggle */}
             <Box
@@ -140,6 +176,9 @@ export default function Pricing() {
                 justifyContent: 'center',
                 alignItems: 'center',
                 marginBottom: '2rem',
+                opacity: heroVisible ? 1 : 0,
+                transform: heroVisible ? 'translateY(0)' : 'translateY(20px)',
+                transition: 'opacity 0.8s ease-out 0.2s, transform 0.8s ease-out 0.2s',
               }}
             >
               <ToggleButtonGroup
@@ -208,6 +247,7 @@ export default function Pricing() {
       >
         <Container maxWidth="lg">
           <Box
+            ref={plansRef}
             sx={{
               display: 'grid',
               gridTemplateColumns: {
@@ -219,9 +259,12 @@ export default function Pricing() {
               marginTop: { xs: '-4rem', md: '-6rem' },
               position: 'relative',
               zIndex: 10,
+              opacity: plansVisible ? 1 : 0,
+              transform: plansVisible ? 'translateY(0)' : 'translateY(40px)',
+              transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
             }}
           >
-            {plans.map((plan) => {
+            {plans.map((plan, planIndex) => {
               const price = billingPeriod === 'monthly' ? plan.monthlyPrice : plan.quarterlyPrice;
               
               return (
@@ -243,6 +286,19 @@ export default function Pricing() {
                     borderStyle: 'solid',
                     borderColor: 'rgba(255, 255, 255, 0.5)',
                     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                    opacity: plansVisible ? 1 : 0,
+                    transform: plansVisible ? 'translateY(0)' : 'translateY(40px)',
+                    animation: plansVisible ? `fadeInUp 0.6s ease-out ${planIndex * 0.1}s both` : 'none',
+                    '@keyframes fadeInUp': {
+                      from: {
+                        opacity: 0,
+                        transform: 'translateY(40px)',
+                      },
+                      to: {
+                        opacity: 1,
+                        transform: 'translateY(0)',
+                      },
+                    },
                     '&:hover': {
                       transform: 'translateY(-4px)',
                       boxShadow: '0 25px 50px -10px rgba(30, 41, 59, 0.12)',
@@ -443,7 +499,16 @@ export default function Pricing() {
         </Container>
       </Box>
 
-      <Box sx={{padding:{sm:'0rem', md:'0rem 3rem'}, backgroundColor:'#EDF2F7'}}>
+      <Box 
+        ref={roiRef}
+        sx={{
+          padding: { sm: '0rem', md: '0rem 3rem' },
+          backgroundColor: '#EDF2F7',
+          opacity: roiVisible ? 1 : 0,
+          transform: roiVisible ? 'translateY(0)' : 'translateY(40px)',
+          transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
+        }}
+      >
         <ROICalculator/>
       </Box>
 
@@ -481,6 +546,14 @@ export default function Pricing() {
               overflowX: 'auto',
             }}
           >
+            <Box
+              ref={tableRef}
+              sx={{
+                opacity: tableVisible ? 1 : 0,
+                transform: tableVisible ? 'translateY(0)' : 'translateY(40px)',
+                transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
+              }}
+            >
             <TableContainer>
               <Table
                 sx={{
@@ -727,81 +800,44 @@ export default function Pricing() {
                 </TableBody>
               </Table>
             </TableContainer>
+            </Box>
           </Box>
         </Container>
       </Box>
 
       <Box sx={{padding:{sm:'0rem', md:'3rem'}, backgroundColor:'#EDF2F7'}}>
-      <Typography
-            component="h3"
+        <Container maxWidth="lg">
+          <Box
+            ref={logosRef}
             sx={{
-              textAlign: 'center',
-              fontSize: { xs: '0.8rem', md: '1.2rem' },
-              fontWeight: 700,
-              color: 'grey',
-              fontFamily: 'inherit',
-              marginBottom: { xs: '2rem', md: '3rem' },
-              textTransform: 'uppercase',
-              letterSpacing: '0.02em',
+              opacity: logosVisible ? 1 : 0,
+              transform: logosVisible ? 'translateY(0)' : 'translateY(30px)',
+              transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
             }}
           >
-            OUR CLIENTS GET HIRED AT
-          </Typography>
-        <Box
-            sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: { xs: 5, md: 10 },
-              opacity: 0.6,
-              filter: 'grayscale(100%)',
-              transition: 'all 0.5s',
-              '&:hover': {
-                filter: 'grayscale(0%)',
-              },
-            }}
-          >
-            {['TECHCORP', 'GlobalSoft', 'Nexus', 'FutureScale', 'Innovate'].map(
-              (company, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 0.5,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: '32px',
-                      height: '32px',
-                      backgroundColor: '#1E293B',
-                      borderRadius: index === 1 || index === 2 ? '50%' : '4px',
-                      transform: index === 3 ? 'rotate(45deg)' : 'none',
-                      border:
-                        index === 2 ? '4px solid #1E293B' : 'none',
-                      borderBottom: index === 4 ? '4px solid #1E293B' : 'none',
-                    }}
-                  />
-                  <Typography
-                    sx={{
-                      fontWeight: 700,
-                      fontSize: '1.25rem',
-                      color: '#1E293B',
-                      fontStyle: index === 1 ? 'italic' : 'normal',
-                    }}
-                  >
-                    {company}
-                  </Typography>
-                </Box>
-              )
-            )}
+            <Typography
+              component="h3"
+              sx={{
+                textAlign: 'center',
+                fontSize: { xs: '0.875rem', md: '1.125rem' },
+                fontWeight: 700,
+                color: '#64748B',
+                fontFamily: 'inherit',
+                marginBottom: { xs: '2rem', md: '3rem' },
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              OUR CLIENTS GET HIRED AT
+            </Typography>
+            <CompanyLogos title="Our Clients Get Hired At" />
           </Box>
+        </Container>
       </Box>
 
       {/* Frequently Asked Questions Section */}
       <Box
+        ref={faqRef}
         sx={{
           backgroundColor: '#F8FAFC',
           paddingY: { xs: '4rem', md: '6rem' },
@@ -819,6 +855,9 @@ export default function Pricing() {
               color: '#1E293B',
               fontFamily: 'inherit',
               marginBottom: { xs: '2rem', md: '3rem' },
+              opacity: faqVisible ? 1 : 0,
+              transform: faqVisible ? 'translateY(0)' : 'translateY(30px)',
+              transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
             }}
           >
             Frequently Asked Questions
@@ -884,7 +923,7 @@ export default function Pricing() {
                 >
                   <Typography
                     sx={{
-                      fontSize: { xs: '0.625rem', md: '0.75rem' },
+                      fontSize: { xs: '1rem', md: '1.125rem' },
                       fontWeight: 600,
                       color: '#1E293B',
                       fontFamily: 'inherit',
@@ -898,7 +937,7 @@ export default function Pricing() {
                     sx={{
                       color: '#1E293B',
                       fontSize: '1.5rem',
-                      transition: 'transform 0.3s ease',
+                      transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                       transform: expandedFaq === index ? 'rotate(180deg)' : 'rotate(0deg)',
                       flexShrink: 0,
                     }}
@@ -906,28 +945,37 @@ export default function Pricing() {
                 </Box>
 
                 {/* Answer Content */}
-                {expandedFaq === index && (
-                  <Box
-                    sx={{
-                      paddingX: { xs: '1rem', md: '1.75rem' },
-                      paddingBottom: { xs: '1.25rem', md: '1.5rem' },
-                      borderTop: '1px solid #E2E8F0',
-                      animation: 'fadeIn 0.3s ease',
-                      '@keyframes fadeIn': {
-                        from: {
-                          opacity: 0,
-                          transform: 'translateY(-10px)',
+                <Box
+                  sx={{
+                    maxHeight: expandedFaq === index ? '500px' : '0',
+                    overflow: 'hidden',
+                    transition: 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    paddingX: expandedFaq === index ? { xs: '1rem', md: '1.75rem' } : 0,
+                    paddingBottom: expandedFaq === index ? { xs: '1.25rem', md: '1.5rem' } : 0,
+                    borderTop: expandedFaq === index ? '1px solid #E2E8F0' : 'none',
+                    opacity: expandedFaq === index ? 1 : 0,
+                    transition: 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, border-top 0.3s ease',
+                  }}
+                >
+                  {expandedFaq === index && (
+                    <Box
+                      sx={{
+                        animation: 'fadeInDown 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                        '@keyframes fadeInDown': {
+                          from: {
+                            opacity: 0,
+                            transform: 'translateY(-10px)',
+                          },
+                          to: {
+                            opacity: 1,
+                            transform: 'translateY(0)',
+                          },
                         },
-                        to: {
-                          opacity: 1,
-                          transform: 'translateY(0)',
-                        },
-                      },
-                    }}
-                  >
+                      }}
+                    >
                     <Typography
                       sx={{
-                        fontSize: { xs: '0.675rem', md: '0.75rem' },
+                        fontSize: { xs: '0.9375rem', md: '1rem' },
                         color: '#64748B',
                         fontFamily: 'inherit',
                         lineHeight: 1.7,
@@ -936,8 +984,9 @@ export default function Pricing() {
                     >
                       {faq.answer}
                     </Typography>
-                  </Box>
-                )}
+                    </Box>
+                  )}
+                </Box>
               </Box>
             ))}
           </Box>
@@ -1018,15 +1067,6 @@ export default function Pricing() {
             >
               Start your free trial
             </Button>
-            <Typography
-              sx={{
-                mt: 3,
-                color: '#64748B',
-                fontSize: '0.875rem',
-              }}
-            >
-              No credit card required for consultation.
-            </Typography>
           </Box>
         </Box>
       </Box>

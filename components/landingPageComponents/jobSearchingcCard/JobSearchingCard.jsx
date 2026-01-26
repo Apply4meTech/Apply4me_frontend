@@ -1,16 +1,45 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 
 export default function JobSearchingCard() {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, []);
+
   return (
     <Container maxWidth="lg">
       <Box
+        ref={ref}
         sx={{
           position: 'relative',
           marginTop: { xs: '-4rem', md: '-6rem' },
-          zIndex: 10,
+          zIndex: 20,
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
+          transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
         }}
       >
         <Box
@@ -24,9 +53,7 @@ export default function JobSearchingCard() {
             position: 'relative',
             overflow: 'hidden',
             boxShadow: '0 20px 40px -10px rgba(30, 41, 59, 0.08)',
-            borderWidth: '1px',
-            borderStyle: 'solid',
-            borderColor: 'rgba(255, 255, 255, 0.5)',
+            zIndex: 2,
           }}
         >
           {/* Decorative blur circle effect */}
@@ -101,6 +128,13 @@ export default function JobSearchingCard() {
                 padding: { xs: '1.5rem', md: '2rem' },
                 minWidth: { xs: '100%', lg: '18rem' },
                 maxWidth: { xs: '100%', lg: '20rem' },
+                opacity: isVisible ? 1 : 0,
+                transform: isVisible ? 'translateX(0) scale(1)' : 'translateX(30px) scale(0.95)',
+                transition: 'opacity 0.8s ease-out 0.3s, transform 0.8s ease-out 0.3s',
+                '&:hover': {
+                  transform: 'translateY(-4px) scale(1.02)',
+                  boxShadow: '0 12px 24px -8px rgba(239, 68, 68, 0.3)',
+                },
               }}
             >
               <Box

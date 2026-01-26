@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Container, Typography, TextField } from '@mui/material';
 import Button from '../../Button';
 
@@ -8,6 +8,30 @@ export default function ROICalculator() {
   const [hourlyRate, setHourlyRate] = useState(75);
   const [calculatedSavings, setCalculatedSavings] = useState(7500);
   const [hoursSaved] = useState(100);
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, []);
 
   const handleCalculate = () => {
     // Calculate savings: hourly rate * hours saved
@@ -31,6 +55,7 @@ export default function ROICalculator() {
     >
       <Container maxWidth="lg">
         <Box
+          ref={ref}
           sx={{
             display: 'flex',
             backgroundColor: '#FFFFFF',
@@ -39,10 +64,10 @@ export default function ROICalculator() {
             boxShadow: '0 0.125rem 0.5rem rgba(0, 0, 0, 0.1)',
             flexDirection: { xs: 'column', lg: 'row' },
             gap: { xs: '1.5rem', md: '2rem' },
-            alignItems: 'stretch', 
-            
-            display:'flex',
-
+            alignItems: 'stretch',
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(40px) scale(0.95)',
+            transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
           }}
         >
           {/* Left Card - ROI Calculator */}

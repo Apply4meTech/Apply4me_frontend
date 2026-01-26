@@ -16,6 +16,11 @@ export default function StatCard({ number, title, description }) {
         gap: '0.5rem',
         flex: 1,
         minWidth: { xs: '100%', sm: 'calc(50% - 0.75rem)', md: 'auto' },
+        transition: 'transform 0.4s ease, box-shadow 0.4s ease',
+        '&:hover': {
+          transform: 'translateY(-0.5rem) scale(1.02)',
+          boxShadow: '0 0.5rem 1.5rem rgba(0, 0, 0, 0.15)',
+        },
       }}
     >
       <Typography
