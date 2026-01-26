@@ -1,45 +1,116 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Box, Typography, Paper, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, IconButton, Menu, MenuItem, Chip, Select, FormControl, ListItemIcon, ListItemText } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { 
+  Box, 
+  Typography, 
+  Paper, 
+  Grid, 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow, 
+  Button, 
+  IconButton, 
+  Menu, 
+  MenuItem, 
+  Chip, 
+  Select, 
+  FormControl, 
+  ListItemIcon, 
+  ListItemText,
+  CircularProgress,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Input,
+} from '@mui/material';
 import { useSelector } from 'react-redux';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import EmailIcon from '@mui/icons-material/Email';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PeopleIcon from '@mui/icons-material/People';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import ViewDataModal from '../../../../components/employee/ViewDataModal';
 import CreateEmployeeModal from '../../../../components/employee/CreateEmployeeModal';
 import AllEmployeesModal from '../../../../components/employee/AllEmployeesModal';
 
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+const getApiUrl = () => {
+  const url = API_URL;
+  return url.endsWith('/api') ? url.slice(0, -4) : url;
+};
+
 export default function EmployeeDashboard() {
   const { user } = useSelector((state) => state.auth);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
   const [viewDataOpen, setViewDataOpen] = useState(false);
   const [createEmployeeOpen, setCreateEmployeeOpen] = useState(false);
   const [allEmployeesOpen, setAllEmployeesOpen] = useState(false);
-  const [viewMode, setViewMode] = useState('view'); // 'view' or 'fill'
+  const [viewMode, setViewMode] = useState('view');
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [emailData, setEmailData] = useState({ emailAddress: '', subject: '', body: '', sent: false });
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [uploadFileType, setUploadFileType] = useState(null);
+  const [uploading, setUploading] = useState(false);
   
-  // Check if user is super admin
+  const [dashboardData, setDashboardData] = useState({
+    totalJobs: 0,
+    totalCompleted: 0,
+    totalPending: 0,
+    jobs: []
+  });
+  
   const isSuperAdmin = user?.role === 'super_admin';
 
-  // Dummy data
-  const stats = {
-    totalAssigned: 25,
-    totalCompleted: 18,
-    totalPending: 7,
-  };
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
-  const jobs = [
-    { id: 1, jobTitle: 'Senior Software Engineer', applicant: 'John Doe', status: 'Pending', link: 'https://linkedin.com/jobs/123', date: '2024-01-15' },
-    { id: 2, jobTitle: 'Full Stack Developer', applicant: 'Jane Smith', status: 'Completed', link: 'https://indeed.com/job/456', date: '2024-01-14' },
-    { id: 3, jobTitle: 'Frontend Developer', applicant: 'Bob Johnson', status: 'Pending', link: 'https://glassdoor.com/job/789', date: '2024-01-13' },
-  ];
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch(`${getApiUrl()}/api/employee/dashboard`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch dashboard data');
+      }
+
+      if (data.success) {
+        setDashboardData(data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleMenuOpen = (event, job) => {
     setAnchorEl(event.currentTarget);
@@ -56,32 +127,186 @@ export default function EmployeeDashboard() {
     handleMenuClose();
   };
 
-  const handleStatusChange = (jobId, newStatus) => {
-    // Update status logic here
-    console.log(`Updating job ${jobId} status to ${newStatus}`);
+  const handleStatusChange = async (jobId, newStatus) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${getApiUrl()}/api/employee/jobs/${jobId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Refresh dashboard data
+        fetchDashboardData();
+      } else {
+        alert(data.error || 'Failed to update status');
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+      alert('Failed to update status');
+    }
   };
 
   const handleAction = (action) => {
     if (action === 'view' || action === 'fill') {
       setViewMode(action);
       setViewDataOpen(true);
-    } else if (action === 'notify') {
-      // WhatsApp notification logic
-      console.log('Notify on WhatsApp:', selectedJob);
-    } else if (action === 'delete') {
-      // Delete logic
-      console.log('Delete:', selectedJob);
     } else if (action === 'email') {
-      // Send email logic
-      console.log('Send email:', selectedJob);
+      if (selectedJob) {
+        setEmailData({
+          emailAddress: selectedJob.emailData?.emailAddress || selectedJob.applicantEmail || '',
+          subject: selectedJob.emailData?.subject || '',
+          body: selectedJob.emailData?.body || '',
+          sent: selectedJob.emailData?.sent || false
+        });
+        setEmailDialogOpen(true);
+      }
+    } else if (action === 'upload-resume') {
+      setUploadFileType('resume');
+      setUploadDialogOpen(true);
+    } else if (action === 'upload-coverletter') {
+      setUploadFileType('coverLetter');
+      setUploadDialogOpen(true);
+    } else if (action === 'upload-screenshot') {
+      setUploadFileType('screenshotProof');
+      setUploadDialogOpen(true);
+    } else if (action === 'delete') {
+      if (confirm('Are you sure you want to delete this job?')) {
+        handleDeleteJob();
+      }
     }
     handleMenuClose();
   };
 
-  const handleCreateEmployeeSuccess = (employee) => {
-    console.log('Employee created:', employee);
-    // You can add a toast notification or refresh employee list here
+  const handleSaveEmail = async () => {
+    if (!selectedJob) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${getApiUrl()}/api/employee/jobs/${selectedJob.id}/email`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(emailData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        alert('Email data saved successfully');
+        setEmailDialogOpen(false);
+        fetchDashboardData();
+      } else {
+        alert(data.error || 'Failed to save email data');
+      }
+    } catch (error) {
+      console.error('Error saving email data:', error);
+      alert('Failed to save email data');
+    }
   };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !selectedJob || !uploadFileType) return;
+
+    try {
+      setUploading(true);
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(`${getApiUrl()}/api/employee/jobs/${selectedJob.id}/files/${uploadFileType}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        alert(`${uploadFileType} uploaded successfully`);
+        setUploadDialogOpen(false);
+        setUploadFileType(null);
+        fetchDashboardData();
+      } else {
+        alert(data.error || 'Failed to upload file');
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('Failed to upload file');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleDeleteJob = async () => {
+    if (!selectedJob) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${getApiUrl()}/api/employee/jobs/${selectedJob.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        alert('Job deleted successfully');
+        fetchDashboardData();
+      } else {
+        alert(data.error || 'Failed to delete job');
+      }
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      alert('Failed to delete job');
+    }
+  };
+
+  const getStatusColor = (status) => {
+    const statusMap = {
+      'pending': { bg: '#fef3c7', color: '#d97706' },
+      'assigned': { bg: '#f3e8ff', color: '#9333ea' },
+      'applied': { bg: '#eff6ff', color: '#2463eb' },
+      'response': { bg: '#dcfce7', color: '#16a34a' },
+      'rejected': { bg: '#fee2e2', color: '#dc2626' },
+      'completed': { bg: '#dcfce7', color: '#16a34a' }
+    };
+    return statusMap[status] || { bg: '#f1f5f9', color: '#64748b' };
+  };
+
+  const formatStatus = (status) => {
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -134,24 +359,42 @@ export default function EmployeeDashboard() {
         )}
       </Box>
 
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+
       {/* Summary Boxes */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={4}>
           <Paper elevation={0} sx={{ p: 3, borderRadius: '12px', border: '1px solid #e2e8f0', bgcolor: 'white' }}>
-            <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>Total Jobs Assigned</Typography>
-            <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#0f172a' }}>{stats.totalAssigned}</Typography>
+            <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
+              {isSuperAdmin ? 'Total Jobs' : 'Total Jobs Assigned'}
+            </Typography>
+            <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#0f172a' }}>
+              {dashboardData.totalJobs}
+            </Typography>
           </Paper>
         </Grid>
         <Grid item xs={12} sm={4}>
           <Paper elevation={0} sx={{ p: 3, borderRadius: '12px', border: '1px solid #e2e8f0', bgcolor: 'white' }}>
-            <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>Total Completed</Typography>
-            <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#16a34a' }}>{stats.totalCompleted}</Typography>
+            <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
+              {isSuperAdmin ? 'Total Completed' : 'My Completed'}
+            </Typography>
+            <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#16a34a' }}>
+              {dashboardData.totalCompleted}
+            </Typography>
           </Paper>
         </Grid>
         <Grid item xs={12} sm={4}>
           <Paper elevation={0} sx={{ p: 3, borderRadius: '12px', border: '1px solid #e2e8f0', bgcolor: 'white' }}>
-            <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>Total Pending</Typography>
-            <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#f59e0b' }}>{stats.totalPending}</Typography>
+            <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
+              {isSuperAdmin ? 'Total Pending' : 'My Pending'}
+            </Typography>
+            <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#f59e0b' }}>
+              {dashboardData.totalPending}
+            </Typography>
           </Paper>
         </Grid>
       </Grid>
@@ -171,31 +414,60 @@ export default function EmployeeDashboard() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {jobs.map((job) => (
-                <TableRow key={job.id} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
-                  <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>{job.jobTitle}</TableCell>
-                  <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>{job.applicant}</TableCell>
-                  <TableCell>
-                    <FormControl size="small" sx={{ minWidth: 120 }}>
-                      <Select value={job.status} onChange={(e) => handleStatusChange(job.id, e.target.value)} sx={{ fontSize: '0.875rem', height: '32px' }}>
-                        <MenuItem value="Pending">Pending</MenuItem>
-                        <MenuItem value="Completed">Completed</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </TableCell>
-                  <TableCell>
-                    <IconButton size="small" onClick={() => handleCopyLink(job.link)} sx={{ color: '#2463eb' }}>
-                      <ContentCopyIcon fontSize="small" />
-                    </IconButton>
-                  </TableCell>
-                  <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>{new Date(job.date).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <IconButton size="small" onClick={(e) => handleMenuOpen(e, job)}>
-                      <MoreVertIcon fontSize="small" />
-                    </IconButton>
+              {dashboardData.jobs.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} sx={{ textAlign: 'center', py: 6 }}>
+                    <Typography sx={{ color: '#64748b' }}>No jobs found</Typography>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                dashboardData.jobs.map((job) => {
+                  const statusColors = getStatusColor(job.status);
+                  return (
+                    <TableRow key={job.id} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
+                      <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>{job.jobTitle}</TableCell>
+                      <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>{job.applicant}</TableCell>
+                      <TableCell>
+                        <FormControl size="small" sx={{ minWidth: 120 }}>
+                          <Select 
+                            value={job.status} 
+                            onChange={(e) => handleStatusChange(job.id, e.target.value)} 
+                            sx={{ 
+                              fontSize: '0.875rem', 
+                              height: '32px',
+                              bgcolor: statusColors.bg,
+                              color: statusColors.color,
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: statusColors.color,
+                              }
+                            }}
+                          >
+                            <MenuItem value="pending">Pending</MenuItem>
+                            <MenuItem value="assigned">Assigned</MenuItem>
+                            <MenuItem value="applied">Applied</MenuItem>
+                            <MenuItem value="response">Response</MenuItem>
+                            <MenuItem value="rejected">Rejected</MenuItem>
+                            <MenuItem value="completed">Completed</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </TableCell>
+                      <TableCell>
+                        <IconButton size="small" onClick={() => handleCopyLink(job.link)} sx={{ color: '#2463eb' }}>
+                          <ContentCopyIcon fontSize="small" />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
+                        {new Date(job.date).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <IconButton size="small" onClick={(e) => handleMenuOpen(e, job)}>
+                          <MoreVertIcon fontSize="small" />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -203,13 +475,21 @@ export default function EmployeeDashboard() {
 
       {/* Action Menu */}
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItem onClick={() => handleAction('notify')}>
-          <ListItemIcon><WhatsAppIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Notify on WhatsApp</ListItemText>
-        </MenuItem>
         <MenuItem onClick={() => handleAction('email')}>
           <ListItemIcon><EmailIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Send Email</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleAction('upload-resume')}>
+          <ListItemIcon><AttachFileIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Upload Resume</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleAction('upload-coverletter')}>
+          <ListItemIcon><AttachFileIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Upload Cover Letter</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleAction('upload-screenshot')}>
+          <ListItemIcon><AttachFileIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Upload Screenshot Proof</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => handleAction('fill')}>
           <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
@@ -225,14 +505,82 @@ export default function EmployeeDashboard() {
         </MenuItem>
       </Menu>
 
+      {/* Email Dialog */}
+      <Dialog open={emailDialogOpen} onClose={() => setEmailDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Email Data</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+            <TextField
+              fullWidth
+              label="Email Address"
+              type="email"
+              value={emailData.emailAddress}
+              onChange={(e) => setEmailData({ ...emailData, emailAddress: e.target.value })}
+            />
+            <TextField
+              fullWidth
+              label="Subject"
+              value={emailData.subject}
+              onChange={(e) => setEmailData({ ...emailData, subject: e.target.value })}
+            />
+            <TextField
+              fullWidth
+              label="Body"
+              multiline
+              rows={4}
+              value={emailData.body}
+              onChange={(e) => setEmailData({ ...emailData, body: e.target.value })}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEmailDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleSaveEmail} variant="contained">Save</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* File Upload Dialog */}
+      <Dialog open={uploadDialogOpen} onClose={() => { setUploadDialogOpen(false); setUploadFileType(null); }} maxWidth="sm" fullWidth>
+        <DialogTitle>Upload {uploadFileType === 'resume' ? 'Resume' : uploadFileType === 'coverLetter' ? 'Cover Letter' : 'Screenshot Proof'}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <Input
+              type="file"
+              accept={uploadFileType === 'screenshotProof' ? 'image/*,.pdf' : '.pdf,.doc,.docx,.txt'}
+              onChange={handleFileUpload}
+              disabled={uploading}
+              fullWidth
+            />
+            {uploading && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+                <CircularProgress size={20} />
+                <Typography>Uploading...</Typography>
+              </Box>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setUploadDialogOpen(false); setUploadFileType(null); }}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
       {/* View/Fill Data Modal */}
-      <ViewDataModal open={viewDataOpen} onClose={() => setViewDataOpen(false)} job={selectedJob} mode={viewMode} />
+      <ViewDataModal 
+        open={viewDataOpen} 
+        onClose={() => setViewDataOpen(false)} 
+        job={selectedJob} 
+        mode={viewMode}
+        onUpdate={fetchDashboardData}
+      />
       
       {/* Create Employee Modal */}
       <CreateEmployeeModal 
         open={createEmployeeOpen} 
         onClose={() => setCreateEmployeeOpen(false)}
-        onSuccess={handleCreateEmployeeSuccess}
+        onSuccess={() => {
+          setCreateEmployeeOpen(false);
+          // Optionally refresh employee list
+        }}
       />
       
       {/* All Employees Modal */}
@@ -243,4 +591,3 @@ export default function EmployeeDashboard() {
     </Box>
   );
 }
-

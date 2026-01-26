@@ -23,7 +23,7 @@ const getApiUrl = () => {
   return url.endsWith('/api') ? url.slice(0, -4) : url;
 };
 
-export default function ProfilePictureUpload({ profilePicture, onUpdate, userName }) {
+export default function ProfilePictureUpload({ profilePicture, onUpdate, userName, isEmployee = false }) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(profilePicture?.url || null);
   const fileInputRef = useRef(null);
@@ -62,7 +62,12 @@ export default function ProfilePictureUpload({ profilePicture, onUpdate, userNam
       const formData = new FormData();
       formData.append('picture', croppedFile);
 
-      const response = await fetch(`${getApiUrl()}/api/profile/picture`, {
+      // Determine API endpoint based on isEmployee prop
+      const apiUrl = isEmployee 
+        ? `${getApiUrl()}/api/employee/profile/picture`
+        : `${getApiUrl()}/api/profile/picture`;
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -108,7 +113,12 @@ export default function ProfilePictureUpload({ profilePicture, onUpdate, userNam
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`${getApiUrl()}/api/profile/picture`, {
+      // Determine API endpoint
+      const apiUrl = isEmployee 
+        ? `${getApiUrl()}/api/employee/profile/picture`
+        : `${getApiUrl()}/api/profile/picture`;
+
+      const response = await fetch(apiUrl, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
