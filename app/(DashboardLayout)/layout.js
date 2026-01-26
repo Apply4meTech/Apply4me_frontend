@@ -47,7 +47,7 @@ const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
   { text: 'Applications', icon: <WorkIcon />, path: '/dashboard/applications' },
   { text: 'Profile', icon: <PersonIcon />, path: '/dashboard/profile' },
-  { text: 'Settings', icon: <SettingsIcon />, path: '/dashboard/settings' },
+  // { text: 'Settings', icon: <SettingsIcon />, path: '/dashboard/settings' },
 ];
 
 export default function DashboardLayout({ children }) {
@@ -56,6 +56,7 @@ export default function DashboardLayout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [profilePicture, setProfilePicture] = useState(null);
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useDispatch();
@@ -112,6 +113,48 @@ export default function DashboardLayout({ children }) {
     }
   }, [isInitialized, isAuthenticated, user, pathname, router]);
 
+  // Get profile picture from Redux state or fetch it
+  useEffect(() => {
+    // First check Redux state
+    if (user?.profilePicture?.url) {
+      setProfilePicture(user.profilePicture.url);
+      return;
+    }
+
+    // If not in Redux, fetch from API
+    const fetchProfilePicture = async () => {
+      if (!isAuthenticated) return;
+      
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+        const getApiUrl = () => {
+          const url = API_URL;
+          return url.endsWith('/api') ? url.slice(0, -4) : url;
+        };
+
+        const response = await fetch(`${getApiUrl()}/api/profile`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+        if (data.success && data.user && data.user.profilePicture) {
+          setProfilePicture(data.user.profilePicture.url);
+        }
+      } catch (error) {
+        console.error('Error fetching profile picture:', error);
+      }
+    };
+
+    if (isInitialized && isAuthenticated) {
+      fetchProfilePicture();
+    }
+  }, [isInitialized, isAuthenticated, user?.profilePicture]);
+
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
@@ -152,7 +195,13 @@ export default function DashboardLayout({ children }) {
   const sidebar = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Logo */}
-      <Box sx={{ p: 3, borderBottom: '1px solid #e2e8f0' }}>
+      <Box sx={{ 
+        height: '64px', 
+        display: 'flex', 
+        alignItems: 'center', 
+        px: 3,
+        borderBottom: '1px solid #e2e8f0',
+      }}>
         <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <LogoIcon color="#2463eb" size={32} />
           <Typography sx={{ color: '#0f172a', fontSize: '1.125rem', fontWeight: 700, letterSpacing: '0.02em' }}>
@@ -198,12 +247,15 @@ export default function DashboardLayout({ children }) {
       {isMobile && (
         <Box sx={{ p: 2, borderTop: '1px solid #e2e8f0' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ bgcolor: '#2463eb', width: 40, height: 40 }}>
-              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+            <Avatar 
+              src={profilePicture || user?.profilePicture?.url || undefined}
+              sx={{ bgcolor: '#2463eb', width: 40, height: 40 }}
+            >
+              {!profilePicture && !user?.profilePicture?.url && (user?.name?.charAt(0)?.toUpperCase() || 'U')}
             </Avatar>
             <Box sx={{ flex: 1, overflow: 'hidden' }}>
               <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {user?.name || 'User'}
+                {user?.name || user?.fullName || 'User'}
               </Typography>
               <Typography sx={{ fontSize: '0.75rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {user?.email || 'user@example.com'}
@@ -227,7 +279,7 @@ export default function DashboardLayout({ children }) {
             '& .MuiDrawer-paper': {
               width: drawerWidth,
               boxSizing: 'border-box',
-              borderRight: '1px solid #e2e8f0',
+              borderRight: 'none',
               bgcolor: 'white',
             },
           }}
@@ -256,7 +308,7 @@ export default function DashboardLayout({ children }) {
       )}
 
       {/* Main Content Area */}
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, borderLeft: !isMobile ? '1px solid #e2e8f0' : 'none' }}>
         {/* Top Header */}
         <AppBar 
           position="sticky" 
@@ -264,9 +316,10 @@ export default function DashboardLayout({ children }) {
           sx={{ 
             bgcolor: 'white', 
             borderBottom: '1px solid #e2e8f0',
+            height: '64px',
           }}
         >
-          <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Toolbar sx={{ justifyContent: 'space-between', height: '64px', minHeight: '64px !important' }}>
             {/* Left side - Menu button (mobile) or Page title */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               {isMobile && (
@@ -307,14 +360,17 @@ export default function DashboardLayout({ children }) {
                 '&:hover': { bgcolor: '#f1f5f9' },
               }}
             >
-              <Avatar sx={{ bgcolor: '#2463eb', width: 36, height: 36, fontSize: '0.875rem' }}>
-                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+              <Avatar 
+                src={profilePicture || user?.profilePicture?.url || undefined}
+                sx={{ bgcolor: '#2463eb', width: 36, height: 36, fontSize: '0.875rem' }}
+              >
+                {!profilePicture && !user?.profilePicture?.url && (user?.name?.charAt(0)?.toUpperCase() || 'U')}
               </Avatar>
               {!isMobile && (
                 <>
                   <Box sx={{ textAlign: 'left' }}>
                     <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', lineHeight: 1.2 }}>
-                      {user?.name || 'User'}
+                      {user?.name || user?.fullName || 'User'}
                     </Typography>
                     <Typography sx={{ fontSize: '0.75rem', color: '#64748b', lineHeight: 1.2 }}>
                       {user?.email || 'user@example.com'}
@@ -349,13 +405,21 @@ export default function DashboardLayout({ children }) {
                 },
               }}
             >
-              <Box sx={{ px: 2, py: 1.5 }}>
-                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
-                  {user?.name || 'User'}
-                </Typography>
-                <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
-                  {user?.email || 'user@example.com'}
-                </Typography>
+              <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Avatar 
+                  src={profilePicture || user?.profilePicture?.url || undefined}
+                  sx={{ bgcolor: '#2463eb', width: 40, height: 40 }}
+                >
+                  {!profilePicture && !user?.profilePicture?.url && (user?.name?.charAt(0)?.toUpperCase() || 'U')}
+                </Avatar>
+                <Box>
+                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
+                    {user?.name || user?.fullName || 'User'}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    {user?.email || 'user@example.com'}
+                  </Typography>
+                </Box>
               </Box>
               <Divider sx={{ my: 1 }} />
               <MenuItem onClick={handleProfileClick}>
@@ -364,12 +428,12 @@ export default function DashboardLayout({ children }) {
                 </ListItemIcon>
                 <ListItemText primary="Profile" primaryTypographyProps={{ fontSize: '0.875rem' }} />
               </MenuItem>
-              <MenuItem onClick={() => { handleProfileMenuClose(); router.push('/dashboard/settings'); }}>
+              {/* <MenuItem onClick={() => { handleProfileMenuClose(); router.push('/dashboard/settings'); }}>
                 <ListItemIcon sx={{ minWidth: 36 }}>
                   <SettingsIcon fontSize="small" />
                 </ListItemIcon>
                 <ListItemText primary="Settings" primaryTypographyProps={{ fontSize: '0.875rem' }} />
-              </MenuItem>
+              </MenuItem> */}
               <MenuItem onClick={() => { handleProfileMenuClose(); router.push('/dashboard/plan'); }}>
                 <ListItemIcon sx={{ minWidth: 36 }}>
                   <CardMembershipIcon fontSize="small" />

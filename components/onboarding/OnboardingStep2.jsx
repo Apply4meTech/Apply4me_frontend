@@ -39,38 +39,17 @@ export default function OnboardingStep2() {
   const [jobTitleInput, setJobTitleInput] = useState('');
 
   const handleChange = (field) => (e) => {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    let value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    
+    // Prevent negative values for salary fields
+    if (['minAcceptableSalary', 'preferredSalaryMin', 'preferredSalaryMax'].includes(field)) {
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && numValue < 0) {
+        value = 0;
+      }
+    }
+    
     updateFormData(field, value);
-  };
-
-  const handleJobTitleAdd = (event, newValue) => {
-    if (newValue && formData.primaryJobTitles.length < 3) {
-      const trimmedValue = newValue.trim();
-      if (trimmedValue && !formData.primaryJobTitles.includes(trimmedValue)) {
-        updateFormData('primaryJobTitles', [...formData.primaryJobTitles, trimmedValue]);
-        setJobTitleInput('');
-      }
-    }
-  };
-
-  const handleJobTitleKeyDown = (event) => {
-    if (event.key === 'Enter' && jobTitleInput.trim()) {
-      event.preventDefault();
-      if (formData.primaryJobTitles.length < 3) {
-        const trimmedValue = jobTitleInput.trim();
-        if (!formData.primaryJobTitles.includes(trimmedValue)) {
-          updateFormData('primaryJobTitles', [...formData.primaryJobTitles, trimmedValue]);
-          setJobTitleInput('');
-        }
-      }
-    }
-  };
-
-  const handleJobTitleDelete = (titleToDelete) => {
-    updateFormData(
-      'primaryJobTitles',
-      formData.primaryJobTitles.filter((title) => title !== titleToDelete)
-    );
   };
 
   const handleJobTypeChange = (jobType) => {
@@ -99,19 +78,35 @@ export default function OnboardingStep2() {
           </Typography>
           <Autocomplete
             freeSolo
+            multiple
             options={[]}
+            value={formData.primaryJobTitles || []}
+            onChange={(event, newValue) => {
+              // Limit to 3 job titles
+              if (newValue.length <= 3) {
+                updateFormData('primaryJobTitles', newValue);
+              }
+            }}
             inputValue={jobTitleInput}
             onInputChange={(event, newInputValue) => {
               setJobTitleInput(newInputValue);
             }}
-            onChange={handleJobTitleAdd}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && jobTitleInput.trim() && formData.primaryJobTitles.length < 3) {
+                event.preventDefault();
+                const trimmedValue = jobTitleInput.trim();
+                if (!formData.primaryJobTitles.includes(trimmedValue)) {
+                  updateFormData('primaryJobTitles', [...formData.primaryJobTitles, trimmedValue]);
+                  setJobTitleInput('');
+                }
+              }
+            }}
             renderInput={(params) => (
               <TextField
                 {...params}
                 placeholder="Enter job title and press Enter"
-                onKeyDown={handleJobTitleKeyDown}
                 error={errors.primaryJobTitles ? true : false}
-                helperText={errors.primaryJobTitles || 'Press Enter to add job title'}
+                helperText={errors.primaryJobTitles || (formData.primaryJobTitles.length >= 3 ? 'Maximum 3 job titles reached' : 'Press Enter to add job title')}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '8px',
@@ -119,28 +114,26 @@ export default function OnboardingStep2() {
                 }}
               />
             )}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => {
+                const { key, ...chipProps } = getTagProps({ index });
+                return (
+                  <Chip
+                    key={key}
+                    label={option}
+                    {...chipProps}
+                    sx={{
+                      bgcolor: '#eff6ff',
+                      color: '#2463eb',
+                      '& .MuiChip-deleteIcon': {
+                        color: '#2463eb',
+                      },
+                    }}
+                  />
+                );
+              })
+            }
           />
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
-            {formData.primaryJobTitles.map((title) => (
-              <Chip
-                key={title}
-                label={title}
-                onDelete={() => handleJobTitleDelete(title)}
-                sx={{
-                  bgcolor: '#eff6ff',
-                  color: '#2463eb',
-                  '& .MuiChip-deleteIcon': {
-                    color: '#2463eb',
-                  },
-                }}
-              />
-            ))}
-          </Box>
-          {formData.primaryJobTitles.length >= 3 && (
-            <Typography sx={{ fontSize: '0.75rem', color: '#f59e0b', mt: 1 }}>
-              Maximum 3 job titles reached
-            </Typography>
-          )}
         </Box>
 
         {/* Total Years of Experience */}
@@ -264,6 +257,7 @@ export default function OnboardingStep2() {
           value={formData.minAcceptableSalary}
           onChange={handleChange('minAcceptableSalary')}
           placeholder="e.g., 80000"
+          inputProps={{ min: 0 }}
           InputProps={{
             startAdornment: <Typography sx={{ mr: 1, color: '#64748b' }}>$</Typography>,
           }}
@@ -284,6 +278,7 @@ export default function OnboardingStep2() {
               value={formData.preferredSalaryMin}
               onChange={handleChange('preferredSalaryMin')}
               placeholder="e.g., 90000"
+              inputProps={{ min: 0 }}
               InputProps={{
                 startAdornment: <Typography sx={{ mr: 1, color: '#64748b' }}>$</Typography>,
               }}
@@ -302,6 +297,7 @@ export default function OnboardingStep2() {
               value={formData.preferredSalaryMax}
               onChange={handleChange('preferredSalaryMax')}
               placeholder="e.g., 120000"
+              inputProps={{ min: 0 }}
               InputProps={{
                 startAdornment: <Typography sx={{ mr: 1, color: '#64748b' }}>$</Typography>,
               }}
@@ -331,6 +327,52 @@ export default function OnboardingStep2() {
             },
           }}
         />
+
+        {/* Skills */}
+        <Box>
+          <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
+            Skills
+          </Typography>
+          <Autocomplete
+            freeSolo
+            multiple
+            options={[]}
+            value={formData.skills || []}
+            onChange={(event, newValue) => {
+              updateFormData('skills', newValue);
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder="Enter skills and press Enter"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                  },
+                }}
+              />
+            )}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => {
+                const { key, ...chipProps } = getTagProps({ index });
+                return (
+                  <Chip
+                    key={key}
+                    label={option}
+                    {...chipProps}
+                    sx={{
+                      bgcolor: '#eff6ff',
+                      color: '#2463eb',
+                      '& .MuiChip-deleteIcon': {
+                        color: '#2463eb',
+                      },
+                    }}
+                  />
+                );
+              })
+            }
+          />
+        </Box>
       </Box>
     </Box>
   );

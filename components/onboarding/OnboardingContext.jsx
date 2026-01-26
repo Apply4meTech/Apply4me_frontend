@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
 const OnboardingContext = createContext();
 
@@ -13,25 +14,45 @@ export const useOnboarding = () => {
 };
 
 export const OnboardingProvider = ({ children }) => {
-  // Load saved data from localStorage
+  // Get user data from Redux store
+  const { user } = useSelector((state) => state.auth);
+
+  // Load saved data from localStorage and prefill with user data
   const loadSavedData = () => {
+    const initialData = getInitialData();
+    
+    // Prefill email and fullName from user data if available
+    if (user) {
+      if (user.email) {
+        initialData.email = user.email;
+      }
+      if (user.name) {
+        initialData.fullName = user.name;
+      }
+    }
+
+    // If there's saved onboarding data, merge it (saved data takes precedence)
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('onboardingData');
       if (saved) {
         try {
-          return JSON.parse(saved);
+          const savedData = JSON.parse(saved);
+          // Merge saved data with prefilled data (saved data takes precedence)
+          return { ...initialData, ...savedData };
         } catch (e) {
-          return getInitialData();
+          return initialData;
         }
       }
     }
-    return getInitialData();
+    
+    return initialData;
   };
 
   const getInitialData = () => ({
     // Step 1: Personal Information
     fullName: '',
     email: '',
+    phoneCode: '',
     phone: '',
     address: '',
     openToRelocate: false,
@@ -40,6 +61,7 @@ export const OnboardingProvider = ({ children }) => {
     
     // Step 2: Job Preferences & Compensation
     primaryJobTitles: [],
+    skills: [],
     totalYearsExperience: '',
     seniorityLevel: '',
     jobTypes: [],
@@ -52,10 +74,8 @@ export const OnboardingProvider = ({ children }) => {
     equityPreference: false,
     
     // Step 3: Documents & Links
-    resume: null,
-    resumeFileName: '',
-    coverLetter: null,
-    coverLetterFileName: '',
+    resume_details: null,
+    cv_details: null,
     portfolioWebsite: '',
     github: '',
     linkedinProfile: '',
@@ -66,7 +86,24 @@ export const OnboardingProvider = ({ children }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState({});
 
-  // Save to localStorage whenever formData changes
+  // Update form data when user data becomes available (e.g., after signup)
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => {
+        const updated = { ...prev };
+        // Only prefill if fields are empty
+        if (!updated.email && user.email) {
+          updated.email = user.email;
+        }
+        if (!updated.fullName && user.name) {
+          updated.fullName = user.name;
+        }
+        return updated;
+      });
+    }
+  }, [user]);
+
+  // Save to localStorage whenever formData changes (for temporary storage during form filling)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('onboardingData', JSON.stringify(formData));

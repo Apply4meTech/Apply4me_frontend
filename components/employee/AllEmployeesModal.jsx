@@ -22,6 +22,9 @@ import {
 } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import EditIcon from '@mui/icons-material/Edit';
+import IconButton from '@mui/material/IconButton';
+import EditEmployeeModal from './EditEmployeeModal';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
 
@@ -29,6 +32,8 @@ export default function AllEmployeesModal({ open, onClose }) {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [editEmployee, setEditEmployee] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -153,6 +158,7 @@ export default function AllEmployeesModal({ open, onClose }) {
                   <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Role</TableCell>
                   <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Status</TableCell>
                   <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Created At</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -196,6 +202,18 @@ export default function AllEmployeesModal({ open, onClose }) {
                     <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
                       {formatDate(employee.createdAt)}
                     </TableCell>
+                    <TableCell>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setEditEmployee(employee);
+                          setEditModalOpen(true);
+                        }}
+                        sx={{ color: '#2463eb', '&:hover': { bgcolor: '#e0e7ff' } }}
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -211,6 +229,20 @@ export default function AllEmployeesModal({ open, onClose }) {
           Close
         </Button>
       </DialogActions>
+
+      {/* Edit Employee Modal */}
+      <EditEmployeeModal
+        open={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setEditEmployee(null);
+        }}
+        employee={editEmployee}
+        onSuccess={(updatedEmployee) => {
+          // Refresh the employee list
+          fetchEmployees();
+        }}
+      />
     </Dialog>
   );
 }

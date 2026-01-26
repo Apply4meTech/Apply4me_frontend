@@ -35,6 +35,7 @@ function OnboardingContent() {
     previousStep,
     errors,
     clearErrors,
+    setFieldError,
   } = useOnboarding();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,7 +66,14 @@ function OnboardingContent() {
       }
     }
 
-    // Step 3 doesn't require all fields, so validation is optional
+    if (step === 3) {
+      // Resume is mandatory
+      if (!formData.resume_details) {
+        isValid = false;
+        errorMessages.push('Resume is required');
+        setFieldError('resume', 'Resume is required. Please upload your resume.');
+      }
+    }
 
     if (!isValid && errorMessages.length > 0) {
       setSubmitError(errorMessages.join('. '));
@@ -95,22 +103,84 @@ function OnboardingContent() {
     setSubmitError(null);
 
     try {
-      // Static implementation - will be replaced with API call later
-      // For now, we'll just mark onboarding as complete
-      
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Ensure API_URL doesn't end with /api to avoid double /api/api
+      const getApiUrl = () => {
+        const url = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+        return url.endsWith('/api') ? url.slice(0, -4) : url;
+      };
+      const API_URL = getApiUrl();
+      const token = localStorage.getItem('token');
 
-      // Mark onboarding as complete
-      dispatch(setOnboardingComplete());
-
-      // Clear onboarding data from localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('onboardingData');
+      if (!token) {
+        throw new Error('Authentication required. Please login again.');
       }
 
-      // Redirect to dashboard
-      router.push('/dashboard');
+      // Validate resume is uploaded
+      if (!formData.resume_details) {
+        throw new Error('Resume is required. Please upload your resume.');
+      }
+
+      // Prepare JSON data (files are already uploaded separately)
+      const onboardingData = {
+        // Step 1: Personal Information
+        fullName: formData.fullName,
+        phoneCode: formData.phoneCode,
+        phone: formData.phone,
+        address: formData.address,
+        openToRelocate: formData.openToRelocate,
+        countryOfWork: formData.countryOfWork,
+        visaSponsorshipRequired: formData.visaSponsorshipRequired,
+        // Step 2: Job Preferences & Compensation
+        primaryJobTitles: formData.primaryJobTitles || [],
+        skills: formData.skills || [],
+        totalYearsExperience: formData.totalYearsExperience || '',
+        seniorityLevel: formData.seniorityLevel || '',
+        jobTypes: formData.jobTypes || [],
+        workLocation: formData.workLocation || '',
+        locationPreference: formData.locationPreference || '',
+        remoteOnly: formData.remoteOnly || false,
+        minAcceptableSalary: formData.minAcceptableSalary || '',
+        preferredSalaryMin: formData.preferredSalaryMin || '',
+        preferredSalaryMax: formData.preferredSalaryMax || '',
+        equityPreference: formData.equityPreference || false,
+        // Step 3: Documents & Links
+        resume_details: formData.resume_details,
+        cv_details: formData.cv_details || null,
+        portfolioWebsite: formData.portfolioWebsite || '',
+        github: formData.github || '',
+        linkedinProfile: formData.linkedinProfile || '',
+        personalBlog: formData.personalBlog || '',
+      };
+
+      const response = await fetch(`${API_URL}/api/onboarding`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(onboardingData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save onboarding data. Please try again.');
+      }
+
+      if (data.success) {
+        // Mark onboarding as complete
+        dispatch(setOnboardingComplete());
+
+        // Clear onboarding data from localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('onboardingData');
+        }
+
+        // Redirect to dashboard
+        router.push('/dashboard');
+      } else {
+        throw new Error(data.error || 'Failed to save onboarding data. Please try again.');
+      }
     } catch (error) {
       setSubmitError(error.message || 'Failed to submit onboarding data. Please try again.');
       setIsSubmitting(false);

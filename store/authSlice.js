@@ -100,6 +100,16 @@ const authSlice = createSlice({
         }
       }
     },
+    // Update user data
+    updateUser: (state, action) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+        // Update localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('user', JSON.stringify(state.user));
+        }
+      }
+    },
   },
 });
 
@@ -111,6 +121,7 @@ export const {
   logout,
   clearError,
   setOnboardingComplete,
+  updateUser,
 } = authSlice.actions;
 
 export default authSlice.reducer;

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -14,78 +14,103 @@ import {
   TableRow,
   Link as MuiLink,
   Chip,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import { useSelector } from 'react-redux';
 import WorkIcon from '@mui/icons-material/Work';
 import PersonIcon from '@mui/icons-material/Person';
 
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+const getApiUrl = () => {
+  const url = API_URL;
+  return url.endsWith('/api') ? url.slice(0, -4) : url;
+};
+
 export default function DashboardContent() {
   const { user } = useSelector((state) => state.auth);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [dashboardData, setDashboardData] = useState({
+    totalJobsApplied: 0,
+    accountManagerName: 'Not Assigned',
+    applications: []
+  });
 
-  // Static data - will be replaced with API data later
-  const accountManagerName = 'John Doe'; // Static for now
-  
-  // Dummy job applications data
-  const jobApplications = [
-    {
-      jobName: 'Senior Software Engineer',
-      link: 'https://linkedin.com/jobs/view/123456',
-      status: 'Interview',
-      date: '2024-01-15',
-      source: 'LinkedIn',
-    },
-    {
-      jobName: 'Full Stack Developer',
-      link: 'https://indeed.com/viewjob?jk=abc123',
-      status: 'Applied',
-      date: '2024-01-14',
-      source: 'Indeed',
-    },
-    {
-      jobName: 'Frontend Developer',
-      link: 'https://glassdoor.com/job-listing/xyz789',
-      status: 'Applied',
-      date: '2024-01-13',
-      source: 'Glassdoor',
-    },
-    {
-      jobName: 'React Developer',
-      link: 'https://monster.com/jobs/def456',
-      status: 'Pending',
-      date: '2024-01-12',
-      source: 'Monster',
-    },
-    {
-      jobName: 'Software Engineer II',
-      link: 'https://linkedin.com/jobs/view/789012',
-      status: 'Interview',
-      date: '2024-01-11',
-      source: 'LinkedIn',
-    },
-    {
-      jobName: 'Backend Developer',
-      link: 'https://indeed.com/viewjob?jk=ghi789',
-      status: 'Applied',
-      date: '2024-01-10',
-      source: 'Indeed',
-    },
-    {
-      jobName: 'DevOps Engineer',
-      link: 'https://glassdoor.com/job-listing/jkl012',
-      status: 'Rejected',
-      date: '2024-01-09',
-      source: 'Glassdoor',
-    },
-    {
-      jobName: 'Node.js Developer',
-      link: 'https://linkedin.com/jobs/view/345678',
-      status: 'Applied',
-      date: '2024-01-08',
-      source: 'LinkedIn',
-    },
-  ];
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Authentication required');
+        }
 
-  const totalJobsApplied = jobApplications.length;
+        const response = await fetch(`${getApiUrl()}/api/dashboard`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch dashboard data');
+        }
+
+        if (data.success) {
+          setDashboardData(data.data);
+        } else {
+          throw new Error(data.error || 'Failed to fetch dashboard data');
+        }
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  const getStatusColor = (status) => {
+    const statusMap = {
+      'applied': { bg: '#eff6ff', color: '#2463eb' },
+      'response': { bg: '#dcfce7', color: '#16a34a' },
+      'interview': { bg: '#dcfce7', color: '#16a34a' },
+      'rejected': { bg: '#fee2e2', color: '#dc2626' },
+      'pending': { bg: '#fef3c7', color: '#d97706' },
+      'assigned': { bg: '#f3e8ff', color: '#9333ea' }
+    };
+    return statusMap[status] || { bg: '#f1f5f9', color: '#64748b' };
+  };
+
+  const formatStatus = (status) => {
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      </Box>
+    );
+  }
+
+  const { totalJobsApplied, accountManagerName, applications } = dashboardData;
 
   return (
     <Box>
@@ -175,7 +200,7 @@ export default function DashboardContent() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {jobApplications.length === 0 ? (
+              {applications.length === 0 ? (
                 // Empty state
                 <TableRow>
                   <TableCell colSpan={5} sx={{ textAlign: 'center', py: 6 }}>
@@ -191,58 +216,53 @@ export default function DashboardContent() {
                   </TableCell>
                 </TableRow>
               ) : (
-                jobApplications.map((application, index) => (
-                  <TableRow key={index} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
-                    <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>
-                      {application.jobName}
-                    </TableCell>
-                    <TableCell>
-                      <MuiLink
-                        href={application.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        sx={{
-                          color: '#2463eb',
-                          fontSize: '0.875rem',
-                          textDecoration: 'none',
-                          '&:hover': { textDecoration: 'underline' },
-                        }}
-                      >
-                        View Job
-                      </MuiLink>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={application.status}
-                        size="small"
-                        sx={{
-                          bgcolor: 
-                            application.status === 'Applied' ? '#eff6ff' :
-                            application.status === 'Interview' ? '#dcfce7' :
-                            application.status === 'Rejected' ? '#fee2e2' :
-                            '#fef3c7',
-                          color:
-                            application.status === 'Applied' ? '#2463eb' :
-                            application.status === 'Interview' ? '#16a34a' :
-                            application.status === 'Rejected' ? '#dc2626' :
-                            '#d97706',
-                          fontWeight: 500,
-                          fontSize: '0.75rem',
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
-                      {new Date(application.date).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric' 
-                      })}
-                    </TableCell>
-                    <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
-                      {application.source}
-                    </TableCell>
-                  </TableRow>
-                ))
+                applications.map((application) => {
+                  const statusColors = getStatusColor(application.status);
+                  return (
+                    <TableRow key={application.id} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
+                      <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>
+                        {application.jobName}
+                      </TableCell>
+                      <TableCell>
+                        <MuiLink
+                          href={application.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          sx={{
+                            color: '#2463eb',
+                            fontSize: '0.875rem',
+                            textDecoration: 'none',
+                            '&:hover': { textDecoration: 'underline' },
+                          }}
+                        >
+                          View Job
+                        </MuiLink>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={formatStatus(application.status)}
+                          size="small"
+                          sx={{
+                            bgcolor: statusColors.bg,
+                            color: statusColors.color,
+                            fontWeight: 500,
+                            fontSize: '0.75rem',
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
+                        {new Date(application.date).toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
+                      </TableCell>
+                      <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
+                        {application.source}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
