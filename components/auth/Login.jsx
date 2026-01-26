@@ -13,7 +13,7 @@ import { setLoading, loginSuccess, loginFailure, clearError } from '../../store/
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-// Validation schema
+
 const loginSchema = yup.object().shape({
   email: yup
     .string()
