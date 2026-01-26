@@ -89,7 +89,8 @@ export default function Signup() {
       
       if (data.success && data.token) {
         dispatch(loginSuccess({ token: data.token, user: data.user }));
-        router.push('/dashboard');
+        // New users always go to onboarding
+        router.push('/onboarding');
       } else {
         throw new Error(data.message || 'Signup failed. Please try again.');
       }

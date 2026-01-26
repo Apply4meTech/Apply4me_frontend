@@ -30,7 +30,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { logout } from '../../store/authSlice';
+import CardMembershipIcon from '@mui/icons-material/CardMembership';
+import { logout, initializeAuth } from '../../store/authSlice';
 
 const drawerWidth = 260;
 
@@ -54,6 +55,7 @@ export default function DashboardLayout({ children }) {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useDispatch();
@@ -61,12 +63,54 @@ export default function DashboardLayout({ children }) {
 
   const profileMenuOpen = Boolean(anchorEl);
 
+  // Initialize auth state from localStorage on mount
   useEffect(() => {
-    // Redirect to login if not authenticated
-    if (!isAuthenticated) {
+    // Check localStorage directly first
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
+      
+      // If token exists in localStorage but not in Redux, initialize it
+      if (token && user && !isAuthenticated) {
+        dispatch(initializeAuth());
+      }
+      
+      setIsInitialized(true);
+    }
+  }, [dispatch, isAuthenticated]);
+
+  useEffect(() => {
+    // Only redirect if we've checked localStorage and still not authenticated
+    if (isInitialized && !isAuthenticated) {
+      // Double-check localStorage before redirecting
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('token');
+        const user = localStorage.getItem('user');
+        
+        // If token exists in localStorage, initialize auth instead of redirecting
+        if (token && user) {
+          dispatch(initializeAuth());
+          return;
+        }
+      }
+      
+      // Only redirect if truly not authenticated
       router.push('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isInitialized, isAuthenticated, router, dispatch]);
+
+  // Check onboarding completion status
+  useEffect(() => {
+    if (isInitialized && isAuthenticated && user) {
+      const isOnboardingComplete = user.isOnboardingComplete ?? false;
+      const currentPath = pathname;
+      
+      // Don't redirect if already on onboarding page
+      if (!isOnboardingComplete && currentPath !== '/onboarding') {
+        router.push('/onboarding');
+      }
+    }
+  }, [isInitialized, isAuthenticated, user, pathname, router]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -91,7 +135,16 @@ export default function DashboardLayout({ children }) {
     router.push('/dashboard/profile');
   };
 
-  // Don't render anything if not authenticated
+  // Show loading state while checking authentication
+  if (!isInitialized) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <Typography>Loading...</Typography>
+      </Box>
+    );
+  }
+
+  // Don't render anything if not authenticated (after initialization)
   if (!isAuthenticated) {
     return null;
   }
@@ -316,6 +369,12 @@ export default function DashboardLayout({ children }) {
                   <SettingsIcon fontSize="small" />
                 </ListItemIcon>
                 <ListItemText primary="Settings" primaryTypographyProps={{ fontSize: '0.875rem' }} />
+              </MenuItem>
+              <MenuItem onClick={() => { handleProfileMenuClose(); router.push('/dashboard/plan'); }}>
+                <ListItemIcon sx={{ minWidth: 36 }}>
+                  <CardMembershipIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="My Plan" primaryTypographyProps={{ fontSize: '0.875rem' }} />
               </MenuItem>
               <Divider sx={{ my: 1 }} />
               <MenuItem onClick={handleLogout} sx={{ color: '#ef4444' }}>

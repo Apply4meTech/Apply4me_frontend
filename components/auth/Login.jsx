@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Button, InputAdornment, IconButton, Link as MuiLink, useMediaQuery, useTheme, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, TextField, Button, InputAdornment, IconButton, Link as MuiLink, useMediaQuery, useTheme, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Link from 'next/link';
@@ -22,6 +22,14 @@ const loginSchema = yup.object().shape({
   password: yup
     .string()
     .required('Password is required'),
+});
+
+// Forgot password validation schema
+const forgotPasswordSchema = yup.object().shape({
+  email: yup
+    .string()
+    .email('Please enter a valid email address')
+    .required('Email is required'),
 });
 
 // Logo SVG Component
@@ -60,9 +68,57 @@ export default function Login() {
   const { loading, error: authError } = useSelector((state) => state.auth);
   
   const [showPassword, setShowPassword] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
+  const [forgotPasswordError, setForgotPasswordError] = useState(null);
+  const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState(false);
 
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
+  };
+
+  const handleForgotPasswordOpen = () => {
+    setForgotPasswordOpen(true);
+    setForgotPasswordError(null);
+    setForgotPasswordSuccess(false);
+  };
+
+  const handleForgotPasswordClose = () => {
+    setForgotPasswordOpen(false);
+    setForgotPasswordError(null);
+    setForgotPasswordSuccess(false);
+  };
+
+  const handleForgotPassword = async (values) => {
+    setForgotPasswordLoading(true);
+    setForgotPasswordError(null);
+    setForgotPasswordSuccess(false);
+    
+    try {
+      const response = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: values.email }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send password reset email. Please try again.');
+      }
+      
+      if (data.success) {
+        setForgotPasswordSuccess(true);
+      } else {
+        throw new Error(data.error || 'Failed to send password reset email. Please try again.');
+      }
+    } catch (err) {
+      setForgotPasswordError(err.message);
+    } finally {
+      setForgotPasswordLoading(false);
+    }
   };
 
   const handleLogin = async (values) => {
@@ -86,7 +142,13 @@ export default function Login() {
       
       if (data.success && data.token) {
         dispatch(loginSuccess({ token: data.token, user: data.user }));
-        router.push('/dashboard');
+        // Check if onboarding is complete
+        const isOnboardingComplete = data.user?.isOnboardingComplete ?? false;
+        if (isOnboardingComplete) {
+          router.push('/dashboard');
+        } else {
+          router.push('/onboarding');
+        }
       } else {
         throw new Error(data.message || 'Login failed. Please try again.');
       }
@@ -96,8 +158,7 @@ export default function Login() {
   };
 
   // Mobile/Tablet View - Card with gradient background
-  if (isMobileOrTablet) {
-    return (
+  const mobileView = isMobileOrTablet ? (
       <Box
         sx={{
           minHeight: '100vh',
@@ -259,13 +320,19 @@ export default function Login() {
                       Password
                     </Typography>
                     <MuiLink
-                      href="#"
+                      component="button"
+                      type="button"
+                      onClick={handleForgotPasswordOpen}
                       sx={{
                         color: '#2463eb',
                         fontWeight: 600,
                         fontSize: '0.875rem',
                         textDecoration: 'none',
                         fontFamily: '"Manrope", sans-serif',
+                        border: 'none',
+                        background: 'none',
+                        cursor: 'pointer',
+                        padding: 0,
                         '&:hover': { color: '#1d4ed8' },
                       }}
                     >
@@ -338,11 +405,10 @@ export default function Login() {
           </Box>
         </Box>
       </Box>
-    );
-  }
+    ) : null;
 
   // Desktop View - Split screen layout
-  return (
+  const desktopView = !isMobileOrTablet ? (
     <Box
       sx={{
         position: 'relative',
@@ -601,12 +667,18 @@ export default function Login() {
                       Password
                     </Typography>
                     <MuiLink
-                      href="#"
+                      component="button"
+                      type="button"
+                      onClick={handleForgotPasswordOpen}
                       sx={{
                         color: '#2463eb',
                         fontWeight: 600,
                         fontSize: '0.875rem',
                         textDecoration: 'none',
+                        border: 'none',
+                        background: 'none',
+                        cursor: 'pointer',
+                        padding: 0,
                         '&:hover': { color: '#1d4ed8' },
                       }}
                     >
@@ -680,5 +752,131 @@ export default function Login() {
         </Box>
       </Box>
     </Box>
+    ) : null;
+
+  return (
+    <>
+      {mobileView}
+      {desktopView}
+
+      {/* Forgot Password Dialog */}
+      <Dialog 
+        open={forgotPasswordOpen} 
+        onClose={handleForgotPasswordClose}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            fontFamily: '"Manrope", sans-serif',
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          fontSize: '1.5rem', 
+          fontWeight: 700, 
+          color: '#111318',
+          fontFamily: '"Manrope", sans-serif',
+          pb: 1
+        }}>
+          Forgot Password?
+        </DialogTitle>
+        <DialogContent>
+          {forgotPasswordSuccess ? (
+            <Box sx={{ py: 2 }}>
+              <Alert severity="success" sx={{ borderRadius: '8px', mb: 2 }}>
+                If an account with that email exists, a password reset link has been sent to your email.
+              </Alert>
+              <Typography sx={{ color: '#64748b', fontSize: '0.875rem' }}>
+                Please check your email and click on the reset link to create a new password.
+              </Typography>
+            </Box>
+          ) : (
+            <Formik
+              initialValues={{ email: '' }}
+              validationSchema={forgotPasswordSchema}
+              onSubmit={handleForgotPassword}
+            >
+              {({ values, errors, touched, handleChange, handleBlur }) => (
+                <Form style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '8px' }}>
+                  <Typography sx={{ color: '#64748b', fontSize: '0.875rem', mb: 1 }}>
+                    Enter your email address and we'll send you a link to reset your password.
+                  </Typography>
+                  
+                  <TextField
+                    id="forgot-email"
+                    name="email"
+                    type="email"
+                    label="Email Address"
+                    placeholder="Enter your email"
+                    value={values.email}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.email && !!errors.email}
+                    helperText={touched.email && errors.email}
+                    fullWidth
+                    sx={getTextFieldStyles(touched.email && !!errors.email)}
+                  />
+
+                  {forgotPasswordError && (
+                    <Alert severity="error" sx={{ borderRadius: '8px' }}>
+                      {forgotPasswordError}
+                    </Alert>
+                  )}
+
+                  <DialogActions sx={{ px: 0, pt: 2 }}>
+                    <Button
+                      onClick={handleForgotPasswordClose}
+                      sx={{
+                        color: '#64748b',
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        '&:hover': { bgcolor: '#f1f5f9' },
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={forgotPasswordLoading}
+                      sx={{
+                        bgcolor: '#2463eb',
+                        color: 'white',
+                        fontWeight: 700,
+                        textTransform: 'none',
+                        borderRadius: '8px',
+                        px: 3,
+                        '&:hover': { bgcolor: '#1d4ed8' },
+                        '&:disabled': { bgcolor: '#93c5fd', color: 'white' },
+                      }}
+                    >
+                      {forgotPasswordLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Send Reset Link'}
+                    </Button>
+                  </DialogActions>
+                </Form>
+              )}
+            </Formik>
+          )}
+        </DialogContent>
+        {forgotPasswordSuccess && (
+          <DialogActions sx={{ px: 3, pb: 3 }}>
+            <Button
+              onClick={handleForgotPasswordClose}
+              fullWidth
+              sx={{
+                bgcolor: '#2463eb',
+                color: 'white',
+                fontWeight: 700,
+                textTransform: 'none',
+                borderRadius: '8px',
+                '&:hover': { bgcolor: '#1d4ed8' },
+              }}
+            >
+              Close
+            </Button>
+          </DialogActions>
+        )}
+      </Dialog>
+    </>
   );
 }

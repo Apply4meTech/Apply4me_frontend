@@ -90,6 +90,16 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    // Set onboarding complete
+    setOnboardingComplete: (state) => {
+      if (state.user) {
+        state.user.isOnboardingComplete = true;
+        // Update localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('user', JSON.stringify(state.user));
+        }
+      }
+    },
   },
 });
 
@@ -100,6 +110,7 @@ export const {
   loginFailure,
   logout,
   clearError,
+  setOnboardingComplete,
 } = authSlice.actions;
 
 export default authSlice.reducer;
