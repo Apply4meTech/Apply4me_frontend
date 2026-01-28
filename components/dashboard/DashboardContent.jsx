@@ -16,10 +16,19 @@ import {
   Chip,
   CircularProgress,
   Alert,
+  Button,
 } from '@mui/material';
 import { useSelector } from 'react-redux';
 import WorkIcon from '@mui/icons-material/Work';
 import PersonIcon from '@mui/icons-material/Person';
+import AddIcon from '@mui/icons-material/Add';
+import DescriptionIcon from '@mui/icons-material/Description';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import ImageIcon from '@mui/icons-material/Image';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
+import AddJobModal from './AddJobModal';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
 const getApiUrl = () => {
@@ -31,50 +40,55 @@ export default function DashboardContent() {
   const { user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState({
     totalJobsApplied: 0,
     accountManagerName: 'Not Assigned',
     applications: []
   });
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('Authentication required');
-        }
-
-        const response = await fetch(`${getApiUrl()}/api/dashboard`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch dashboard data');
-        }
-
-        if (data.success) {
-          setDashboardData(data.data);
-        } else {
-          throw new Error(data.error || 'Failed to fetch dashboard data');
-        }
-      } catch (err) {
-        console.error('Error fetching dashboard data:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
       }
-    };
 
+      const response = await fetch(`${getApiUrl()}/api/dashboard`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch dashboard data');
+      }
+
+      if (data.success) {
+        setDashboardData(data.data);
+      } else {
+        throw new Error(data.error || 'Failed to fetch dashboard data');
+      }
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  const handleJobAdded = () => {
+    fetchDashboardData();
+  };
 
   const getStatusColor = (status) => {
     const statusMap = {
@@ -118,9 +132,26 @@ export default function DashboardContent() {
       <Box sx={{ mb: 4, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, gap: 3 }}>
         {/* Left Side - Greeting and Summary Boxes */}
         <Box sx={{ flex: 1 }}>
-          <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a', mb: 3 }}>
-            Hi {user?.name || 'User'}
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a' }}>
+              Hi {user?.name || 'User'}
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setModalOpen(true)}
+              sx={{
+                bgcolor: '#2463eb',
+                '&:hover': {
+                  bgcolor: '#1d4ed8',
+                },
+                textTransform: 'none',
+                fontWeight: 600,
+              }}
+            >
+              Add Job
+            </Button>
+          </Box>
           
           <Grid container spacing={2}>
             {/* Total Jobs Applied Box */}
@@ -192,6 +223,9 @@ export default function DashboardContent() {
                   Status
                 </TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
+                  Uploaded Files
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
                   Date
                 </TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
@@ -203,7 +237,7 @@ export default function DashboardContent() {
               {applications.length === 0 ? (
                 // Empty state
                 <TableRow>
-                  <TableCell colSpan={5} sx={{ textAlign: 'center', py: 6 }}>
+                  <TableCell colSpan={6} sx={{ textAlign: 'center', py: 6 }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                       <WorkIcon sx={{ fontSize: '3rem', color: '#cbd5e1' }} />
                       <Typography sx={{ color: '#64748b', fontSize: '1rem' }}>
@@ -224,19 +258,25 @@ export default function DashboardContent() {
                         {application.jobName}
                       </TableCell>
                       <TableCell>
-                        <MuiLink
-                          href={application.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          sx={{
-                            color: '#2463eb',
-                            fontSize: '0.875rem',
-                            textDecoration: 'none',
-                            '&:hover': { textDecoration: 'underline' },
-                          }}
-                        >
-                          View Job
-                        </MuiLink>
+                        {application.link ? (
+                          <MuiLink
+                            href={application.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            sx={{
+                              color: '#2463eb',
+                              fontSize: '0.875rem',
+                              textDecoration: 'none',
+                              '&:hover': { textDecoration: 'underline' },
+                            }}
+                          >
+                            View Job
+                          </MuiLink>
+                        ) : (
+                          <Typography sx={{ color: '#94a3b8', fontSize: '0.875rem', fontStyle: 'italic' }}>
+                            No URL
+                          </Typography>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Chip
@@ -249,6 +289,57 @@ export default function DashboardContent() {
                             fontSize: '0.75rem',
                           }}
                         />
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                          {application.files?.resume && (
+                            <Tooltip title={`Resume: ${application.files.resume.fileName}`} arrow>
+                              <IconButton
+                                size="small"
+                                onClick={() => window.open(application.files.resume.url, '_blank')}
+                                sx={{
+                                  color: '#2463eb',
+                                  '&:hover': { bgcolor: '#eff6ff' },
+                                }}
+                              >
+                                <DescriptionIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                          {application.files?.coverLetter && (
+                            <Tooltip title={`Cover Letter: ${application.files.coverLetter.fileName}`} arrow>
+                              <IconButton
+                                size="small"
+                                onClick={() => window.open(application.files.coverLetter.url, '_blank')}
+                                sx={{
+                                  color: '#16a34a',
+                                  '&:hover': { bgcolor: '#dcfce7' },
+                                }}
+                              >
+                                <PictureAsPdfIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                          {application.files?.screenshotProof && (
+                            <Tooltip title={`Screenshot Proof: ${application.files.screenshotProof.fileName}`} arrow>
+                              <IconButton
+                                size="small"
+                                onClick={() => window.open(application.files.screenshotProof.url, '_blank')}
+                                sx={{
+                                  color: '#f59e0b',
+                                  '&:hover': { bgcolor: '#fef3c7' },
+                                }}
+                              >
+                                <ImageIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                          {(!application.files?.resume && !application.files?.coverLetter && !application.files?.screenshotProof) && (
+                            <Typography sx={{ color: '#94a3b8', fontSize: '0.75rem', fontStyle: 'italic' }}>
+                              No files
+                            </Typography>
+                          )}
+                        </Box>
                       </TableCell>
                       <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
                         {new Date(application.date).toLocaleDateString('en-US', { 
@@ -268,6 +359,13 @@ export default function DashboardContent() {
           </Table>
         </TableContainer>
       </Paper>
+
+      {/* Add Job Modal */}
+      <AddJobModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSuccess={handleJobAdded}
+      />
     </Box>
   );
 }

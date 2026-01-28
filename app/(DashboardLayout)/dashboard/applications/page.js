@@ -25,6 +25,11 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import WorkIcon from '@mui/icons-material/Work';
+import DescriptionIcon from '@mui/icons-material/Description';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import ImageIcon from '@mui/icons-material/Image';
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
 const getApiUrl = () => {
@@ -265,6 +270,9 @@ export default function ApplicationsPage() {
                       Status
                     </TableCell>
                     <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
+                      Uploaded Files
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
                       Source
                     </TableCell>
                     <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
@@ -275,7 +283,7 @@ export default function ApplicationsPage() {
                 <TableBody>
                   {applications.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} sx={{ textAlign: 'center', py: 6 }}>
+                      <TableCell colSpan={8} sx={{ textAlign: 'center', py: 6 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                           <WorkIcon sx={{ fontSize: '3rem', color: '#cbd5e1' }} />
                           <Typography sx={{ color: '#64748b', fontSize: '1rem' }}>
@@ -329,6 +337,57 @@ export default function ApplicationsPage() {
                                 fontSize: '0.75rem',
                               }}
                             />
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                              {application.files?.resume && (
+                                <Tooltip title={`Resume: ${application.files.resume.fileName}`} arrow>
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => window.open(application.files.resume.url, '_blank')}
+                                    sx={{
+                                      color: '#2463eb',
+                                      '&:hover': { bgcolor: '#eff6ff' },
+                                    }}
+                                  >
+                                    <DescriptionIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                              {application.files?.coverLetter && (
+                                <Tooltip title={`Cover Letter: ${application.files.coverLetter.fileName}`} arrow>
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => window.open(application.files.coverLetter.url, '_blank')}
+                                    sx={{
+                                      color: '#16a34a',
+                                      '&:hover': { bgcolor: '#dcfce7' },
+                                    }}
+                                  >
+                                    <PictureAsPdfIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                              {application.files?.screenshotProof && (
+                                <Tooltip title={`Screenshot Proof: ${application.files.screenshotProof.fileName}`} arrow>
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => window.open(application.files.screenshotProof.url, '_blank')}
+                                    sx={{
+                                      color: '#f59e0b',
+                                      '&:hover': { bgcolor: '#fef3c7' },
+                                    }}
+                                  >
+                                    <ImageIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                              {(!application.files?.resume && !application.files?.coverLetter && !application.files?.screenshotProof) && (
+                                <Typography sx={{ color: '#94a3b8', fontSize: '0.75rem', fontStyle: 'italic' }}>
+                                  No files
+                                </Typography>
+                              )}
+                            </Box>
                           </TableCell>
                           <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
                             {application.source}

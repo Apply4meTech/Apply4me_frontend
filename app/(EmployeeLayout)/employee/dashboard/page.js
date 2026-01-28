@@ -41,6 +41,9 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PeopleIcon from '@mui/icons-material/People';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import SettingsIcon from '@mui/icons-material/Settings';
+import Switch from '@mui/material/Switch';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import ViewDataModal from '../../../../components/employee/ViewDataModal';
 import CreateEmployeeModal from '../../../../components/employee/CreateEmployeeModal';
 import AllEmployeesModal from '../../../../components/employee/AllEmployeesModal';
@@ -63,6 +66,7 @@ export default function EmployeeDashboard() {
   const [viewMode, setViewMode] = useState('view');
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [emailData, setEmailData] = useState({ emailAddress: '', subject: '', body: '', sent: false });
+  const [sendingEmail, setSendingEmail] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [uploadFileType, setUploadFileType] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -70,6 +74,9 @@ export default function EmployeeDashboard() {
   const [employees, setEmployees] = useState([]);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
+  const [autoAssignEnabled, setAutoAssignEnabled] = useState(true);
+  const [loadingSettings, setLoadingSettings] = useState(false);
+  const [employeeStats, setEmployeeStats] = useState([]);
   
   const [dashboardData, setDashboardData] = useState({
     totalJobs: 0,
@@ -82,7 +89,11 @@ export default function EmployeeDashboard() {
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+    if (isSuperAdmin) {
+      fetchSettings();
+      fetchEmployeeStats();
+    }
+  }, [isSuperAdmin]);
 
   const fetchDashboardData = async () => {
     try {
@@ -223,10 +234,22 @@ export default function EmployeeDashboard() {
     handleMenuClose();
   };
 
-  const handleSaveEmail = async () => {
+  const handleSaveEmail = async (sendEmail = false) => {
     if (!selectedJob) return;
 
+    // Validate email address if sending
+    if (sendEmail && !emailData.emailAddress?.trim()) {
+      alert('Please enter an email address to send the email');
+      return;
+    }
+
+    if (sendEmail && !emailData.subject?.trim()) {
+      alert('Please enter a subject for the email');
+      return;
+    }
+
     try {
+      setSendingEmail(sendEmail);
       const token = localStorage.getItem('token');
       if (!token) return;
 
@@ -236,21 +259,32 @@ export default function EmployeeDashboard() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(emailData)
+        body: JSON.stringify({
+          ...emailData,
+          sendEmail: sendEmail
+        })
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
-        alert('Email data saved successfully');
+        if (sendEmail && data.emailSent) {
+          alert('Email sent successfully!');
+        } else if (sendEmail && !data.emailSent) {
+          alert('Failed to send email: ' + (data.details || 'Unknown error'));
+        } else {
+          alert('Email data saved successfully');
+        }
         setEmailDialogOpen(false);
         fetchDashboardData();
       } else {
         alert(data.error || 'Failed to save email data');
       }
     } catch (error) {
-      console.error('Error saving email data:', error);
-      alert('Failed to save email data');
+      console.error('Error saving/sending email:', error);
+      alert('Failed to ' + (sendEmail ? 'send' : 'save') + ' email');
+    } finally {
+      setSendingEmail(false);
     }
   };
 
@@ -406,6 +440,86 @@ export default function EmployeeDashboard() {
     }
   };
 
+  const fetchSettings = async () => {
+    try {
+      setLoadingSettings(true);
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${getApiUrl()}/api/settings`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setAutoAssignEnabled(data.settings.autoAssignEnabled);
+      }
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+    } finally {
+      setLoadingSettings(false);
+    }
+  };
+
+  const fetchEmployeeStats = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${getApiUrl()}/api/settings/employee-stats`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setEmployeeStats(data.employeeStats || []);
+      }
+    } catch (error) {
+      console.error('Error fetching employee stats:', error);
+    }
+  };
+
+  const handleToggleAutoAssign = async (event) => {
+    const newValue = event.target.checked;
+    setAutoAssignEnabled(newValue);
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${getApiUrl()}/api/settings`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ autoAssignEnabled: newValue })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        // Revert on error
+        setAutoAssignEnabled(!newValue);
+        alert(data.error || 'Failed to update settings');
+      } else {
+        alert(`Auto-assign ${newValue ? 'enabled' : 'disabled'} successfully`);
+        fetchEmployeeStats(); // Refresh stats
+      }
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      // Revert on error
+      setAutoAssignEnabled(!newValue);
+      alert('Failed to update settings');
+    }
+  };
+
   const getStatusColor = (status) => {
     const statusMap = {
       'pending': { bg: '#fef3c7', color: '#d97706' },
@@ -485,6 +599,99 @@ export default function EmployeeDashboard() {
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
           {error}
         </Alert>
+      )}
+
+      {/* Auto-Assign Settings (Super Admin Only) */}
+      {isSuperAdmin && (
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: 3, 
+            mb: 4, 
+            borderRadius: '12px', 
+            border: '1px solid #e2e8f0', 
+            bgcolor: 'white' 
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <SettingsIcon sx={{ color: '#2463eb', fontSize: '1.5rem' }} />
+              <Typography sx={{ fontSize: '1.125rem', fontWeight: 600, color: '#0f172a' }}>
+                Auto-Assign Settings
+              </Typography>
+            </Box>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={autoAssignEnabled}
+                  onChange={handleToggleAutoAssign}
+                  disabled={loadingSettings}
+                  sx={{
+                    '& .MuiSwitch-switchBase.Mui-checked': {
+                      color: '#2463eb',
+                    },
+                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                      backgroundColor: '#2463eb',
+                    },
+                  }}
+                />
+              }
+              label={
+                <Typography sx={{ fontSize: '0.875rem', color: '#64748b' }}>
+                  {autoAssignEnabled ? 'Enabled' : 'Disabled'}
+                </Typography>
+              }
+            />
+          </Box>
+          <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 2 }}>
+            When enabled, new jobs will be automatically assigned to the employee with the least pending jobs.
+            When disabled, only manual assignment by super admin is allowed.
+          </Typography>
+          
+          {/* Employee Statistics */}
+          {employeeStats.length > 0 && (
+            <Box sx={{ mt: 3 }}>
+              <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', mb: 1.5 }}>
+                Employee Workload (Sorted by Pending Jobs)
+              </Typography>
+              <Grid container spacing={2}>
+                {employeeStats.map((emp) => (
+                  <Grid item xs={12} sm={6} md={4} key={emp.id}>
+                    <Box
+                      sx={{
+                        p: 2,
+                        borderRadius: '8px',
+                        border: '1px solid #e2e8f0',
+                        bgcolor: '#f8fafc',
+                      }}
+                    >
+                      <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', mb: 0.5 }}>
+                        {emp.name}
+                      </Typography>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#64748b', mb: 1 }}>
+                        {emp.email}
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Box>
+                          <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>Pending</Typography>
+                          <Typography sx={{ fontSize: '1rem', fontWeight: 600, color: '#f59e0b' }}>
+                            {emp.pendingJobs}
+                          </Typography>
+                        </Box>
+                        <Box>
+                          <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>Total</Typography>
+                          <Typography sx={{ fontSize: '1rem', fontWeight: 600, color: '#0f172a' }}>
+                            {emp.totalJobs}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          )}
+        </Paper>
       )}
 
       {/* Summary Boxes */}
@@ -652,35 +859,88 @@ export default function EmployeeDashboard() {
         setEmailDialogOpen(false);
         setSelectedJob(null); // Clear selectedJob when dialog closes
       }} maxWidth="sm" fullWidth>
-        <DialogTitle>Email Data</DialogTitle>
+        <DialogTitle>Send Email</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
             <TextField
               fullWidth
               label="Email Address"
               type="email"
+              required
               value={emailData.emailAddress}
               onChange={(e) => setEmailData({ ...emailData, emailAddress: e.target.value })}
+              helperText="Recipient email address"
             />
             <TextField
               fullWidth
               label="Subject"
+              required
               value={emailData.subject}
               onChange={(e) => setEmailData({ ...emailData, subject: e.target.value })}
+              helperText="Email subject line"
             />
             <TextField
               fullWidth
-              label="Body"
+              label="Email Body"
               multiline
-              rows={4}
+              rows={6}
               value={emailData.body}
               onChange={(e) => setEmailData({ ...emailData, body: e.target.value })}
+              helperText="Email message content"
             />
+            {selectedJob && (
+              <Box sx={{ mt: 1, p: 2, bgcolor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', mb: 1 }}>
+                  Job Information:
+                </Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                  <strong>Job:</strong> {selectedJob.jobTitle} at {selectedJob.company}
+                </Typography>
+                {(selectedJob.resume || selectedJob.coverLetter || selectedJob.screenshotProof) && (
+                  <Typography sx={{ fontSize: '0.75rem', color: '#64748b', mt: 0.5 }}>
+                    <strong>Attachments:</strong> Files will be automatically attached to the email
+                  </Typography>
+                )}
+              </Box>
+            )}
+            {emailData.sent && (
+              <Alert severity="success" sx={{ mt: 1 }}>
+                Email was previously sent on {emailData.sentAt ? new Date(emailData.sentAt).toLocaleString() : 'unknown date'}
+              </Alert>
+            )}
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEmailDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleSaveEmail} variant="contained">Save</Button>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button 
+            onClick={() => {
+              setEmailDialogOpen(false);
+              setSelectedJob(null);
+            }}
+            disabled={sendingEmail}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={() => handleSaveEmail(false)} 
+            variant="outlined"
+            disabled={sendingEmail}
+            sx={{ mr: 1 }}
+          >
+            Save Only
+          </Button>
+          <Button 
+            onClick={() => handleSaveEmail(true)} 
+            variant="contained"
+            disabled={sendingEmail || !emailData.emailAddress?.trim() || !emailData.subject?.trim()}
+            startIcon={sendingEmail ? <CircularProgress size={16} /> : <EmailIcon />}
+            sx={{
+              bgcolor: '#2463eb',
+              '&:hover': { bgcolor: '#1d4ed8' },
+              '&:disabled': { bgcolor: '#cbd5e1' }
+            }}
+          >
+            {sendingEmail ? 'Sending...' : 'Send Email'}
+          </Button>
         </DialogActions>
       </Dialog>
 
