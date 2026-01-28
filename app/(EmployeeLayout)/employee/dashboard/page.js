@@ -40,6 +40,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PeopleIcon from '@mui/icons-material/People';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import ViewDataModal from '../../../../components/employee/ViewDataModal';
 import CreateEmployeeModal from '../../../../components/employee/CreateEmployeeModal';
 import AllEmployeesModal from '../../../../components/employee/AllEmployeesModal';
@@ -65,6 +66,10 @@ export default function EmployeeDashboard() {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [uploadFileType, setUploadFileType] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [employees, setEmployees] = useState([]);
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
   
   const [dashboardData, setDashboardData] = useState({
     totalJobs: 0,
@@ -117,9 +122,11 @@ export default function EmployeeDashboard() {
     setSelectedJob(job);
   };
 
-  const handleMenuClose = () => {
+  const handleMenuClose = (clearJob = true) => {
     setAnchorEl(null);
-    setSelectedJob(null);
+    if (clearJob) {
+      setSelectedJob(null);
+    }
   };
 
   const handleCopyLink = (link) => {
@@ -157,8 +164,12 @@ export default function EmployeeDashboard() {
 
   const handleAction = (action) => {
     if (action === 'view' || action === 'fill') {
-      setViewMode(action);
-      setViewDataOpen(true);
+      if (selectedJob) {
+        setViewMode(action);
+        setViewDataOpen(true);
+        handleMenuClose(false); // Don't clear selectedJob yet
+        return; // Return early to preserve selectedJob
+      }
     } else if (action === 'email') {
       if (selectedJob) {
         setEmailData({
@@ -168,16 +179,42 @@ export default function EmployeeDashboard() {
           sent: selectedJob.emailData?.sent || false
         });
         setEmailDialogOpen(true);
+        handleMenuClose(false); // Don't clear selectedJob yet
+        return; // Return early
       }
     } else if (action === 'upload-resume') {
-      setUploadFileType('resume');
-      setUploadDialogOpen(true);
+      if (selectedJob) {
+        setUploadFileType('resume');
+        setUploadDialogOpen(true);
+        handleMenuClose(false); // Don't clear selectedJob yet
+        return; // Return early
+      }
     } else if (action === 'upload-coverletter') {
-      setUploadFileType('coverLetter');
-      setUploadDialogOpen(true);
+      if (selectedJob) {
+        setUploadFileType('coverLetter');
+        setUploadDialogOpen(true);
+        handleMenuClose(false); // Don't clear selectedJob yet
+        return; // Return early
+      }
     } else if (action === 'upload-screenshot') {
-      setUploadFileType('screenshotProof');
-      setUploadDialogOpen(true);
+      if (selectedJob) {
+        setUploadFileType('screenshotProof');
+        setUploadDialogOpen(true);
+        handleMenuClose(false); // Don't clear selectedJob yet
+        return; // Return early
+      }
+    } else if (action === 'assign') {
+      if (isSuperAdmin && selectedJob) {
+        // Keep selectedJob for the dialog
+        fetchEmployees();
+        setAssignDialogOpen(true);
+        handleMenuClose(false); // Don't clear selectedJob
+        return; // Return early
+      }
+    } else if (action === 'unassign') {
+      if (isSuperAdmin && confirm('Are you sure you want to unassign this job?')) {
+        handleUnassignJob();
+      }
     } else if (action === 'delete') {
       if (confirm('Are you sure you want to delete this job?')) {
         handleDeleteJob();
@@ -281,6 +318,91 @@ export default function EmployeeDashboard() {
     } catch (error) {
       console.error('Error deleting job:', error);
       alert('Failed to delete job');
+    }
+  };
+
+  const fetchEmployees = async () => {
+    try {
+      setLoadingEmployees(true);
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${getApiUrl()}/api/auth/employee/all`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setEmployees(data.employees || []);
+      }
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+    } finally {
+      setLoadingEmployees(false);
+    }
+  };
+
+  const handleAssignJob = async () => {
+    if (!selectedJob || !selectedEmployeeId) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${getApiUrl()}/api/employee/jobs/${selectedJob.id}/assign`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ employeeId: selectedEmployeeId })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        alert('Job assigned successfully');
+        setAssignDialogOpen(false);
+        setSelectedEmployeeId('');
+        setSelectedJob(null); // Clear selected job after assignment
+        fetchDashboardData();
+      } else {
+        alert(data.error || 'Failed to assign job');
+      }
+    } catch (error) {
+      console.error('Error assigning job:', error);
+      alert('Failed to assign job');
+    }
+  };
+
+  const handleUnassignJob = async () => {
+    if (!selectedJob) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${getApiUrl()}/api/employee/jobs/${selectedJob.id}/unassign`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        alert('Job unassigned successfully');
+        fetchDashboardData();
+      } else {
+        alert(data.error || 'Failed to unassign job');
+      }
+    } catch (error) {
+      console.error('Error unassigning job:', error);
+      alert('Failed to unassign job');
     }
   };
 
@@ -407,6 +529,9 @@ export default function EmployeeDashboard() {
               <TableRow sx={{ bgcolor: '#f8fafc' }}>
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Job title</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Applicant</TableCell>
+                {isSuperAdmin && (
+                  <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Assigned To</TableCell>
+                )}
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Status</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Link</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Date</TableCell>
@@ -416,7 +541,7 @@ export default function EmployeeDashboard() {
             <TableBody>
               {dashboardData.jobs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} sx={{ textAlign: 'center', py: 6 }}>
+                  <TableCell colSpan={isSuperAdmin ? 7 : 6} sx={{ textAlign: 'center', py: 6 }}>
                     <Typography sx={{ color: '#64748b' }}>No jobs found</Typography>
                   </TableCell>
                 </TableRow>
@@ -427,6 +552,11 @@ export default function EmployeeDashboard() {
                     <TableRow key={job.id} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
                       <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>{job.jobTitle}</TableCell>
                       <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>{job.applicant}</TableCell>
+                      {isSuperAdmin && (
+                        <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>
+                          {job.assignedTo || 'Unassigned'}
+                        </TableCell>
+                      )}
                       <TableCell>
                         <FormControl size="small" sx={{ minWidth: 120 }}>
                           <Select 
@@ -475,6 +605,18 @@ export default function EmployeeDashboard() {
 
       {/* Action Menu */}
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+        {isSuperAdmin && !selectedJob?.assignedTo && (
+          <MenuItem onClick={() => handleAction('assign')}>
+            <ListItemIcon><AssignmentIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>Assign Employee</ListItemText>
+          </MenuItem>
+        )}
+        {isSuperAdmin && selectedJob?.assignedTo && (
+          <MenuItem onClick={() => handleAction('unassign')}>
+            <ListItemIcon><AssignmentIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>Unassign Employee</ListItemText>
+          </MenuItem>
+        )}
         <MenuItem onClick={() => handleAction('email')}>
           <ListItemIcon><EmailIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Send Email</ListItemText>
@@ -506,7 +648,10 @@ export default function EmployeeDashboard() {
       </Menu>
 
       {/* Email Dialog */}
-      <Dialog open={emailDialogOpen} onClose={() => setEmailDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog open={emailDialogOpen} onClose={() => {
+        setEmailDialogOpen(false);
+        setSelectedJob(null); // Clear selectedJob when dialog closes
+      }} maxWidth="sm" fullWidth>
         <DialogTitle>Email Data</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
@@ -540,7 +685,11 @@ export default function EmployeeDashboard() {
       </Dialog>
 
       {/* File Upload Dialog */}
-      <Dialog open={uploadDialogOpen} onClose={() => { setUploadDialogOpen(false); setUploadFileType(null); }} maxWidth="sm" fullWidth>
+      <Dialog open={uploadDialogOpen} onClose={() => { 
+        setUploadDialogOpen(false); 
+        setUploadFileType(null);
+        setSelectedJob(null); // Clear selectedJob when dialog closes
+      }} maxWidth="sm" fullWidth>
         <DialogTitle>Upload {uploadFileType === 'resume' ? 'Resume' : uploadFileType === 'coverLetter' ? 'Cover Letter' : 'Screenshot Proof'}</DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
@@ -567,7 +716,10 @@ export default function EmployeeDashboard() {
       {/* View/Fill Data Modal */}
       <ViewDataModal 
         open={viewDataOpen} 
-        onClose={() => setViewDataOpen(false)} 
+        onClose={() => {
+          setViewDataOpen(false);
+          setSelectedJob(null); // Clear selectedJob when dialog closes
+        }} 
         job={selectedJob} 
         mode={viewMode}
         onUpdate={fetchDashboardData}
@@ -588,6 +740,68 @@ export default function EmployeeDashboard() {
         open={allEmployeesOpen} 
         onClose={() => setAllEmployeesOpen(false)}
       />
+
+      {/* Assign Employee Dialog */}
+      <Dialog open={assignDialogOpen} onClose={() => { 
+        setAssignDialogOpen(false); 
+        setSelectedEmployeeId('');
+        setSelectedJob(null);
+      }} maxWidth="sm" fullWidth>
+        <DialogTitle>Assign Job to Employee</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+            {loadingEmployees ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <FormControl fullWidth>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', mb: 1 }}>
+                  Select Employee
+                </Typography>
+                <Select
+                  value={selectedEmployeeId}
+                  onChange={(e) => setSelectedEmployeeId(e.target.value)}
+                  displayEmpty
+                  sx={{ borderRadius: '8px', minWidth: '200px' }}
+                  renderValue={(value) => {
+                    if (!value) return <em style={{ color: '#94a3b8' }}>Select an employee</em>;
+                    const emp = employees.find(e => (e._id || e.id) === value);
+                    return emp ? `${emp.name} (${emp.email})` : value;
+                  }}
+                >
+                  <MenuItem value="" disabled>
+                    <em>Select an employee</em>
+                  </MenuItem>
+                  {employees
+                    .filter(emp => emp.role === 'employee' && emp.isActive)
+                    .map((employee) => (
+                      <MenuItem key={employee._id || employee.id} value={employee._id || employee.id}>
+                        {employee.name} ({employee.email})
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setAssignDialogOpen(false); setSelectedEmployeeId(''); }}>Cancel</Button>
+          <Button 
+            onClick={handleAssignJob} 
+            variant="contained" 
+            disabled={!selectedEmployeeId || loadingEmployees}
+            sx={{ 
+              bgcolor: '#2463eb', 
+              textTransform: 'none',
+              '&:hover': { bgcolor: '#1d4ed8' },
+              '&:disabled': { bgcolor: '#cbd5e1', color: '#94a3b8' }
+            }}
+          >
+            Assign
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

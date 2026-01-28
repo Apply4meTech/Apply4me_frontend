@@ -20,7 +20,7 @@ import { OnboardingProvider, useOnboarding } from '../../components/onboarding/O
 import OnboardingStep1 from '../../components/onboarding/OnboardingStep1';
 import OnboardingStep2 from '../../components/onboarding/OnboardingStep2';
 import OnboardingStep3 from '../../components/onboarding/OnboardingStep3';
-import { setOnboardingComplete } from '../../store/authSlice';
+import { setOnboardingComplete, updateUser } from '../../store/authSlice';
 
 const steps = ['Personal Information', 'Job Preferences', 'Documents & Links'];
 
@@ -167,8 +167,14 @@ function OnboardingContent() {
         throw new Error(data.error || 'Failed to save onboarding data. Please try again.');
       }
 
-      if (data.success) {
-        // Mark onboarding as complete
+      if (data.success && data.user) {
+        // Update user in Redux with complete user data from API (includes isOnboardingComplete flag)
+        // The updateUser action merges with existing user data, so we only need to update the flag
+        dispatch(updateUser({
+          isOnboardingComplete: data.user.isOnboardingComplete !== undefined ? data.user.isOnboardingComplete : true,
+        }));
+
+        // Also mark onboarding as complete (redundant but ensures flag is set)
         dispatch(setOnboardingComplete());
 
         // Clear onboarding data from localStorage
