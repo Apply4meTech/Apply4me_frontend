@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, Container, Typography, ToggleButton, ToggleButtonGroup, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Box, Container, Typography, ToggleButton, ToggleButtonGroup, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -10,10 +10,19 @@ import Button from '@/components/Button';
 import MainLayout from '../../components/layouts/MainLayout';
 import CompanyLogos from '../../components/CompanyLogos';
 import { useScrollAnimation } from '../../hooks/useScrollAnimation';
+import { useSelector } from 'react-redux';
+import { useRouter } from 'next/navigation';
+import razorpayService from '../../utils/razorpayService';
 
 export default function Pricing() {
   const [billingPeriod, setBillingPeriod] = useState('monthly');
   const [expandedFaq, setExpandedFaq] = useState(null);
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const [processingPlan, setProcessingPlan] = useState(null);
+  
+  // Redux and Router
+  const { token, user, isAuthenticated } = useSelector((state) => state.auth);
+  const router = useRouter();
   
   // Animation refs
   const [heroRef, heroVisible] = useScrollAnimation();
@@ -26,6 +35,114 @@ export default function Pricing() {
   const handleBillingChange = (event, newPeriod) => {
     if (newPeriod !== null) {
       setBillingPeriod(newPeriod);
+    }
+  };
+
+  // Load Razorpay SDK on component mount
+  useEffect(() => {
+    razorpayService.loadRazorpaySDK().catch((error) => {
+      console.error('Failed to load Razorpay SDK:', error);
+    });
+  }, []);
+
+  // Handle payment initiation
+  const handleGetStarted = async (plan) => {
+    // Check if user is authenticated
+    if (!isAuthenticated || !token) {
+      router.push('/login?redirect=/pricing');
+      return;
+    }
+
+    setProcessingPayment(true);
+    setProcessingPlan(plan.name);
+
+    try {
+      const price = billingPeriod === 'monthly' ? plan.monthlyPrice : plan.quarterlyPrice;
+      
+      // Prepare order data
+      const orderData = {
+        amount: price,
+        customerInfo: {
+          name: user.name || 'User',
+          email: user.email,
+          phone: user.phone || ''
+        },
+        planName: plan.name,
+        billingPeriod: billingPeriod
+      };
+
+      // Create Razorpay order
+      const orderResult = await razorpayService.createOrder(orderData, token);
+
+      if (!orderResult.success) {
+        alert(orderResult.message || 'Failed to create order. Please try again.');
+        setProcessingPayment(false);
+        setProcessingPlan(null);
+        return;
+      }
+
+      // Load Razorpay SDK if not already loaded
+      await razorpayService.loadRazorpaySDK();
+
+      // Initialize Razorpay payment
+      const options = {
+        key: orderResult.key_id,
+        amount: orderResult.data.amount,
+        currency: orderResult.data.currency,
+        name: 'ApplyForMe',
+        description: `${plan.name} Plan - ${billingPeriod === 'monthly' ? 'Monthly' : 'Quarterly'} Subscription`,
+        order_id: orderResult.data.order_id,
+        handler: async function (response) {
+          // Verify payment on backend
+          try {
+            const verificationData = {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            };
+
+            const verifyResult = await razorpayService.verifyPayment(verificationData, token);
+
+            if (verifyResult.success) {
+              // Redirect to success page
+              router.push(verifyResult.redirect_url || '/payment/success');
+            } else {
+              // Redirect to failure page
+              router.push('/payment/failure');
+            }
+          } catch (error) {
+            console.error('Payment verification error:', error);
+            router.push('/payment/failure');
+          } finally {
+            setProcessingPayment(false);
+            setProcessingPlan(null);
+          }
+        },
+        prefill: {
+          name: user.name || '',
+          email: user.email || '',
+          contact: user.phone || ''
+        },
+        theme: {
+          color: '#2563EB'
+        },
+        modal: {
+          ondismiss: function() {
+            setProcessingPayment(false);
+            setProcessingPlan(null);
+          }
+        }
+      };
+
+      // Open Razorpay checkout
+      const rzp = await razorpayService.initializeRazorpay(options);
+      rzp.open();
+
+    } catch (error) {
+      console.error('Error initiating payment:', error);
+      alert('Failed to initiate payment. Please try again.');
+      setProcessingPayment(false);
+      setProcessingPlan(null);
     }
   };
 
@@ -463,6 +580,8 @@ export default function Pricing() {
                   {/* Get Started Button */}
                   <Box
                     component="button"
+                    onClick={() => handleGetStarted(plan)}
+                    disabled={processingPayment}
                     sx={{
                       padding: '0.75rem 1.5rem',
                       borderRadius: '0.5rem',
@@ -471,13 +590,20 @@ export default function Pricing() {
                       color: '#FFFFFF',
                       fontSize: '1rem',
                       fontWeight: 600,
-                      cursor: 'pointer',
+                      cursor: processingPayment ? 'not-allowed' : 'pointer',
                       fontFamily: 'inherit',
                       transition: 'all 0.3s ease',
+                      opacity: processingPayment ? 0.7 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
                       '&:hover': {
-                        backgroundColor: plan.isPopular ? '#1E3A8A' : '#2563EB',
+                        backgroundColor: processingPayment 
+                          ? (plan.isPopular ? '#2563EB' : '#FFFFFF')
+                          : (plan.isPopular ? '#1E3A8A' : '#2563EB'),
                         color: '#FFFFFF',
-                        transform: 'scale(1.02)',
+                        transform: processingPayment ? 'none' : 'scale(1.02)',
                       },
                       ...(plan.isPopular
                         ? {}
@@ -489,7 +615,14 @@ export default function Pricing() {
                           }),
                     }}
                   >
-                    Get Started
+                    {processingPayment && processingPlan === plan.name ? (
+                      <>
+                        <CircularProgress size={16} sx={{ color: 'inherit' }} />
+                        Processing...
+                      </>
+                    ) : (
+                      'Get Started'
+                    )}
                   </Box>
                   </Box>
                 </Box>
