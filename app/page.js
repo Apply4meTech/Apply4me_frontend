@@ -5,7 +5,6 @@ import { Box, Container, Typography } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import Button from '../components/Button';
 import JobSearchingCard from '../components/landingPageComponents/jobSearchingcCard/JobSearchingCard';
 import StatisticsSection from '../components/landingPageComponents/StatisticsSection/StatisticsSection';
@@ -20,7 +19,6 @@ import MainLayout from '../components/layouts/MainLayout';
 export default function Home() {
   const { isAuthenticated } = useSelector((state) => state.auth);
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [heroVisible, setHeroVisible] = useState(false);
 
   useEffect(() => {
