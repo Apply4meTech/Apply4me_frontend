@@ -24,7 +24,7 @@ const loginSchema = yup.object().shape({
     .required('Password is required'),
 });
 
-// Forgot password validation schema
+
 const forgotPasswordSchema = yup.object().shape({
   email: yup
     .string()
