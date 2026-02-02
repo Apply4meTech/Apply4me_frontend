@@ -38,8 +38,8 @@ export default function JobSearchingCard() {
           marginTop: { xs: '-4rem', md: '-6rem' },
           zIndex: 20,
           opacity: isVisible ? 1 : 0,
-          transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
-          transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
+          // transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
+          // transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
         }}
       >
         <Box

@@ -215,8 +215,8 @@ export default function AboutUs() {
             maxWidth: '1000px',
             mx: 'auto',
             opacity: originVisible ? 1 : 0,
-            transform: originVisible ? 'translateY(0)' : 'translateY(40px)',
-            transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
+            // transform: originVisible ? 'translateY(0)' : 'translateY(40px)',
+            // transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
           }}
         >
           <Paper

@@ -37,3 +37,8 @@ body {
 .MuiTypography-root {
   font-family: inherit;
 }
+
+/* Footer link hover */
+a.footer-link:hover {
+  color: #111827;
+}

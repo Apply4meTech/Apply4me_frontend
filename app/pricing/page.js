@@ -377,8 +377,8 @@ export default function Pricing() {
               position: 'relative',
               zIndex: 10,
               opacity: plansVisible ? 1 : 0,
-              transform: plansVisible ? 'translateY(0)' : 'translateY(40px)',
-              transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
+              // transform: plansVisible ? 'translateY(0)' : 'translateY(40px)',
+              // transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
             }}
           >
             {plans.map((plan, planIndex) => {
@@ -404,18 +404,18 @@ export default function Pricing() {
                     borderColor: 'rgba(255, 255, 255, 0.5)',
                     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                     opacity: plansVisible ? 1 : 0,
-                    transform: plansVisible ? 'translateY(0)' : 'translateY(40px)',
-                    animation: plansVisible ? `fadeInUp 0.6s ease-out ${planIndex * 0.1}s both` : 'none',
-                    '@keyframes fadeInUp': {
-                      from: {
-                        opacity: 0,
-                        transform: 'translateY(40px)',
-                      },
-                      to: {
-                        opacity: 1,
-                        transform: 'translateY(0)',
-                      },
-                    },
+                    // transform: plansVisible ? 'translateY(0)' : 'translateY(40px)',
+                    // animation: plansVisible ? `fadeInUp 0.6s ease-out ${planIndex * 0.1}s both` : 'none',
+                    // '@keyframes fadeInUp': {
+                    //   from: {
+                    //     opacity: 0,
+                    //     transform: 'translateY(40px)',
+                    //   },
+                    //   to: {
+                    //     opacity: 1,
+                    //     transform: 'translateY(0)',
+                    //   },
+                    // },
                     '&:hover': {
                       transform: 'translateY(-4px)',
                       boxShadow: '0 25px 50px -10px rgba(30, 41, 59, 0.12)',
