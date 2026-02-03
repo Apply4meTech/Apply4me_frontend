@@ -39,8 +39,11 @@ const LogoIcon = ({ color = '#2463eb', size = 32 }) => (
   </svg>
 );
 
+import ArticleIcon from '@mui/icons-material/Article';
+
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/employee/dashboard' },
+  { text: 'Blogs', icon: <ArticleIcon />, path: '/employee/blogs' },
   { text: 'Profile', icon: <PersonIcon />, path: '/employee/profile' },
 ];
 
@@ -174,6 +177,10 @@ export default function EmployeeLayout({ children }) {
       {/* Menu Items */}
       <List sx={{ flex: 1, p: 2 }}>
         {menuItems.map((item) => {
+          // Hide Blogs menu item if user is not super admin
+          if (item.path === '/employee/blogs' && user?.role !== 'super_admin') {
+            return null;
+          }
           const isActive = pathname === item.path;
           return (
             <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>

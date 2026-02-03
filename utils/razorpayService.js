@@ -1,6 +1,11 @@
-import axios from 'axios';
+// Helper function to normalize API URL
+const getApiUrl = () => {
+  const url = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+  // Remove trailing /api if it exists to avoid double /api/api/
+  return url.endsWith('/api') ? url.slice(0, -4) : url;
+};
 
-const RAZORPAY_API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+const RAZORPAY_API_BASE = getApiUrl();
 
 /**
  * Razorpay Service for frontend integration
@@ -19,29 +24,40 @@ class RazorpayService {
    */
   async createOrder(orderData, token) {
     try {
-      const response = await axios.post(
+      const response = await fetch(
         `${this.apiBase}/api/payments/razorpay/create-order`,
-        orderData,
         {
+          method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify(orderData),
         }
       );
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          message: data.message || 'Failed to create order',
+          error: data || 'Unknown error'
+        };
+      }
+
       return {
         success: true,
-        data: response.data.data || response.data,
-        key_id: response.data.data?.key_id || response.data.key_id,
-        message: response.data.message || 'Order created successfully',
+        data: data.data || data,
+        key_id: data.data?.key_id || data.key_id,
+        message: data.message || 'Order created successfully',
       };
     } catch (error) {
       console.error('Error creating Razorpay order:', error);
       return {
         success: false,
-        message: error.response?.data?.message || 'Failed to create order',
-        error: error.response?.data || error.message
+        message: 'Failed to create order',
+        error: error.message
       };
     }
   }
@@ -54,29 +70,40 @@ class RazorpayService {
    */
   async verifyPayment(paymentData, token) {
     try {
-      const response = await axios.post(
+      const response = await fetch(
         `${this.apiBase}/api/payments/razorpay/verify`,
-        paymentData,
         {
+          method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify(paymentData),
         }
       );
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          message: data.message || 'Payment verification failed',
+          error: data || 'Unknown error'
+        };
+      }
+
       return {
         success: true,
-        data: response.data.data,
+        data: data.data,
         message: 'Payment verified successfully',
-        redirect_url: response.data.redirect_url
+        redirect_url: data.redirect_url
       };
     } catch (error) {
       console.error('Error verifying payment:', error);
       return {
         success: false,
-        message: error.response?.data?.message || 'Payment verification failed',
-        error: error.response?.data || error.message
+        message: 'Payment verification failed',
+        error: error.message
       };
     }
   }
