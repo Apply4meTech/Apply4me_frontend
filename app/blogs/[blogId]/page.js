@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -15,16 +15,22 @@ import {
   IconButton,
   Avatar,
   TextField,
-  Button
+  Button,
+  Snackbar
 } from '@mui/material';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useSelector } from 'react-redux';
 import MainLayout from '../../../components/layouts/MainLayout';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PersonIcon from '@mui/icons-material/Person';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 
 // Helper function to normalize API URL
 const getApiUrl = () => {
@@ -38,10 +44,22 @@ export default function BlogDetailPage() {
   const router = useRouter();
   const params = useParams();
   const blogId = params?.blogId;
+  const { isAuthenticated, token } = useSelector((state) => state.auth);
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  
+  // Like and bookmark state
+  const [isLiked, setIsLiked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [bookmarkCount, setBookmarkCount] = useState(0);
+  const [isLiking, setIsLiking] = useState(false);
+  const [isBookmarking, setIsBookmarking] = useState(false);
+  
+  // Notification state
+  const [notification, setNotification] = useState({ open: false, message: '' });
   
   // Newsletter subscription state
   const [email, setEmail] = useState('');
@@ -50,11 +68,46 @@ export default function BlogDetailPage() {
   const [subscriptionSuccess, setSubscriptionSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
-  useEffect(() => {
-    if (blogId) {
-      fetchBlog();
+  const fetchBlog = useCallback(async () => {
+    if (!blogId) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const response = await fetch(`${API_URL}/api/blogs/${blogId}`, {
+        headers
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch blog');
+      }
+
+      if (data.success) {
+        setBlog(data.blog);
+        // Update like and bookmark state
+        setIsLiked(data.blog.isLiked || false);
+        setIsBookmarked(data.blog.isBookmarked || false);
+        setLikeCount(data.blog.likeCount || 0);
+        setBookmarkCount(data.blog.bookmarkCount || 0);
+      } else {
+        throw new Error(data.error || 'Failed to fetch blog');
+      }
+    } catch (err) {
+      console.error('Error fetching blog:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-  }, [blogId]);
+  }, [blogId, token]);
+
+  useEffect(() => {
+    fetchBlog();
+  }, [fetchBlog]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -66,30 +119,6 @@ export default function BlogDetailPage() {
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const fetchBlog = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await fetch(`${API_URL}/api/blogs/${blogId}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch blog');
-      }
-
-      if (data.success) {
-        setBlog(data.blog);
-      } else {
-        throw new Error(data.error || 'Failed to fetch blog');
-      }
-    } catch (err) {
-      console.error('Error fetching blog:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
   };
 
   const formatDate = (dateString) => {
@@ -125,6 +154,97 @@ export default function BlogDetailPage() {
       setSubscriptionSuccess(false);
       setSuccessMessage('');
     }
+  };
+
+  // Handle like toggle
+  const handleLike = async () => {
+    if (!isAuthenticated || !token) {
+      setNotification({
+        open: true,
+        message: 'You need to login first to like this blog'
+      });
+      return;
+    }
+
+    if (isLiking) return; // Prevent double clicks
+
+    setIsLiking(true);
+    try {
+      const response = await fetch(`${API_URL}/api/blogs/${blogId}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to toggle like');
+      }
+
+      if (data.success) {
+        setIsLiked(data.isLiked);
+        setLikeCount(data.likeCount);
+      }
+    } catch (err) {
+      console.error('Error toggling like:', err);
+      setNotification({
+        open: true,
+        message: err.message || 'Failed to like blog. Please try again.'
+      });
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  // Handle bookmark toggle
+  const handleBookmark = async () => {
+    if (!isAuthenticated || !token) {
+      setNotification({
+        open: true,
+        message: 'You need to login first to bookmark this blog'
+      });
+      return;
+    }
+
+    if (isBookmarking) return; // Prevent double clicks
+
+    setIsBookmarking(true);
+    try {
+      const response = await fetch(`${API_URL}/api/blogs/${blogId}/bookmark`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to toggle bookmark');
+      }
+
+      if (data.success) {
+        setIsBookmarked(data.isBookmarked);
+        setBookmarkCount(data.bookmarkCount);
+      }
+    } catch (err) {
+      console.error('Error toggling bookmark:', err);
+      setNotification({
+        open: true,
+        message: err.message || 'Failed to bookmark blog. Please try again.'
+      });
+    } finally {
+      setIsBookmarking(false);
+    }
+  };
+
+  // Close notification
+  const handleCloseNotification = () => {
+    setNotification({ open: false, message: '' });
   };
 
   // Handle newsletter subscription
@@ -334,6 +454,7 @@ export default function BlogDetailPage() {
               {blog.description}
             </Typography>
 
+           <Box sx={{display:'flex',alignItems:'center', justifyContent:'center'}}>
             {/* Author Info */}
             <Box
               sx={{
@@ -380,6 +501,95 @@ export default function BlogDetailPage() {
               </Box>
             </Box>
 
+            {/* Like and Bookmark Buttons */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 3,
+                mb: 4,
+                ml:4,
+                flexWrap: 'wrap'
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}
+              >
+                <IconButton
+                  onClick={handleLike}
+                  disabled={isLiking}
+                  sx={{
+                    color: isLiked ? '#f44336' : '#757575',
+                    '&:hover': {
+                      bgcolor: isLiked ? 'rgba(244, 67, 54, 0.08)' : 'rgba(0, 0, 0, 0.04)'
+                    },
+                    transition: 'all 0.2s ease'
+                  }}
+                  aria-label="like blog"
+                >
+                  {isLiked ? (
+                    <FavoriteIcon sx={{ fontSize: '28px' }} />
+                  ) : (
+                    <FavoriteBorderIcon sx={{ fontSize: '28px' }} />
+                  )}
+                </IconButton>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#666',
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    minWidth: '30px'
+                  }}
+                >
+                  {likeCount}
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}
+              >
+                <IconButton
+                  onClick={handleBookmark}
+                  disabled={isBookmarking}
+                  sx={{
+                    color: isBookmarked ? '#1976D2' : '#757575',
+                    '&:hover': {
+                      bgcolor: isBookmarked ? 'rgba(25, 118, 210, 0.08)' : 'rgba(0, 0, 0, 0.04)'
+                    },
+                    transition: 'all 0.2s ease'
+                  }}
+                  aria-label="bookmark blog"
+                >
+                  {isBookmarked ? (
+                    <BookmarkIcon sx={{ fontSize: '28px' }} />
+                  ) : (
+                    <BookmarkBorderIcon sx={{ fontSize: '28px' }} />
+                  )}
+                </IconButton>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#666',
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    minWidth: '30px'
+                  }}
+                >
+                  {bookmarkCount}
+                </Typography>
+              </Box>
+            </Box>
+            </Box>
             </Box>
             {/* Featured Image */}
             {blog.featuredImage?.url && (
@@ -679,6 +889,22 @@ export default function BlogDetailPage() {
             </Box>
           </Container>
         </Box>
+
+        {/* Notification Snackbar */}
+        <Snackbar
+          open={notification.open}
+          autoHideDuration={4000}
+          onClose={handleCloseNotification}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+          <Alert
+            onClose={handleCloseNotification}
+            severity="info"
+            sx={{ width: '100%' }}
+          >
+            {notification.message}
+          </Alert>
+        </Snackbar>
       </Box>
     </MainLayout>
   );

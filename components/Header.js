@@ -20,6 +20,7 @@ const Header = () => {
 
   const navLinks = [
     { href: '/about-us', label: 'About Us' },
+    { href: '/blogs', label: 'Blogs' },
     { href: '/pricing', label: 'Pricing' },
     ...(isAuthenticated ? [] : [{ href: '/login', label: 'Login' }]),
   ];

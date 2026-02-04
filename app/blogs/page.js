@@ -14,13 +14,18 @@ import {
   Alert,
   Chip,
   Stack,
-  Pagination
+  Pagination,
+  Button,
+  ButtonGroup
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
 import MainLayout from '../../components/layouts/MainLayout';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PersonIcon from '@mui/icons-material/Person';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 
 // Helper function to normalize API URL
 const getApiUrl = () => {
@@ -33,21 +38,50 @@ const API_URL = getApiUrl();
 
 export default function BlogsPage() {
   const router = useRouter();
+  const { isAuthenticated, token } = useSelector((state) => state.auth);
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [filter, setFilter] = useState('all'); // 'all', 'liked', 'bookmarked'
 
   useEffect(() => {
     fetchBlogs();
-  }, [page]);
+  }, [page, filter, token]);
+
+  // Reset filter to 'all' if user logs out while viewing liked/bookmarked
+  useEffect(() => {
+    if (!isAuthenticated && (filter === 'liked' || filter === 'bookmarked')) {
+      setFilter('all');
+      setPage(1);
+    }
+  }, [isAuthenticated, filter]);
 
   const fetchBlogs = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch(`${API_URL}/api/blogs?page=${page}&limit=12`);
+      
+      // Build query parameters
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '12'
+      });
+      
+      // Add filter if not 'all' and user is authenticated
+      if (filter !== 'all' && isAuthenticated) {
+        params.append('filter', filter);
+      }
+      
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(`${API_URL}/api/blogs?${params.toString()}`, {
+        headers
+      });
       const data = await response.json();
 
       if (!response.ok) {
@@ -70,6 +104,18 @@ export default function BlogsPage() {
 
   const handlePageChange = (event, value) => {
     setPage(value);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleFilterChange = (newFilter) => {
+    // If user tries to filter by liked/bookmarked but isn't authenticated, show error
+    if ((newFilter === 'liked' || newFilter === 'bookmarked') && !isAuthenticated) {
+      setError('Please login to view your liked or bookmarked blogs');
+      return;
+    }
+    setFilter(newFilter);
+    setPage(1); // Reset to first page when filter changes
+    setError(null); // Clear any previous errors
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -125,11 +171,92 @@ export default function BlogsPage() {
                 color: 'text.secondary',
                 maxWidth: '600px',
                 mx: 'auto',
-                fontSize: { xs: '0.9rem', md: '1rem' }
+                fontSize: { xs: '0.9rem', md: '1rem' },
+                mb: 3
               }}
             >
               Stay updated with the latest insights, tips, and stories from our team
             </Typography>
+
+            {/* Filter Buttons */}
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 2,
+                flexWrap: 'wrap',
+                mb: 2
+              }}
+            >
+              <Button
+                variant={filter === 'all' ? 'contained' : 'outlined'}
+                onClick={() => handleFilterChange('all')}
+                sx={{
+                  textTransform: 'none',
+                  borderRadius: '8px',
+                  px: 3,
+                  py: 1,
+                  fontWeight: 500,
+                  bgcolor: filter === 'all' ? '#000' : 'transparent',
+                  color: filter === 'all' ? '#fff' : '#000',
+                  borderColor: '#000',
+                  '&:hover': {
+                    bgcolor: filter === 'all' ? '#333' : 'rgba(0, 0, 0, 0.04)',
+                    borderColor: '#000'
+                  }
+                }}
+              >
+                All Blogs
+              </Button>
+              
+              {isAuthenticated && (
+                <>
+                  <Button
+                    variant={filter === 'liked' ? 'contained' : 'outlined'}
+                    onClick={() => handleFilterChange('liked')}
+                    startIcon={<FavoriteIcon />}
+                    sx={{
+                      textTransform: 'none',
+                      borderRadius: '8px',
+                      px: 3,
+                      py: 1,
+                      fontWeight: 500,
+                      bgcolor: filter === 'liked' ? '#f44336' : 'transparent',
+                      color: filter === 'liked' ? '#fff' : '#f44336',
+                      borderColor: '#f44336',
+                      '&:hover': {
+                        bgcolor: filter === 'liked' ? '#d32f2f' : 'rgba(244, 67, 54, 0.08)',
+                        borderColor: '#f44336'
+                      }
+                    }}
+                  >
+                    Liked
+                  </Button>
+                  
+                  <Button
+                    variant={filter === 'bookmarked' ? 'contained' : 'outlined'}
+                    onClick={() => handleFilterChange('bookmarked')}
+                    startIcon={<BookmarkIcon />}
+                    sx={{
+                      textTransform: 'none',
+                      borderRadius: '8px',
+                      px: 3,
+                      py: 1,
+                      fontWeight: 500,
+                      bgcolor: filter === 'bookmarked' ? '#1976D2' : 'transparent',
+                      color: filter === 'bookmarked' ? '#fff' : '#1976D2',
+                      borderColor: '#1976D2',
+                      '&:hover': {
+                        bgcolor: filter === 'bookmarked' ? '#1565C0' : 'rgba(25, 118, 210, 0.08)',
+                        borderColor: '#1976D2'
+                      }
+                    }}
+                  >
+                    Bookmarked
+                  </Button>
+                </>
+              )}
+            </Box>
           </Box>
 
           {loading && (
@@ -146,9 +273,22 @@ export default function BlogsPage() {
 
           {!loading && !error && blogs.length === 0 && (
             <Box sx={{ textAlign: 'center', py: 8 }}>
-              <Typography variant="h6" color="text.secondary">
-                No blogs available yet. Check back soon!
+              <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                {filter === 'liked' 
+                  ? "You haven't liked any blogs yet." 
+                  : filter === 'bookmarked'
+                  ? "You haven't bookmarked any blogs yet."
+                  : "No blogs available yet. Check back soon!"}
               </Typography>
+              {filter !== 'all' && (
+                <Button
+                  variant="outlined"
+                  onClick={() => handleFilterChange('all')}
+                  sx={{ mt: 2, textTransform: 'none' }}
+                >
+                  View All Blogs
+                </Button>
+              )}
             </Box>
           )}
 
