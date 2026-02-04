@@ -11,20 +11,21 @@ import {
   Stack,
   Divider,
   Breadcrumbs,
-  Link as MuiLink
+  Link as MuiLink,
+  IconButton,
+  Avatar
 } from '@mui/material';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import MainLayout from '../../../components/layouts/MainLayout';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PersonIcon from '@mui/icons-material/Person';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 // Helper function to normalize API URL
 const getApiUrl = () => {
   const url = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
-  // Remove trailing /api if it exists to avoid double /api/api/
   return url.endsWith('/api') ? url.slice(0, -4) : url;
 };
 
@@ -37,12 +38,25 @@ export default function BlogDetailPage() {
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     if (blogId) {
       fetchBlog();
     }
   }, [blogId]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const fetchBlog = async () => {
     try {
@@ -72,7 +86,7 @@ export default function BlogDetailPage() {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric'
     });
   };
@@ -137,226 +151,377 @@ export default function BlogDetailPage() {
     <MainLayout>
       <Box
         sx={{
+          width: '100%',
           minHeight: '100vh',
-          bgcolor: 'background.default',
-          py: { xs: 4, md: 6 }
+          position: 'relative'
         }}
       >
-        <Container maxWidth="md">
-          <Breadcrumbs sx={{ mb: 3 }}>
-            <MuiLink
-              component={Link}
-              href="/blogs"
-              sx={{
-                textDecoration: 'none',
-                color: 'text.secondary',
-                '&:hover': { textDecoration: 'underline' }
-              }}
-            >
-              Blogs
-            </MuiLink>
-            <Typography color="text.primary">{blog.title}</Typography>
-          </Breadcrumbs>
+        {/* Scroll to Top Button */}
+        {showScrollTop && (
+          <IconButton
+            onClick={scrollToTop}
+            sx={{
+              position: 'fixed',
+              bottom: 32,
+              right: 32,
+              bgcolor: '#000',
+              color: '#fff',
+              width: 35,
+              height: 35,
+              borderRadius: '4px',
+              zIndex: 1000,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              '&:hover': {
+                bgcolor: '#000',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 6px 16px rgba(0,0,0,0.2)'
+              },
+              transition: 'all 0.3s ease',
+              '& svg': {
+                fontSize: '24px'
+              }
+            }}
+          >
+            <KeyboardArrowUpIcon />
+          </IconButton>
+        )}
 
-          <Box sx={{ mb: 4 }}>
+        {/* Main Blog Content Section - Full Width White Background */}
+        <Box
+          sx={{
+            width: '100%',
+            bgcolor: '#fff',
+            py: { xs: 4, md: 6 }
+          }}
+        >
+          <Container maxWidth="md" >
+            {/* Tag */}
+            {blog.tags && blog.tags.length > 0 && (
+              <Box sx={{ mb: 2}}>
+                <Chip
+                  label={blog.tags[0]}
+                  sx={{
+                    bgcolor: '#E3F2FD',
+                    color: '#1976D2',
+                    fontWeight: 500,
+                    fontSize: '0.875rem',
+                    height: '32px',
+                    borderRadius: '16px'
+                  }}
+                />
+              </Box>
+            )}
+
+            <Box sx={{  width:'90%', margin: '0 auto'}}>
+            {/* Title */}
             <Typography
               variant="h3"
               component="h1"
               sx={{
                 fontWeight: 700,
                 mb: 3,
-                color: 'text.primary',
-                fontSize: { xs: '1.75rem', md: '2.5rem' }
+                color: '#000',
+                fontSize: { xs: '1.25rem', md: '2.25rem' },
+                lineHeight: 1.2,
+                textAlign: 'center'
               }}
             >
               {blog.title}
             </Typography>
 
-            <Stack
-              direction="row"
-              spacing={2}
-              sx={{
-                mb: 3,
-                flexWrap: 'wrap',
-                alignItems: 'center'
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <PersonIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-                <Typography variant="body2" color="text.secondary">
-                  {blog.authorName || 'Admin'}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <CalendarTodayIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-                <Typography variant="body2" color="text.secondary">
-                  {formatDate(blog.createdAt)}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <VisibilityIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-                <Typography variant="body2" color="text.secondary">
-                  {blog.views || 0} views
-                </Typography>
-              </Box>
-            </Stack>
-
-            {blog.tags && blog.tags.length > 0 && (
-              <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 3 }}>
-                {blog.tags.map((tag, index) => (
-                  <Chip
-                    key={index}
-                    label={tag}
-                    size="small"
-                    sx={{ fontSize: '0.75rem' }}
-                  />
-                ))}
-              </Stack>
-            )}
-
-            <Divider sx={{ mb: 4 }} />
-          </Box>
-
-          {blog.featuredImage?.url && (
-            <Box
+            {/* Description */}
+            <Typography
+              variant="body1"
               sx={{
                 mb: 4,
-                borderRadius: 2,
-                overflow: 'hidden',
-                boxShadow: 2
-              }}
-            >
-              <img
-                src={blog.featuredImage.url}
-                alt={blog.title}
-                style={{
-                  width: '100%',
-                  height: 'auto',
-                  display: 'block'
-                }}
-              />
-            </Box>
-          )}
-
-          <Box sx={{ mb: 4 }}>
-            <Typography
-              variant="h6"
-              component="p"
-              sx={{
-                mb: 3,
-                color: 'text.secondary',
-                fontSize: '1.1rem',
-                lineHeight: 1.8,
-                fontWeight: 400
+                color: '#666',
+                fontSize: '0.95rem',
+                lineHeight: 1.2,
+                fontWeight: 400,
+                textAlign: 'center'
               }}
             >
               {blog.description}
             </Typography>
-          </Box>
 
-          <Box
-            sx={{
-              mb: 4,
-              '& p': {
-                mb: 2,
-                lineHeight: 1.8,
-                color: 'text.primary'
-              },
-              '& h2': {
-                mt: 4,
-                mb: 2,
-                fontWeight: 600,
-                color: 'text.primary'
-              },
-              '& h3': {
-                mt: 3,
-                mb: 1.5,
-                fontWeight: 600,
-                color: 'text.primary'
-              },
-              '& ul, & ol': {
-                mb: 2,
-                pl: 3
-              },
-              '& li': {
-                mb: 1,
-                lineHeight: 1.8
-              },
-              '& img': {
-                maxWidth: '100%',
-                height: 'auto',
-                borderRadius: 1,
-                my: 2
-              }
-            }}
-            dangerouslySetInnerHTML={{ __html: blog.content }}
-          />
-
-          {blog.images && blog.images.length > 0 && (
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                Gallery
-              </Typography>
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: {
-                    xs: '1fr',
-                    sm: 'repeat(2, 1fr)',
-                    md: 'repeat(3, 1fr)'
-                  },
-                  gap: 2
-                }}
-              >
-                {blog.images.map((image, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      borderRadius: 2,
-                      overflow: 'hidden',
-                      boxShadow: 1,
-                      '&:hover': {
-                        boxShadow: 3
-                      }
-                    }}
-                  >
-                    <img
-                      src={image.url}
-                      alt={`${blog.title} - Image ${index + 1}`}
-                      style={{
-                        width: '100%',
-                        height: 'auto',
-                        display: 'block'
-                      }}
-                    />
-                  </Box>
-                ))}
-              </Box>
-            </Box>
-          )}
-
-          <Divider sx={{ my: 4 }} />
-
-          <Box sx={{ textAlign: 'center' }}>
-            <MuiLink
-              component={Link}
-              href="/blogs"
+            {/* Author Info */}
+            <Box
               sx={{
-                display: 'inline-flex',
+                display: 'flex',
                 alignItems: 'center',
-                gap: 1,
-                textDecoration: 'none',
-                color: 'primary.main',
-                '&:hover': { textDecoration: 'underline' }
+                justifyContent: 'center',
+                gap: 2,
+                mb: 4
               }}
             >
-              <ArrowBackIcon />
-              Back to All Blogs
-            </MuiLink>
-          </Box>
-        </Container>
+              <Avatar
+                sx={{
+                  width: 40,
+                  height: 40,
+                  bgcolor: '#1976D2'
+                }}
+              >
+                {blog.authorName?.charAt(0) || 'A'}
+              </Avatar>
+              <Box>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontWeight: 600,
+                    color: '#000',
+                    fontSize: '0.85rem',
+                    mb: 0.5
+                  }}
+                >
+                  {blog.authorName || 'Admin'}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#757575',
+                    fontSize: '0.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}
+                >
+                  {formatDate(blog.createdAt)} • 1 min read
+                </Typography>
+              </Box>
+            </Box>
+
+            </Box>
+            {/* Featured Image */}
+            {blog.featuredImage?.url && (
+              <Box
+                sx={{
+                  mb: 4,
+                  borderRadius: '6px',
+                  overflow: 'hidden',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.1)'
+                }}
+              >
+                <img
+                  src={blog.featuredImage.url}
+                  alt={blog.title}
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    display: 'block'
+                  }}
+                />
+              </Box>
+            )}
+
+            {/* Content */}
+            <Box sx={{  width:'90%', margin: '0 auto'}}>
+            <Box
+              // variant="body1"
+              // sx={{
+              //   mb: 4,
+              //   color: '#666',
+              //   fontSize: '0.95rem',
+              //   lineHeight: 1.2,
+              //   fontWeight: 400,
+               sx={{
+                 '& p': {
+                   margin: 0,
+                   fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+                   fontWeight: 400,
+                   fontSize: '0.95rem',
+                   lineHeight: 1.2,
+                   letterSpacing: '0.00938em',
+                   color: '#666',
+                   marginBottom: '32px',
+                 },
+                '& h2': {
+                  mt: 2,
+                  mb: 2,
+                  fontWeight: 700,
+                  color: '#000',
+                  fontSize: '1rem',
+                  lineHeight: 1.3
+                },
+                '& h3': {
+                  mt: 1.5,
+                  mb: 1.5,
+                  fontWeight: 600,
+                  color: '#000',
+                  fontSize: '1rem',
+                  lineHeight: 1.4
+                },
+                '& ul, & ol': {
+                  mb: 2.5,
+                  pl: 3,
+                  '& li': {
+                    mb: 1,
+                    lineHeight: 1.8,
+                    color: '#333',
+                    fontSize: '1rem'
+                  }
+                },
+                '& img': {
+                  maxWidth: '100%',
+                  height: 'auto',
+                  borderRadius: '8px',
+                  my: 3,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                },
+                '& blockquote': {
+                  borderLeft: '4px solid #1976D2',
+                  pl: 3,
+                  py: 2,
+                  my: 3,
+                  bgcolor: '#F5F5F5',
+                  fontStyle: 'italic',
+                  color: '#555'
+                }
+              }}
+              dangerouslySetInnerHTML={{ __html: blog.content }}
+            />
+            </Box>
+
+            {/* Additional Images Gallery */}
+            {blog.images && blog.images.length > 0 && (
+              <Box sx={{ mt: 4 }}>
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: {
+                      xs: '1fr',
+                      sm: 'repeat(2, 1fr)',
+                      md: 'repeat(3, 1fr)'
+                    },
+                    gap: 2
+                  }}
+                >
+                  {blog.images.map((image, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        '&:hover': {
+                          boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+                          transform: 'translateY(-2px)',
+                          transition: 'all 0.3s ease'
+                        }
+                      }}
+                    >
+                      <img
+                        src={image.url}
+                        alt={`${blog.title} - Image ${index + 1}`}
+                        style={{
+                          width: '100%',
+                          height: 'auto',
+                          display: 'block'
+                        }}
+                      />
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            )}
+          </Container>
+        </Box>
+
+        {/* Newsletter Section - Greyish Background with Padding */}
+        <Box
+          sx={{
+            width: '100%',
+            bgcolor: '#F5F5F5',
+            py: { xs: 4, md: 6 },
+            px: { xs: 2, sm: 3, md: 2 }
+          }}
+        >
+          <Container maxWidth="lg">
+            <Box
+              sx={{
+                width: '90%',
+                margin: '0 auto',
+                bgcolor: '#fff',
+                borderRadius: '6px',
+                p: 4,
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                alignItems: { xs: 'flex-start', md: 'center' },
+                justifyContent: 'space-between',
+                gap: 1,
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              }}
+            >
+              <Box sx={{ flex: 0.5}}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    mb: 1,
+                    color: '#000',
+                    fontSize: '1rem'
+                  }}
+                >
+                  Subscribe to Newsletter
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#757575',fontSize: '0.85rem'
+                  }}
+                >
+                  Provide your email to get email notification when we launch new products or publish new articles
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  flex: 0.4,
+                  display: 'flex',
+                  gap: 1,
+                  width: { xs: '100%', md: 'auto' },
+                  flexDirection: { xs: 'column', sm: 'row' }
+                }}
+              >
+                <input
+                  type="email"
+                  placeholder="Enter your Email"
+                  style={{
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid #E0E0E0',
+                    fontSize: '0.875rem',
+                    flex: 1,
+                    minWidth: '200px',
+                    outline: 'none'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#1976D2'}
+                  onBlur={(e) => e.target.style.borderColor = '#E0E0E0'}
+                />
+                <button
+                  style={{
+                    padding: '12px 24px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    backgroundColor: '#000',
+                    color: '#fff',
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#333'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#000'}
+                >
+                  Subscribe
+                </button>
+              </Box>
+            </Box>
+          </Container>
+        </Box>
       </Box>
     </MainLayout>
   );
 }
-

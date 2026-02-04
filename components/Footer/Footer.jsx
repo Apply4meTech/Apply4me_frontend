@@ -29,7 +29,7 @@ export default function Footer() {
     <Box
       component="footer"
       sx={{
-        backgroundColor: '#FAFBFC',
+        backgroundColor: '#fff',
         borderTop: '1px solid #E5E7EB',
         paddingTop: { xs: '2.5rem', sm: '3rem', md: '3.5rem' },
         paddingBottom: { xs: '1.5rem', sm: '2rem' },

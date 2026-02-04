@@ -26,7 +26,8 @@ import {
   InputLabel,
   Select,
   Input,
-  FormHelperText
+  FormHelperText,
+  Divider
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -59,13 +60,14 @@ export default function BlogManagement() {
     content: '',
     tags: '',
     status: 'published',
+    authorName: '',
+    authorEmail: '',
     featuredImage: null,
     images: []
   });
   const [submitting, setSubmitting] = useState(false);
   const [previewImages, setPreviewImages] = useState({
-    featured: null,
-    additional: []
+    featured: null
   });
 
   useEffect(() => {
@@ -104,36 +106,73 @@ export default function BlogManagement() {
     }
   };
 
-  const handleOpenDialog = (blog = null) => {
+  const handleOpenDialog = async (blog = null) => {
     if (blog) {
-      setSelectedBlog(blog);
-      setFormData({
-        title: blog.title || '',
-        description: blog.description || '',
-        content: blog.content || '',
-        tags: blog.tags ? blog.tags.join(', ') : '',
-        status: blog.status || 'published',
-        featuredImage: null,
-        images: []
-      });
-      setPreviewImages({
-        featured: blog.featuredImage?.url || null,
-        additional: blog.images?.map(img => img.url) || []
-      });
+      try {
+        // Fetch full blog details including content
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Authentication required');
+        }
+
+        const response = await fetch(`${API_URL}/api/blogs/${blog._id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch blog details');
+        }
+
+        // Use the full blog data with content
+        const fullBlog = data.blog || blog;
+        setSelectedBlog(fullBlog);
+        setFormData({
+          title: fullBlog.title || '',
+          description: fullBlog.description || '',
+          content: fullBlog.content || '',
+          status: fullBlog.status || 'published',
+          authorName: fullBlog.authorName || '',
+          authorEmail: fullBlog.author?.email || '',
+          featuredImage: null
+        });
+        setPreviewImages({
+          featured: fullBlog.featuredImage?.url || null
+        });
+      } catch (err) {
+        console.error('Error fetching blog details:', err);
+        alert(err.message || 'Failed to load blog details');
+        // Fallback to using the blog data from list (without content)
+        setSelectedBlog(blog);
+        setFormData({
+          title: blog.title || '',
+          description: blog.description || '',
+          content: blog.content || '',
+          status: blog.status || 'published',
+          authorName: blog.authorName || '',
+          authorEmail: blog.author?.email || '',
+          featuredImage: null
+        });
+        setPreviewImages({
+          featured: blog.featuredImage?.url || null
+        });
+      }
     } else {
       setSelectedBlog(null);
       setFormData({
         title: '',
         description: '',
-        content: '',
-        tags: '',
+        content: '<h3>Introduction: Finding Bliss in Simplicity</h3>\n<p>In a culture that often celebrates excess and constant activity, the idea of a lifestyle centered around simplicity might seem counterintuitive. However, at its core, simplicity is about focusing on what truly matters and letting go of the superfluous. It\'s a mindful approach that can lead to a more meaningful and fulfilling existence.</p>\n\n<h3>Clearing the Clutter</h3>\n<p>Simplicity starts at home. Decluttering your living space is an invigorating process that allows you to create physical and mental space for what truly resonates with you. Whether it\'s cleaning out your closet, reorganizing your kitchen, or letting go of sentimental items, the act of decluttering can be liberating.</p>\n\n<h3>Mindful Consumption</h3>\n<p>In a consumer-driven society, practicing mindful consumption is a revolutionary act. Embracing quality over quantity and making intentional choices about what you bring into your life can lead to a sense of contentment and reduced environmental impact. Consider supporting sustainable and ethical brands that align with your values.</p>',
         status: 'published',
-        featuredImage: null,
-        images: []
+        authorName: '',
+        authorEmail: '',
+        featuredImage: null
       });
       setPreviewImages({
-        featured: null,
-        additional: []
+        featured: null
       });
     }
     setDialogOpen(true);
@@ -146,14 +185,13 @@ export default function BlogManagement() {
       title: '',
       description: '',
       content: '',
-      tags: '',
       status: 'published',
-      featuredImage: null,
-      images: []
+      authorName: '',
+      authorEmail: '',
+      featuredImage: null
     });
     setPreviewImages({
-      featured: null,
-      additional: []
+      featured: null
     });
   };
 
@@ -178,22 +216,6 @@ export default function BlogManagement() {
         };
         reader.readAsDataURL(files[0]);
       }
-    } else if (type === 'images') {
-      if (files) {
-        const fileArray = Array.from(files);
-        setFormData({ ...formData, images: fileArray });
-        const previews = [];
-        fileArray.forEach(file => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            previews.push(reader.result);
-            if (previews.length === fileArray.length) {
-              setPreviewImages({ ...previewImages, additional: previews });
-            }
-          };
-          reader.readAsDataURL(file);
-        });
-      }
     }
   };
 
@@ -215,15 +237,12 @@ export default function BlogManagement() {
       formDataToSend.append('description', formData.description);
       formDataToSend.append('content', formData.content);
       formDataToSend.append('status', formData.status);
-      if (formData.tags) {
-        formDataToSend.append('tags', formData.tags);
+      if (formData.authorName) {
+        formDataToSend.append('authorName', formData.authorName);
       }
       if (formData.featuredImage) {
         formDataToSend.append('featuredImage', formData.featuredImage);
       }
-      formData.images.forEach((image, index) => {
-        formDataToSend.append('images', image);
-      });
 
       const url = selectedBlog
         ? `${API_URL}/api/blogs/${selectedBlog._id}`
@@ -329,149 +348,338 @@ export default function BlogManagement() {
           <CircularProgress />
         </Box>
       ) : (
-        <Grid container spacing={3}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(2, 1fr)',
+              lg: 'repeat(3, 1fr)'
+            },
+            gap: { xs: 2, sm: 3, md: 3 },
+            width: '100%'
+          }}
+        >
           {blogs.map((blog) => (
-            <Grid item xs={12} sm={6} md={4} key={blog._id}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <Box
+              key={blog._id}
+              sx={{
+                display: 'flex',
+                width: '100%',
+                position: 'relative'
+              }}
+            >
+              <Card
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  bgcolor: '#fff',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12)'
+                  },
+                  border: 'none'
+                }}
+              >
                 {blog.featuredImage?.url && (
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={blog.featuredImage.url}
-                    alt={blog.title}
-                  />
-                )}
-                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600, flex: 1 }}>
-                      {blog.title}
-                    </Typography>
-                    <IconButton size="small" onClick={(e) => handleMenuOpen(e, blog)}>
-                      <MoreVertIcon />
-                    </IconButton>
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: { xs: '220px', sm: '240px', md: '260px' },
+                      overflow: 'hidden',
+                      position: 'relative',
+                      bgcolor: '#f5f5f5'
+                    }}
+                  >
+                    <img
+                      src={blog.featuredImage.url}
+                      alt={blog.title}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        transition: 'transform 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.transform = 'scale(1.05)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = 'scale(1)';
+                      }}
+                    />
                   </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flexGrow: 1 }}>
-                    {blog.description?.substring(0, 100)}...
-                  </Typography>
-                  <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 2 }}>
+                )}
+                <CardContent sx={{ 
+                  flexGrow: 1, 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  p: { xs: 2.5, sm: 3 },
+                  position: 'relative',
+                  '&:last-child': { pb: { xs: 2.5, sm: 3 } }
+                }}>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => handleMenuOpen(e, blog)}
+                    sx={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      bgcolor: 'rgba(255, 255, 255, 0.9)',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 1)'
+                      },
+                      zIndex: 1
+                    }}
+                  >
+                    <MoreVertIcon fontSize="small" />
+                  </IconButton>
+                  {blog.tags && blog.tags.length > 0 && (
+                    <Chip
+                      label={blog.tags[0]}
+                      size="small"
+                      sx={{
+                        mb: 1.5,
+                        height: '26px',
+                        bgcolor: '#E3F2FD',
+                        color: '#1976D2',
+                        fontWeight: 500,
+                        fontSize: '0.75rem',
+                        alignSelf: 'flex-start',
+                        borderRadius: '6px',
+                        px: 1
+                      }}
+                    />
+                  )}
+                  <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1.5 }}>
                     <Chip
                       label={blog.status}
                       size="small"
-                      color={blog.status === 'published' ? 'success' : 'default'}
+                      sx={{
+                        height: '24px',
+                        fontSize: '0.7rem',
+                        bgcolor: blog.status === 'published' ? '#E8F5E9' : '#FFF3E0',
+                        color: blog.status === 'published' ? '#2E7D32' : '#E65100',
+                        fontWeight: 500
+                      }}
                     />
-                    {blog.tags?.slice(0, 2).map((tag, index) => (
-                      <Chip key={index} label={tag} size="small" />
-                    ))}
                   </Stack>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: '0.75rem', color: 'text.secondary' }}>
+                  <Typography
+                    variant="h6"
+                    component="h2"
+                    sx={{
+                      fontWeight: 600,
+                      mb: 1.5,
+                      color: '#000',
+                      fontSize: { xs: '1rem', sm: '1.125rem' },
+                      lineHeight: 1.4,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      minHeight: { xs: '2.8rem', sm: '3.15rem' }
+                    }}
+                  >
+                    {blog.title}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      mb: 2,
+                      color: '#666',
+                      fontSize: '0.875rem',
+                      lineHeight: 1.6,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      flexGrow: 1
+                    }}
+                  >
+                    {blog.description?.substring(0, 120)}...
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: { xs: 1.5, sm: 2 },
+                      mt: 'auto',
+                      pt: 2,
+                      borderTop: '1px solid',
+                      borderColor: '#E8E8E8',
+                      flexWrap: 'wrap'
+                    }}
+                  >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <PersonIcon sx={{ fontSize: 14 }} />
-                      {blog.authorName}
+                      <PersonIcon sx={{ fontSize: 14, color: '#9E9E9E' }} />
+                      <Typography variant="caption" sx={{ color: '#757575', fontSize: '0.75rem', fontWeight: 400 }}>
+                        {blog.authorName || 'Admin'}
+                      </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <CalendarTodayIcon sx={{ fontSize: 14 }} />
-                      {formatDate(blog.createdAt)}
+                      <CalendarTodayIcon sx={{ fontSize: 14, color: '#9E9E9E' }} />
+                      <Typography variant="caption" sx={{ color: '#757575', fontSize: '0.75rem', fontWeight: 400 }}>
+                        {formatDate(blog.createdAt)}
+                      </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <VisibilityIcon sx={{ fontSize: 14 }} />
-                      {blog.views || 0}
+                      <VisibilityIcon sx={{ fontSize: 14, color: '#9E9E9E' }} />
+                      <Typography variant="caption" sx={{ color: '#757575', fontSize: '0.75rem', fontWeight: 400 }}>
+                        {blog.views || 0}
+                      </Typography>
                     </Box>
                   </Box>
                 </CardContent>
               </Card>
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       )}
 
       {/* Create/Edit Dialog */}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        <DialogTitle>{selectedBlog ? 'Edit Blog' : 'Create New Blog'}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-            <TextField
-              fullWidth
-              label="Title"
-              required
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            />
-            <TextField
-              fullWidth
-              label="Description"
-              required
-              multiline
-              rows={3}
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            />
-            <TextField
-              fullWidth
-              label="Content (HTML supported)"
-              required
-              multiline
-              rows={10}
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              helperText="You can use HTML tags for formatting"
-            />
-            <TextField
-              fullWidth
-              label="Tags (comma-separated)"
-              value={formData.tags}
-              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-              helperText="Separate tags with commas"
-            />
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                label="Status"
-              >
-                <MenuItem value="draft">Draft</MenuItem>
-                <MenuItem value="published">Published</MenuItem>
-              </Select>
-            </FormControl>
+      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="lg" fullWidth>
+        <DialogTitle sx={{ pb: 1 }}>
+          <Typography component="div" variant="h5" sx={{ fontWeight: 600 }}>
+            {selectedBlog ? 'Edit Blog' : 'Create New Blog'}
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ maxHeight: '80vh', overflowY: 'auto' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 1 }}>
+            {/* Metadata Section */}
             <Box>
-              <InputLabel>Featured Image</InputLabel>
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileChange(e, 'featuredImage')}
-                sx={{ mt: 1 }}
-              />
-              {previewImages.featured && (
-                <Box sx={{ mt: 2 }}>
-                  <img
-                    src={previewImages.featured}
-                    alt="Featured preview"
-                    style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px' }}
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#1976D2' }}>
+                Metadata
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Title / Heading"
+                  required
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Enter blog title"
+                />
+                <TextField
+                  fullWidth
+                  label="Short Description"
+                  required
+                  multiline
+                  rows={3}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Brief description that appears in blog cards"
+                  helperText="This will be shown in blog listing cards"
+                />
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <TextField
+                    fullWidth
+                    label="Author Name"
+                    required
+                    value={formData.authorName}
+                    onChange={(e) => setFormData({ ...formData, authorName: e.target.value })}
+                    placeholder="Author name"
+                  />
+                  <TextField
+                    fullWidth
+                    label="Author Email"
+                    type="email"
+                    value={formData.authorEmail}
+                    onChange={(e) => setFormData({ ...formData, authorEmail: e.target.value })}
+                    placeholder="author@example.com"
                   />
                 </Box>
-              )}
+                <FormControl fullWidth>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    label="Status"
+                  >
+                    <MenuItem value="draft">Draft</MenuItem>
+                    <MenuItem value="published">Published</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
             </Box>
+
+            <Divider />
+
+            {/* Image Section */}
             <Box>
-              <InputLabel>Additional Images (multiple)</InputLabel>
-              <Input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(e) => handleFileChange(e, 'images')}
-                sx={{ mt: 1 }}
-              />
-              {previewImages.additional.length > 0 && (
-                <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap' }}>
-                  {previewImages.additional.map((preview, index) => (
-                    <img
-                      key={index}
-                      src={preview}
-                      alt={`Preview ${index + 1}`}
-                      style={{ maxWidth: '150px', maxHeight: '150px', borderRadius: '8px' }}
-                    />
-                  ))}
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#1976D2' }}>
+                Images
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box>
+                  <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                    Featured Image *
+                  </Typography>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, 'featuredImage')}
+                    sx={{ mb: 1 }}
+                  />
+                  {previewImages.featured && (
+                    <Box sx={{ mt: 2 }}>
+                      <img
+                        src={previewImages.featured}
+                        alt="Featured preview"
+                        style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '8px', objectFit: 'cover' }}
+                      />
+                    </Box>
+                  )}
                 </Box>
-              )}
+              </Box>
+            </Box>
+
+            <Divider />
+
+            {/* Content Section */}
+            <Box>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#1976D2' }}>
+                Content
+              </Typography>
+              <Box sx={{ mb: 2, p: 2, bgcolor: '#F5F5F5', borderRadius: 1 }}>
+                <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                  Content Structure Guide:
+                </Typography>
+                <Typography variant="body2" component="div" sx={{ fontSize: '0.75rem', color: '#666' }}>
+                  <div>• Use <code>&lt;h2&gt;</code> for main headings</div>
+                  <div>• Use <code>&lt;h3&gt;</code> for subheadings</div>
+                  <div>• Use <code>&lt;p&gt;</code> for paragraphs</div>
+                </Typography>
+              </Box>
+              <TextField
+                fullWidth
+                label="Blog Content (HTML)"
+                required
+                multiline
+                rows={15}
+                value={formData.content}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                placeholder="<h3>Introduction: Finding Bliss in Simplicity</h3>
+<p>In a culture that often celebrates excess and constant activity, the idea of a lifestyle centered around simplicity might seem counterintuitive. However, at its core, simplicity is about focusing on what truly matters and letting go of the superfluous. It's a mindful approach that can lead to a more meaningful and fulfilling existence.</p>
+
+<h3>Clearing the Clutter</h3>
+<p>Simplicity starts at home. Decluttering your living space is an invigorating process that allows you to create physical and mental space for what truly resonates with you. Whether it's cleaning out your closet, reorganizing your kitchen, or letting go of sentimental items, the act of decluttering can be liberating.</p>
+
+<h3>Mindful Consumption</h3>
+<p>In a consumer-driven society, practicing mindful consumption is a revolutionary act. Embracing quality over quantity and making intentional choices about what you bring into your life can lead to a sense of contentment and reduced environmental impact. Consider supporting sustainable and ethical brands that align with your values.</p>"
+                helperText="Use HTML tags for proper structure. Main headings (h2), subheadings (h3), and paragraphs (p) will be styled automatically."
+                sx={{
+                  '& .MuiInputBase-input': {
+                    fontFamily: 'monospace',
+                    fontSize: '0.875rem'
+                  }
+                }}
+              />
             </Box>
           </Box>
         </DialogContent>

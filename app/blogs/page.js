@@ -96,7 +96,16 @@ export default function BlogsPage() {
           py: { xs: 4, md: 6 }
         }}
       >
-        <Container maxWidth="lg">
+        <Container 
+          maxWidth="xl" 
+          sx={{ 
+            px: { xs: 2, sm: 3, md: 4 },
+            width: '100%',
+            '& .MuiContainer-root': {
+              maxWidth: '100%'
+            }
+          }}
+        >
           <Box sx={{ mb: 4, textAlign: 'center' }}>
             <Typography
               variant="h2"
@@ -145,56 +154,138 @@ export default function BlogsPage() {
 
           {!loading && !error && blogs.length > 0 && (
             <>
-              <Grid container spacing={4} sx={{ mb: 4 }}>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: {
+                    xs: '1fr',
+                    sm: 'repeat(2, 1fr)',
+                    md: 'repeat(2, 1fr)',
+                    lg: 'repeat(3, 1fr)'
+                  },
+                  gap: { xs: 2, sm: 3, md: 3 },
+                  mb: 4,
+                  width: '100%'
+                }}
+              >
                 {blogs.map((blog) => (
-                  <Grid item xs={12} sm={6} md={4} key={blog._id}>
+                  <Box
+                    key={blog._id}
+                    sx={{
+                      display: 'flex',
+                      width: '100%'
+                    }}
+                  >
                     <Card
                       sx={{
+                        width: '100%',
                         height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
-                        transition: 'transform 0.2s, box-shadow 0.2s',
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        bgcolor: '#fff',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                         '&:hover': {
                           transform: 'translateY(-4px)',
-                          boxShadow: 4
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12)'
                         },
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        border: 'none'
                       }}
                     >
                       <CardActionArea
                         onClick={() => router.push(`/blogs/${blog.slug || blog._id}`)}
-                        sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
+                        sx={{ 
+                          flexGrow: 1, 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          alignItems: 'stretch',
+                          '&:hover': {
+                            '& .MuiCardActionArea-focusHighlight': {
+                              opacity: 0
+                            }
+                          }
+                        }}
                       >
                         {blog.featuredImage?.url && (
-                          <CardMedia
-                            component="img"
-                            height="200"
-                            image={blog.featuredImage.url}
-                            alt={blog.title}
-                            sx={{ objectFit: 'cover' }}
-                          />
+                          <Box
+                            sx={{
+                              width: '100%',
+                              height: { xs: '220px', sm: '240px', md: '260px' },
+                              overflow: 'hidden',
+                              position: 'relative',
+                              bgcolor: '#f5f5f5'
+                            }}
+                          >
+                            <img
+                              src={blog.featuredImage.url}
+                              alt={blog.title}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                transition: 'transform 0.3s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.transform = 'scale(1.05)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.transform = 'scale(1)';
+                              }}
+                            />
+                          </Box>
                         )}
-                        <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                        <CardContent sx={{ 
+                          flexGrow: 1, 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          p: { xs: 2.5, sm: 3 },
+                          '&:last-child': { pb: { xs: 2.5, sm: 3 } }
+                        }}>
+                          {blog.tags && blog.tags.length > 0 && (
+                            <Chip
+                              label={blog.tags[0]}
+                              size="small"
+                              sx={{
+                                mb: 1.5,
+                                height: '26px',
+                                bgcolor: '#E3F2FD',
+                                color: '#1976D2',
+                                fontWeight: 500,
+                                fontSize: '0.75rem',
+                                alignSelf: 'flex-start',
+                                borderRadius: '6px',
+                                px: 1
+                              }}
+                            />
+                          )}
                           <Typography
                             variant="h6"
                             component="h2"
                             sx={{
                               fontWeight: 600,
-                              mb: 1,
-                              color: 'text.primary',
+                              mb: 1.5,
+                              color: '#000',
+                              fontSize: { xs: '1rem', sm: '1.125rem' },
+                              lineHeight: 1.4,
                               display: '-webkit-box',
                               WebkitLineClamp: 2,
                               WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden'
+                              overflow: 'hidden',
+                              minHeight: { xs: '2.8rem', sm: '3.15rem' }
                             }}
                           >
                             {blog.title}
                           </Typography>
                           <Typography
                             variant="body2"
-                            color="text.secondary"
                             sx={{
                               mb: 2,
+                              color: '#666',
+                              fontSize: '0.875rem',
+                              lineHeight: 1.6,
                               display: '-webkit-box',
                               WebkitLineClamp: 3,
                               WebkitBoxOrient: 'vertical',
@@ -202,58 +293,43 @@ export default function BlogsPage() {
                               flexGrow: 1
                             }}
                           >
-                            {truncateText(blog.description)}
+                            {truncateText(blog.description, 120)}
                           </Typography>
-                          <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1 }}>
-                            {blog.tags && blog.tags.slice(0, 3).map((tag, index) => (
-                              <Chip
-                                key={index}
-                                label={tag}
-                                size="small"
-                                sx={{
-                                  fontSize: '0.7rem',
-                                  height: '24px'
-                                }}
-                              />
-                            ))}
-                          </Stack>
                           <Box
                             sx={{
                               display: 'flex',
                               alignItems: 'center',
-                              gap: 2,
+                              gap: { xs: 1.5, sm: 2 },
                               mt: 'auto',
                               pt: 2,
                               borderTop: '1px solid',
-                              borderColor: 'divider',
+                              borderColor: '#E8E8E8',
                               flexWrap: 'wrap'
                             }}
                           >
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <PersonIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                              <Typography variant="caption" color="text.secondary">
+                              <PersonIcon sx={{ fontSize: 14, color: '#9E9E9E' }} />
+                              <Typography variant="caption" sx={{ color: '#757575', fontSize: '0.75rem', fontWeight: 400 }}>
                                 {blog.authorName || 'Admin'}
                               </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <CalendarTodayIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                              <Typography variant="caption" color="text.secondary">
-                                {formatDate(blog.createdAt)}
-                              </Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <VisibilityIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                              <Typography variant="caption" color="text.secondary">
-                                {blog.views || 0}
+                              <CalendarTodayIcon sx={{ fontSize: 14, color: '#9E9E9E' }} />
+                              <Typography variant="caption" sx={{ color: '#757575', fontSize: '0.75rem', fontWeight: 400 }}>
+                                {new Date(blog.createdAt).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric'
+                                })}
                               </Typography>
                             </Box>
                           </Box>
                         </CardContent>
                       </CardActionArea>
                     </Card>
-                  </Grid>
+                  </Box>
                 ))}
-              </Grid>
+              </Box>
 
               {totalPages > 1 && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
