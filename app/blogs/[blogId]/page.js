@@ -13,7 +13,9 @@ import {
   Breadcrumbs,
   Link as MuiLink,
   IconButton,
-  Avatar
+  Avatar,
+  TextField,
+  Button
 } from '@mui/material';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -22,6 +24,7 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PersonIcon from '@mui/icons-material/Person';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 // Helper function to normalize API URL
 const getApiUrl = () => {
@@ -39,6 +42,13 @@ export default function BlogDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  
+  // Newsletter subscription state
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [subscriptionSuccess, setSubscriptionSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     if (blogId) {
@@ -89,6 +99,83 @@ export default function BlogDetailPage() {
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  // Email validation function
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      return 'Email is required';
+    }
+    if (!emailRegex.test(email)) {
+      return 'Please enter a valid email address';
+    }
+    return '';
+  };
+
+  // Handle email input change
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+    if (emailError) {
+      setEmailError(validateEmail(value));
+    }
+    // Reset success state when user starts typing again
+    if (subscriptionSuccess) {
+      setSubscriptionSuccess(false);
+      setSuccessMessage('');
+    }
+  };
+
+  // Handle newsletter subscription
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    
+    // Validate email
+    const validationError = validateEmail(email);
+    if (validationError) {
+      setEmailError(validationError);
+      return;
+    }
+
+    setIsSubscribing(true);
+    setEmailError('');
+    setSubscriptionSuccess(false);
+    setSuccessMessage('');
+
+    try {
+      const response = await fetch(`${API_URL}/api/newsletter/subscribe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to subscribe to newsletter');
+      }
+
+      if (data.success) {
+        setSubscriptionSuccess(true);
+        setSuccessMessage(data.message || 'Successfully subscribed to newsletter');
+        setEmail('');
+        // Reset success message after 5 seconds
+        setTimeout(() => {
+          setSubscriptionSuccess(false);
+          setSuccessMessage('');
+        }, 5000);
+      } else {
+        throw new Error(data.error || 'Failed to subscribe to newsletter');
+      }
+    } catch (err) {
+      console.error('Error subscribing to newsletter:', err);
+      setEmailError(err.message || 'Failed to subscribe. Please try again.');
+    } finally {
+      setIsSubscribing(false);
+    }
   };
 
   if (loading) {
@@ -478,45 +565,116 @@ export default function BlogDetailPage() {
               <Box
                 sx={{
                   flex: 0.4,
-                  display: 'flex',
-                  gap: 1,
-                  width: { xs: '100%', md: 'auto' },
-                  flexDirection: { xs: 'column', sm: 'row' }
+                  width: { xs: '100%', md: 'auto' }
                 }}
               >
-                <input
-                  type="email"
-                  placeholder="Enter your Email"
-                  style={{
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    border: '1px solid #E0E0E0',
-                    fontSize: '0.875rem',
-                    flex: 1,
-                    minWidth: '200px',
-                    outline: 'none'
+                <Box
+                  component="form"
+                  onSubmit={handleSubscribe}
+                  sx={{
+                    display: 'flex',
+                    gap: 1,
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    alignItems: { xs: 'stretch', sm: 'flex-start' }
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#1976D2'}
-                  onBlur={(e) => e.target.style.borderColor = '#E0E0E0'}
-                />
-                <button
-                  style={{
-                    padding: '12px 24px',
-                    borderRadius: '8px',
-                    border: 'none',
-                    backgroundColor: '#000',
-                    color: '#fff',
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    transition: 'background-color 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#333'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = '#000'}
                 >
-                  Subscribe
-                </button>
+                  <Box sx={{ flex: 1, position: 'relative', minWidth: '200px' }}>
+                    <TextField
+                      type="email"
+                      placeholder="Enter your Email"
+                      value={email}
+                      onChange={handleEmailChange}
+                      onBlur={() => {
+                        if (email) {
+                          setEmailError(validateEmail(email));
+                        }
+                      }}
+                      error={!!emailError}
+                      helperText={emailError || (subscriptionSuccess && successMessage ? '' : '')}
+                      disabled={isSubscribing || subscriptionSuccess}
+                      sx={{
+                        width: '100%',
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '8px',
+                          fontSize: '0.875rem',
+                          backgroundColor: subscriptionSuccess ? '#f1f8e9' : '#fff',
+                          '& fieldset': {
+                            borderColor: emailError ? '#d32f2f' : '#E0E0E0',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: emailError ? '#d32f2f' : '#1976D2',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: emailError ? '#d32f2f' : '#1976D2',
+                          },
+                        },
+                        '& .MuiInputBase-input': {
+                          padding: '12px 16px',
+                        },
+                      }}
+                      InputProps={{
+                        endAdornment: subscriptionSuccess && (
+                          <CheckCircleIcon
+                            sx={{
+                              color: '#4caf50',
+                              fontSize: '20px',
+                              ml: 1
+                            }}
+                          />
+                        ),
+                      }}
+                    />
+                  </Box>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={isSubscribing || subscriptionSuccess}
+                    sx={{
+                      padding: '12px 24px',
+                      borderRadius: '8px',
+                      backgroundColor: subscriptionSuccess ? '#4caf50' : '#000',
+                      color: '#fff',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      whiteSpace: 'nowrap',
+                      textTransform: 'none',
+                      minWidth: '120px',
+                      '&:hover': {
+                        backgroundColor: subscriptionSuccess ? '#4caf50' : '#333',
+                      },
+                      '&:disabled': {
+                        backgroundColor: subscriptionSuccess ? '#4caf50' : '#000',
+                        opacity: 0.7,
+                      },
+                    }}
+                  >
+                    {isSubscribing ? (
+                      <CircularProgress size={20} sx={{ color: '#fff' }} />
+                    ) : subscriptionSuccess ? (
+                      <>
+                        <CheckCircleIcon sx={{ fontSize: '18px', mr: 0.5 }} />
+                        Subscribed
+                      </>
+                    ) : (
+                      'Subscribe'
+                    )}
+                  </Button>
+                </Box>
+                {subscriptionSuccess && successMessage && (
+                  <Typography
+                    sx={{
+                      mt: 1,
+                      color: '#4caf50',
+                      fontSize: '0.875rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5
+                    }}
+                  >
+                    <CheckCircleIcon sx={{ fontSize: '16px' }} />
+                    {successMessage}
+                  </Typography>
+                )}
               </Box>
             </Box>
           </Container>
