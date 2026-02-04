@@ -110,6 +110,16 @@ const authSlice = createSlice({
         }
       }
     },
+    // Update newsletter subscription status
+    setNewsletterSubscribed: (state, action) => {
+      if (state.user) {
+        state.user.isNewsletterSubscribed = action.payload;
+        // Update localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('user', JSON.stringify(state.user));
+        }
+      }
+    },
   },
 });
 
@@ -122,6 +132,7 @@ export const {
   clearError,
   setOnboardingComplete,
   updateUser,
+  setNewsletterSubscribed,
 } = authSlice.actions;
 
 export default authSlice.reducer;

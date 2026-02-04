@@ -16,11 +16,13 @@ import {
   Avatar,
   TextField,
   Button,
-  Snackbar
+  Snackbar,
+  Tooltip
 } from '@mui/material';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { setNewsletterSubscribed } from '../../../store/authSlice';
 import MainLayout from '../../../components/layouts/MainLayout';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PersonIcon from '@mui/icons-material/Person';
@@ -44,7 +46,9 @@ export default function BlogDetailPage() {
   const router = useRouter();
   const params = useParams();
   const blogId = params?.blogId;
-  const { isAuthenticated, token } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const { isAuthenticated, token, user } = useSelector((state) => state.auth);
+  const isNewsletterSubscribed = user?.isNewsletterSubscribed || false;
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -67,6 +71,13 @@ export default function BlogDetailPage() {
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [subscriptionSuccess, setSubscriptionSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Initialize email with user's email if logged in and not already subscribed
+  useEffect(() => {
+    if (isAuthenticated && user?.email && !isNewsletterSubscribed && !email) {
+      setEmail(user.email);
+    }
+  }, [isAuthenticated, user, isNewsletterSubscribed]);
 
   const fetchBlog = useCallback(async () => {
     if (!blogId) return;
@@ -282,6 +293,10 @@ export default function BlogDetailPage() {
         setSubscriptionSuccess(true);
         setSuccessMessage(data.message || 'Successfully subscribed to newsletter');
         setEmail('');
+        // Update Redux state if user is authenticated
+        if (isAuthenticated && user) {
+          dispatch(setNewsletterSubscribed(true));
+        }
         // Reset success message after 5 seconds
         setTimeout(() => {
           setSubscriptionSuccess(false);
@@ -778,112 +793,183 @@ export default function BlogDetailPage() {
                   width: { xs: '100%', md: 'auto' }
                 }}
               >
-                <Box
-                  component="form"
-                  onSubmit={handleSubscribe}
-                  sx={{
-                    display: 'flex',
-                    gap: 1,
-                    flexDirection: { xs: 'column', sm: 'row' },
-                    alignItems: { xs: 'stretch', sm: 'flex-start' }
-                  }}
-                >
-                  <Box sx={{ flex: 1, position: 'relative', minWidth: '200px' }}>
-                    <TextField
-                      type="email"
-                      placeholder="Enter your Email"
-                      value={email}
-                      onChange={handleEmailChange}
-                      onBlur={() => {
-                        if (email) {
-                          setEmailError(validateEmail(email));
-                        }
-                      }}
-                      error={!!emailError}
-                      helperText={emailError || (subscriptionSuccess && successMessage ? '' : '')}
-                      disabled={isSubscribing || subscriptionSuccess}
+                {isAuthenticated && isNewsletterSubscribed ? (
+                  <Tooltip title="You are already subscribed to our newsletter" arrow>
+                    <Box
                       sx={{
-                        width: '100%',
-                        '& .MuiOutlinedInput-root': {
+                        display: 'flex',
+                        gap: 1,
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        alignItems: { xs: 'stretch', sm: 'flex-start' }
+                      }}
+                    >
+                      <Box sx={{ flex: 1, position: 'relative', minWidth: '200px' }}>
+                        <TextField
+                          type="email"
+                          placeholder="Enter your Email"
+                          value={user?.email || ''}
+                          disabled={true}
+                          sx={{
+                            width: '100%',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              fontSize: '0.875rem',
+                              backgroundColor: '#f1f8e9',
+                              '& fieldset': {
+                                borderColor: '#4caf50',
+                              },
+                            },
+                            '& .MuiInputBase-input': {
+                              padding: '12px 16px',
+                            },
+                          }}
+                          InputProps={{
+                            endAdornment: (
+                              <CheckCircleIcon
+                                sx={{
+                                  color: '#4caf50',
+                                  fontSize: '20px',
+                                  ml: 1
+                                }}
+                              />
+                            ),
+                          }}
+                        />
+                      </Box>
+                      <Button
+                        variant="contained"
+                        disabled={true}
+                        sx={{
+                          padding: '12px 24px',
                           borderRadius: '8px',
+                          backgroundColor: '#4caf50',
+                          color: '#fff',
                           fontSize: '0.875rem',
-                          backgroundColor: subscriptionSuccess ? '#f1f8e9' : '#fff',
-                          '& fieldset': {
-                            borderColor: emailError ? '#d32f2f' : '#E0E0E0',
+                          fontWeight: 500,
+                          whiteSpace: 'nowrap',
+                          textTransform: 'none',
+                          minWidth: '120px',
+                          '&:disabled': {
+                            backgroundColor: '#4caf50',
+                            opacity: 0.7,
                           },
-                          '&:hover fieldset': {
-                            borderColor: emailError ? '#d32f2f' : '#1976D2',
-                          },
-                          '&.Mui-focused fieldset': {
-                            borderColor: emailError ? '#d32f2f' : '#1976D2',
-                          },
-                        },
-                        '& .MuiInputBase-input': {
-                          padding: '12px 16px',
-                        },
-                      }}
-                      InputProps={{
-                        endAdornment: subscriptionSuccess && (
-                          <CheckCircleIcon
-                            sx={{
-                              color: '#4caf50',
-                              fontSize: '20px',
-                              ml: 1
-                            }}
-                          />
-                        ),
-                      }}
-                    />
-                  </Box>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={isSubscribing || subscriptionSuccess}
-                    sx={{
-                      padding: '12px 24px',
-                      borderRadius: '8px',
-                      backgroundColor: subscriptionSuccess ? '#4caf50' : '#000',
-                      color: '#fff',
-                      fontSize: '0.875rem',
-                      fontWeight: 500,
-                      whiteSpace: 'nowrap',
-                      textTransform: 'none',
-                      minWidth: '120px',
-                      '&:hover': {
-                        backgroundColor: subscriptionSuccess ? '#4caf50' : '#333',
-                      },
-                      '&:disabled': {
-                        backgroundColor: subscriptionSuccess ? '#4caf50' : '#000',
-                        opacity: 0.7,
-                      },
-                    }}
-                  >
-                    {isSubscribing ? (
-                      <CircularProgress size={20} sx={{ color: '#fff' }} />
-                    ) : subscriptionSuccess ? (
-                      <>
+                        }}
+                      >
                         <CheckCircleIcon sx={{ fontSize: '18px', mr: 0.5 }} />
-                        Subscribed
-                      </>
-                    ) : (
-                      'Subscribe'
+                        Already Subscribed
+                      </Button>
+                    </Box>
+                  </Tooltip>
+                ) : (
+                  <>
+                    <Box
+                      component="form"
+                      onSubmit={handleSubscribe}
+                      sx={{
+                        display: 'flex',
+                        gap: 1,
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        alignItems: { xs: 'stretch', sm: 'flex-start' }
+                      }}
+                    >
+                      <Box sx={{ flex: 1, position: 'relative', minWidth: '200px' }}>
+                        <TextField
+                          type="email"
+                          placeholder={isAuthenticated && user?.email ? user.email : "Enter your Email"}
+                          value={email || (isAuthenticated && user?.email ? user.email : '')}
+                          onChange={handleEmailChange}
+                          onBlur={() => {
+                            if (email) {
+                              setEmailError(validateEmail(email));
+                            }
+                          }}
+                          error={!!emailError}
+                          helperText={emailError || (subscriptionSuccess && successMessage ? '' : '')}
+                          disabled={isSubscribing || subscriptionSuccess || (isAuthenticated && isNewsletterSubscribed)}
+                          sx={{
+                            width: '100%',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              fontSize: '0.875rem',
+                              backgroundColor: subscriptionSuccess ? '#f1f8e9' : '#fff',
+                              '& fieldset': {
+                                borderColor: emailError ? '#d32f2f' : '#E0E0E0',
+                              },
+                              '&:hover fieldset': {
+                                borderColor: emailError ? '#d32f2f' : '#1976D2',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: emailError ? '#d32f2f' : '#1976D2',
+                              },
+                            },
+                            '& .MuiInputBase-input': {
+                              padding: '12px 16px',
+                            },
+                          }}
+                          InputProps={{
+                            endAdornment: subscriptionSuccess && (
+                              <CheckCircleIcon
+                                sx={{
+                                  color: '#4caf50',
+                                  fontSize: '20px',
+                                  ml: 1
+                                }}
+                              />
+                            ),
+                          }}
+                        />
+                      </Box>
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={isSubscribing || subscriptionSuccess || (isAuthenticated && isNewsletterSubscribed)}
+                        sx={{
+                          padding: '12px 24px',
+                          borderRadius: '8px',
+                          backgroundColor: subscriptionSuccess ? '#4caf50' : '#000',
+                          color: '#fff',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                          whiteSpace: 'nowrap',
+                          textTransform: 'none',
+                          minWidth: '120px',
+                          '&:hover': {
+                            backgroundColor: subscriptionSuccess ? '#4caf50' : '#333',
+                          },
+                          '&:disabled': {
+                            backgroundColor: subscriptionSuccess ? '#4caf50' : '#000',
+                            opacity: 0.7,
+                          },
+                        }}
+                      >
+                        {isSubscribing ? (
+                          <CircularProgress size={20} sx={{ color: '#fff' }} />
+                        ) : subscriptionSuccess ? (
+                          <>
+                            <CheckCircleIcon sx={{ fontSize: '18px', mr: 0.5 }} />
+                            Subscribed
+                          </>
+                        ) : (
+                          'Subscribe'
+                        )}
+                      </Button>
+                    </Box>
+                    {subscriptionSuccess && successMessage && (
+                      <Typography
+                        sx={{
+                          mt: 1,
+                          color: '#4caf50',
+                          fontSize: '0.875rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5
+                        }}
+                      >
+                        <CheckCircleIcon sx={{ fontSize: '16px' }} />
+                        {successMessage}
+                      </Typography>
                     )}
-                  </Button>
-                </Box>
-                {subscriptionSuccess && successMessage && (
-                  <Typography
-                    sx={{
-                      mt: 1,
-                      color: '#4caf50',
-                      fontSize: '0.875rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.5
-                    }}
-                  >
-                    <CheckCircleIcon sx={{ fontSize: '16px' }} />
-                    {successMessage}
-                  </Typography>
+                  </>
                 )}
               </Box>
             </Box>
