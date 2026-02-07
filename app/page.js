@@ -116,7 +116,7 @@ export default function Home() {
                 transition: 'opacity 0.8s ease-out 0.2s, transform 0.8s ease-out 0.2s',
               }}
             >
-              The premium concierge service that applies to jobs for you. Reclaim your time and accelerate your career with expert-led applications.
+              uman‑assisted job applications, done accurately and at scale.
             </Typography>
 
             
