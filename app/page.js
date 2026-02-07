@@ -90,14 +90,14 @@ export default function Home() {
                 transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
               }}
             >
-              Land Interviews Without{' '}
+              We apply to jobs for you — so you can{' '}
               <Box
                 component="span"
                 sx={{
                   color: '#60A5FA',
                 }}
               >
-                Applying Yourself
+                focus on interviews.
               </Box>
             </Typography>
 
