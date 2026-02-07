@@ -266,7 +266,7 @@ export default function Pricing() {
                 </Box>
               </Typography>
 
-              {/* Sub-headline */}
+              
               <Typography
                 component="p"
                 sx={{
