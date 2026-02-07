@@ -116,7 +116,7 @@ export default function Home() {
                 transition: 'opacity 0.8s ease-out 0.2s, transform 0.8s ease-out 0.2s',
               }}
             >
-              Human‑assisted job applications, done accurately and at scale.
+              Finding and applying to jobs is time‑consuming and exhausting. ApplyForMe saves you time by applying to relevant roles on your behalf — manually, accurately, and transparently.
             </Typography>
 
             
