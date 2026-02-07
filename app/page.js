@@ -116,7 +116,7 @@ export default function Home() {
                 transition: 'opacity 0.8s ease-out 0.2s, transform 0.8s ease-out 0.2s',
               }}
             >
-              uman‑assisted job applications, done accurately and at scale.
+              Human‑assisted job applications, done accurately and at scale.
             </Typography>
 
             
