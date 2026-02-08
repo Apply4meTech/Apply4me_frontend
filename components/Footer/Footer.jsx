@@ -7,7 +7,7 @@ import Link from 'next/link';
 const linkSx = {
   color: '#6B7280',
   textDecoration: 'none',
-  fontSize: '0.875rem',
+  fontSize: '0.9375rem',
   fontFamily: 'inherit',
   transition: 'color 0.2s ease',
   display: 'block',
@@ -15,7 +15,7 @@ const linkSx = {
 };
 
 const sectionHeadingSx = {
-  fontSize: '0.6875rem',
+  fontSize: '0.8125rem',
   fontWeight: 600,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
@@ -103,7 +103,7 @@ export default function Footer() {
             </Link>
             <Typography
               sx={{
-                fontSize: '0.8125rem',
+                fontSize: '0.9375rem',
                 color: '#6B7280',
                 width: { xs: '100%', md: 'auto' },
                 maxWidth: { xs: '100%', md: 220 },
@@ -122,8 +122,8 @@ export default function Footer() {
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
               <Link href="/about-us" className="footer-link" style={linkSx}>About Us</Link>
+              <Link href="/blogs" className="footer-link" style={linkSx}>Blogs</Link>
               <Link href="/pricing" className="footer-link" style={linkSx}>Pricing</Link>
-              <Link href="/success-stories" className="footer-link" style={linkSx}>Success Stories</Link>
             </Box>
           </Box>
 
@@ -198,12 +198,12 @@ export default function Footer() {
         >
           <Typography
             sx={{
-              fontSize: '0.8125rem',
+              fontSize: '0.9375rem',
               color: '#9CA3AF',
               fontFamily: 'inherit',
             }}
           >
-            © {new Date().getFullYear()} Apply For Me Inc. All rights reserved.
+            © {new Date().getFullYear()} Apply For Me. All rights reserved.
           </Typography>
         </Box>
       </Container>

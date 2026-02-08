@@ -503,7 +503,7 @@ export default function ResetPassword() {
         {/* Footer Copy */}
         <Box sx={{ position: 'relative', zIndex: 10 }}>
           <Typography sx={{ color: '#94a3b8', fontSize: '0.875rem' }}>
-            © 2026 Apply For Me Inc.
+            © 2026 Apply For Me 
           </Typography>
         </Box>
       </Box>

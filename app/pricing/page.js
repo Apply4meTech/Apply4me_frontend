@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, Container, Typography, ToggleButton, ToggleButtonGroup, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, CircularProgress } from '@mui/material';
+import { Box, Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -16,7 +16,6 @@ import { loadStripe } from '@stripe/stripe-js';
 import stripeService from '../../utils/stripeService';
 
 export default function Pricing() {
-  const [billingPeriod, setBillingPeriod] = useState('monthly');
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [processingPlan, setProcessingPlan] = useState(null);
@@ -33,12 +32,6 @@ export default function Pricing() {
   const [roiRef, roiVisible] = useScrollAnimation();
   const [logosRef, logosVisible] = useScrollAnimation();
   const [faqRef, faqVisible] = useScrollAnimation();
-
-  const handleBillingChange = (event, newPeriod) => {
-    if (newPeriod !== null) {
-      setBillingPeriod(newPeriod);
-    }
-  };
 
   // Load Stripe on component mount
   useEffect(() => {
@@ -65,9 +58,9 @@ export default function Pricing() {
     setProcessingPlan(plan.name);
 
     try {
-      const price = billingPeriod === 'monthly' ? plan.monthlyPrice : plan.quarterlyPrice;
+      const price = plan.price;
       
-      // Prepare order data
+      // Prepare order data (one-time payment)
       const orderData = {
         amount: price,
         customerInfo: {
@@ -76,7 +69,7 @@ export default function Pricing() {
           phone: user.phone || ''
         },
         planName: plan.name,
-        billingPeriod: billingPeriod
+        billingPeriod: 'onetime'
       };
 
       // Create Stripe payment intent
@@ -113,56 +106,66 @@ export default function Pricing() {
   const plans = [
     {
       name: 'Starter',
-      monthlyPrice: 99,
-      quarterlyPrice: 79,
-      description: 'For passive job seekers.',
+      price: 89,
+      actualPrice: 119,
+      description: '100 Job Applications',
       features: [
-        { text: '50 Applications/mo', included: true },
-        { text: 'Resume Review', included: true },
-        { text: 'Weekly Reporting', included: true },
-        { text: 'Cover Letter Writing', included: false },
+        { text: '100 Job Applications', included: true },
+        { text: 'Human Assistant', included: true },
+        { text: 'Standard cover letter (role-adjusted)', included: true },
+        { text: 'Real-time progress updates', included: true },
       ],
       isPopular: false,
+      badge: null,
     },
     {
       name: 'Standard',
-      monthlyPrice: 199,
-      quarterlyPrice: 159,
-      description: 'For active job hunting',
+      price: 149,
+      actualPrice: 199,
+      description: '175 Job Applications',
       features: [
-        { text: '150 Applications/mo', included: true },
-        { text: 'Resume Optimization', included: true },
-        { text: 'Cover Letter Writing', included: true },
-        { text: 'LinkedIn Audit', included: true },
+        { text: '175 Job Applications', included: true },
+        { text: 'Human Assistant', included: true },
+        { text: 'Custom cover letters', included: true },
+        { text: 'Resume created by us, ATS-aligned', included: true },
+        { text: 'Real-time progress updates', included: true },
       ],
       isPopular: false,
+      badge: null,
     },
     {
       name: 'Pro',
-      monthlyPrice: 299,
-      quarterlyPrice: 239,
-      description: 'Maximum acceleration',
+      price: 229,
+      actualPrice: 299,
+      description: '250 Job Applications',
       features: [
-        { text: '300 Applications/mo', included: true },
-        { text: 'Full Resume Rewrite', included: true },
-        { text: 'Custom Cover Letters', included: true },
-        { text: 'LinkedIn Overhaul', included: true },
-        { text: 'Interview Prep Guide', included: true },
+        { text: '250 Job Applications', included: true },
+        { text: 'Human Assistant', included: true },
+        { text: 'Custom cover letters', included: true },
+        { text: 'Resume created by us for every job', included: true },
+        { text: 'Real-time progress updates', included: true },
+        { text: '1 Interview prep included + add-on', included: true },
       ],
       isPopular: true,
+      badge: 'Most Popular',
     },
     {
       name: 'Premium',
-      monthlyPrice: 499,
-      quarterlyPrice: 399,
-      description: 'Executive concierge.',
+      price: 329,
+      actualPrice: 399,
+      description: '350 Job Applications',
       features: [
-        { text: 'Unlimited Applications', included: true },
+        { text: '350 Job Applications', included: true },
+        { text: 'Dedicated Human Assistant', included: true },
+        { text: 'Custom cover letters', included: true },
+        { text: 'Resume created by us for every job', included: true },
+        { text: 'LinkedIn Profile Optimisation', included: true },
         { text: 'Priority Processing', included: true },
-        { text: '1:1 Career Coaching', included: true },
-        { text: 'Salary Negotiation', included: true },
+        { text: 'Real-time progress updates', included: true },
+        { text: '3 Interview prep included + add-on', included: true },
       ],
       isPopular: false,
+      badge: 'Best Value',
     },
   ];
 
@@ -246,72 +249,21 @@ export default function Pricing() {
                   fontWeight: 300,
                 }}
               >
-                Choose the plan that fits your goals. Start landing interviews this week.
+                One-time payment (AUD). Choose the plan that fits your goals. Start landing interviews sooner.
               </Typography>
             </Box>
 
-            {/* Billing Toggle */}
-            <Box
+            <Typography
               sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
+                fontSize: { xs: '0.875rem', md: '1rem' },
+                color: '#94A3B8',
+                textAlign: 'center',
                 marginBottom: '2rem',
-                opacity: heroVisible ? 1 : 0,
-                transform: heroVisible ? 'translateY(0)' : 'translateY(20px)',
-                transition: 'opacity 0.8s ease-out 0.2s, transform 0.8s ease-out 0.2s',
+                fontFamily: 'inherit',
               }}
             >
-              <ToggleButtonGroup
-                value={billingPeriod}
-                exclusive
-                onChange={handleBillingChange}
-                sx={{
-                  backgroundColor: 'rgba(15, 23, 42, 0.5)',
-                  borderRadius: '0.75rem',
-                  padding: '0.25rem',
-                  border: 'none',
-                  '& .MuiToggleButton-root': {
-                    color: '#FFFFFF',
-                    border: 'none',
-                    padding: '0.75rem 1.5rem',
-                    fontSize: '1rem',
-                    fontWeight: 500,
-                    textTransform: 'none',
-                    borderRadius: '0.5rem',
-                    '&.Mui-selected': {
-                      backgroundColor: '#1E3A8A',
-                      color: '#FFFFFF',
-                      '&:hover': {
-                        backgroundColor: '#1E3A8A',
-                      },
-                    },
-                    '&:hover': {
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    },
-                  },
-                }}
-              >
-                <ToggleButton value="monthly">Monthly</ToggleButton>
-                <ToggleButton value="quarterly">
-                  Quarterly{' '}
-                  <Box
-                    component="span"
-                    sx={{
-                      marginLeft: '0.5rem',
-                      backgroundColor: '#2563EB',
-                      color: '#FFFFFF',
-                      padding: '0.125rem 0.5rem',
-                      borderRadius: '9999px',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                    }}
-                  >
-                    Save 20%
-                  </Box>
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
+              AUD · One-time payment
+            </Typography>
           </Container>
         </Box>
 
@@ -346,8 +298,6 @@ export default function Pricing() {
             }}
           >
             {plans.map((plan, planIndex) => {
-              const price = billingPeriod === 'monthly' ? plan.monthlyPrice : plan.quarterlyPrice;
-              
               return (
                 <Box
                   key={plan.name}
@@ -400,8 +350,8 @@ export default function Pricing() {
                       pointerEvents: 'none',
                     }}
                   />
-                  {/* Most Popular Badge - positioned relative to main card */}
-                  {plan.isPopular && (
+                  {/* Plan Badge (Most Popular / Best Value) */}
+                  {plan.badge && (
                     <Box
                       sx={{
                         position: 'absolute',
@@ -426,7 +376,7 @@ export default function Pricing() {
                         },
                       }}
                     >
-                      MOST POPULAR
+                      {plan.badge.toUpperCase()}
                     </Box>
                   )}
                   {/* Content wrapper with relative positioning */}
@@ -453,35 +403,65 @@ export default function Pricing() {
                     {plan.name}
                   </Typography>
 
-                  {/* Price */}
+                  {/* Price: actual (strikethrough) + discounted — eye-catching */}
                   <Box
                     sx={{
                       display: 'flex',
                       alignItems: 'baseline',
+                      flexWrap: 'wrap',
+                      gap: '0.75rem',
                       marginBottom: '0.5rem',
                     }}
                   >
                     <Typography
+                      component="span"
                       sx={{
-                        fontSize: '2.5rem',
-                        fontWeight: 700,
-                        color: '#1E293B',
+                        fontSize: '1.375rem',
+                        fontWeight: 600,
+                        color: '#94A3B8',
+                        textDecoration: 'line-through',
                         fontFamily: 'inherit',
                       }}
                     >
-                      ${price}
+                      ${plan.actualPrice}
                     </Typography>
                     <Typography
                       sx={{
-                        fontSize: '1rem',
-                        color: '#64748B',
-                        marginLeft: '0.25rem',
+                        fontSize: '2.5rem',
+                        fontWeight: 800,
+                        color: '#1E293B',
+                        fontFamily: 'inherit',
+                        letterSpacing: '-0.02em',
+                        lineHeight: 1.1,
+                      }}
+                    >
+                      ${plan.price}
+                    </Typography>
+                    <Box
+                      component="span"
+                      sx={{
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        color: '#FFFFFF',
+                        backgroundColor: '#10B981',
+                        padding: '0.2rem 0.5rem',
+                        borderRadius: '0.375rem',
                         fontFamily: 'inherit',
                       }}
                     >
-                      /mo
-                    </Typography>
+                      Save ${plan.actualPrice - plan.price}
+                    </Box>
                   </Box>
+                  <Typography
+                    sx={{
+                      fontSize: '0.8125rem',
+                      color: '#64748B',
+                      marginBottom: '0.5rem',
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    One-time · AUD
+                  </Typography>
 
                   {/* Description */}
                   <Typography
@@ -630,7 +610,7 @@ export default function Pricing() {
               fontFamily: 'inherit',
             }}
           >
-            Compare Plans
+            Package Features Comparison
           </Typography>
 
           {/* Comparison Table Card */}
@@ -654,250 +634,172 @@ export default function Pricing() {
             <TableContainer>
               <Table
                 sx={{
-                  minWidth: 600,
+                  minWidth: 560,
                   '& .MuiTableCell-root': {
                     borderBottom: '1px solid #E2E8F0',
-                    padding: { xs: '1rem 0.75rem', md: '1.25rem 1rem' },
+                    padding: { xs: '0.875rem 0.625rem', md: '1rem 0.875rem' },
                     fontFamily: 'inherit',
+                    verticalAlign: 'middle',
                   },
                 }}
               >
                 <TableHead>
                   <TableRow>
-                    <TableCell
-                      sx={{
-                        fontSize: { xs: '0.75rem', md: '0.875rem' },
-                        fontWeight: 600,
-                        color: '#94A3B8',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                        paddingLeft: 0,
-                        borderBottom: '1px solid #E2E8F0',
-                      }}
-                    >
-                      Features
+                    <TableCell sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', paddingLeft: 0, borderBottom: '1px solid #E2E8F0', width: '22%' }}>
+                      Feature
                     </TableCell>
-                    <TableCell
-                      align="center"
-                      sx={{
-                        fontSize: { xs: '0.875rem', md: '1rem' },
-                        fontWeight: 600,
-                        color: '#1E293B',
-                      }}
-                    >
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#1E293B', width: '19%' }}>
                       Starter
                     </TableCell>
-                    <TableCell
-                      align="center"
-                      sx={{
-                        fontSize: { xs: '0.875rem', md: '1rem' },
-                        fontWeight: 600,
-                        color: '#1E293B',
-                      }}
-                    >
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#1E293B', width: '19%' }}>
                       Standard
                     </TableCell>
-                    <TableCell
-                      align="center"
-                      sx={{
-                        fontSize: { xs: '0.875rem', md: '1rem' },
-                        fontWeight: 600,
-                        color: '#2563EB',
-                      }}
-                    >
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#2563EB', width: '19%' }}>
                       Pro
                     </TableCell>
-                    <TableCell
-                      align="center"
-                      sx={{
-                        fontSize: { xs: '0.875rem', md: '1rem' },
-                        fontWeight: 600,
-                        color: '#1E293B',
-                      }}
-                    >
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#1E293B', width: '19%' }}>
                       Premium
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {/* Monthly Applications */}
                   <TableRow>
-                    <TableCell
-                      sx={{
-                        fontSize: { xs: '0.875rem', md: '1rem' },
-                        color: '#1E293B',
-                        paddingLeft: 0,
-                      }}
-                    >
-                      Monthly Applications
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0, maxWidth: 160 }}>
+                      Job search (who applies)
                     </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, color: '#1E293B' }}>
-                      50
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#1E293B', lineHeight: 1.4 }}>
+                      You (100)
                     </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, color: '#1E293B' }}>
-                      150
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#1E293B', lineHeight: 1.4 }}>
+                      50% us / 50% you
+                      <Box component="span" sx={{ display: 'block', fontSize: '0.75rem', color: '#64748B', marginTop: '0.25rem' }}>(175)</Box>
                     </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, color: '#2563EB', fontWeight: 600 }}>
-                      300
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#2563EB', lineHeight: 1.4 }}>
+                      75% us / 25% you
+                      <Box component="span" sx={{ display: 'block', fontSize: '0.75rem', color: '#64748B', marginTop: '0.25rem' }}>(250)</Box>
                     </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, color: '#2563EB', fontWeight: 600 }}>
-                      Unlimited
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#1E293B', lineHeight: 1.4 }}>
+                      100% us
+                      <Box component="span" sx={{ display: 'block', fontSize: '0.75rem', color: '#64748B', marginTop: '0.25rem' }}>(350)</Box>
                     </TableCell>
                   </TableRow>
-
-                  {/* Resume Review */}
                   <TableRow>
-                    <TableCell
-                      sx={{
-                        fontSize: { xs: '0.875rem', md: '1rem' },
-                        color: '#1E293B',
-                        paddingLeft: 0,
-                      }}
-                    >
-                      Resume Review
-                    </TableCell>
-                    <TableCell align="center">
-                      <CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} />
-                    </TableCell>
-                    <TableCell align="center">
-                      <CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} />
-                    </TableCell>
-                    <TableCell align="center">
-                      <CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} />
-                    </TableCell>
-                    <TableCell align="center">
-                      <CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} />
-                    </TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0 }}>Human Assistant</TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Dedicated</TableCell>
                   </TableRow>
-
-                  {/* Full Resume Rewrite */}
                   <TableRow>
-                    <TableCell
-                      sx={{
-                        fontSize: { xs: '0.875rem', md: '1rem' },
-                        color: '#1E293B',
-                        paddingLeft: 0,
-                      }}
-                    >
-                      Full Resume Rewrite
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography sx={{ color: '#94A3B8', fontSize: '1.25rem' }}>—</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography sx={{ color: '#94A3B8', fontSize: '1.25rem' }}>—</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} />
-                    </TableCell>
-                    <TableCell align="center">
-                      <CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} />
-                    </TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0 }}>Cover Letters</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Standard</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Custom</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Custom</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Custom</TableCell>
                   </TableRow>
-
-                  {/* Custom Cover Letters */}
                   <TableRow>
-                    <TableCell
-                      sx={{
-                        fontSize: { xs: '0.875rem', md: '1rem' },
-                        color: '#1E293B',
-                        paddingLeft: 0,
-                      }}
-                    >
-                      Custom Cover Letters
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography sx={{ color: '#94A3B8', fontSize: '1.25rem' }}>—</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} />
-                    </TableCell>
-                    <TableCell align="center">
-                      <CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} />
-                    </TableCell>
-                    <TableCell align="center">
-                      <CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} />
-                    </TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0 }}>Resume (ATS-aligned)</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Review only (add-on)</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>We create</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>We create</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>We create</TableCell>
                   </TableRow>
-
-                  {/* LinkedIn Optimization */}
                   <TableRow>
-                    <TableCell
-                      sx={{
-                        fontSize: { xs: '0.875rem', md: '1rem' },
-                        color: '#1E293B',
-                        paddingLeft: 0,
-                      }}
-                    >
-                      LinkedIn Optimization
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography sx={{ color: '#94A3B8', fontSize: '1.25rem' }}>—</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} />
-                    </TableCell>
-                    <TableCell align="center">
-                      <CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} />
-                    </TableCell>
-                    <TableCell align="center">
-                      <CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} />
-                    </TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0 }}>LinkedIn optimisation</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Add-on</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Add-on</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Add-on</TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
                   </TableRow>
-
-                  {/* Interview Prep Guide */}
                   <TableRow>
-                    <TableCell
-                      sx={{
-                        fontSize: { xs: '0.875rem', md: '1rem' },
-                        color: '#1E293B',
-                        paddingLeft: 0,
-                      }}
-                    >
-                      Interview Prep Guide
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography sx={{ color: '#94A3B8', fontSize: '1.25rem' }}>—</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography sx={{ color: '#94A3B8', fontSize: '1.25rem' }}>—</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} />
-                    </TableCell>
-                    <TableCell align="center">
-                      <CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} />
-                    </TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0 }}>Priority processing</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>—</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>—</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Add-on</TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
                   </TableRow>
-
-                  {/* 1:1 Coaching Sessions */}
                   <TableRow>
-                    <TableCell
-                      sx={{
-                        fontSize: { xs: '0.875rem', md: '1rem' },
-                        color: '#1E293B',
-                        paddingLeft: 0,
-                      }}
-                    >
-                      1:1 Coaching Sessions
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography sx={{ color: '#94A3B8', fontSize: '1.25rem' }}>—</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography sx={{ color: '#94A3B8', fontSize: '1.25rem' }}>—</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography sx={{ color: '#94A3B8', fontSize: '1.25rem' }}>—</Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} />
-                    </TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0 }}>Real-time updates</TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0 }}>Interview prep</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Add-on</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Add-on</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>1 + add-on</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>3 + add-on</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
             </Box>
+          </Box>
+
+          {/* Optional Add-Ons Section */}
+          <Typography
+            component="h2"
+            sx={{
+              fontSize: { xs: '1.75rem', md: '2.25rem' },
+              fontWeight: 700,
+              color: '#1E293B',
+              textAlign: 'center',
+              marginTop: '4rem',
+              marginBottom: '1.5rem',
+              fontFamily: 'inherit',
+            }}
+          >
+            Optional Add-Ons (One-Time · AUD)
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: { xs: '0.9375rem', md: '1rem' },
+              color: '#64748B',
+              textAlign: 'center',
+              marginBottom: '2rem',
+              fontFamily: 'inherit',
+            }}
+          >
+            Enhance your package with these one-time add-ons.
+          </Typography>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+              gap: '1.25rem',
+              marginBottom: '3rem',
+            }}
+          >
+            {[
+              { name: 'Job Search by Our Team', desc: 'We search and shortlist relevant jobs based on role & location', price: 59 },
+              { name: 'Custom Resume Rewrite (ATS-Optimised)', desc: 'Complete resume rewrite with keyword optimisation', price: 39 },
+              { name: 'LinkedIn Profile Optimisation', desc: 'Headline, summary & recruiter keyword optimisation', price: 49 },
+              { name: 'Interview Prep', desc: 'Preparation session for your interviews', price: 20 },
+              { name: 'Priority Processing Upgrade', desc: 'Faster handling vs standard queue', price: 49 },
+            ].map((addon) => (
+              <Box
+                key={addon.name}
+                sx={{
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '0.75rem',
+                  padding: '1.25rem',
+                  border: '1px solid #E2E8F0',
+                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.06)',
+                }}
+              >
+                <Typography sx={{ fontSize: '1rem', fontWeight: 600, color: '#1E293B', fontFamily: 'inherit', marginBottom: '0.5rem' }}>
+                  {addon.name}
+                </Typography>
+                <Typography sx={{ fontSize: '0.875rem', color: '#64748B', fontFamily: 'inherit', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                  {addon.desc}
+                </Typography>
+                <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#2563EB', fontFamily: 'inherit' }}>
+                  ${addon.price} AUD
+                </Typography>
+              </Box>
+            ))}
           </Box>
         </Container>
       </Box>
@@ -971,27 +873,43 @@ export default function Pricing() {
             }}
           >
             {[
-              {
-                question: 'How does the interview guarantee work?',
-                answer:
-                  'Our interview guarantee ensures that if you don\'t receive any interview requests within 90 days of starting your subscription, we\'ll continue working with you for free until you land your first interview. We track all applications and provide full transparency on the process.',
-              },
-              {
-                question: 'Can I pause or cancel my subscription?',
-                answer:
-                  'Yes, you can pause or cancel your subscription at any time with no penalties. Simply go to your account settings and choose to pause (which will freeze your application count) or cancel (which will stop at the end of your current billing period). Your data and applications remain accessible even after cancellation.',
-              },
-              {
-                question: 'Do you write custom cover letters for every job?',
-                answer:
-                  'Yes! For Standard, Pro, and Premium plans, we write unique, tailored cover letters for each job application. Our team researches the company, analyzes the job description, and highlights your relevant experience to create compelling, personalized cover letters that increase your chances of getting noticed.',
-              },
-              {
-                question: 'Is my data safe with you?',
-                answer:
-                  'Absolutely. We take data security seriously. All your personal information, resumes, and application data are encrypted and stored securely. We never share your information with third parties and comply with GDPR and other privacy regulations. You can read our full privacy policy for complete details.',
-              },
-            ].map((faq, index) => (
+  {
+    question: 'What exactly do you do?',
+    answer:
+      'We apply to jobs on your behalf using your resume and preferences. You give us the details, and our human team submits each application (cover letters included). It’s 100% manual – we’re here to handle the busywork of your job search.',
+  },
+  {
+    question: 'Do you guarantee I’ll get a job?',
+    answer:
+      'No. We can’t promise interviews or job offers – no honest service can. What we guarantee is a structured, transparent application process. We focus on making high-quality submissions, but ultimately hiring decisions are out of our control.',
+  },
+  {
+    question: 'Where do you apply?',
+    answer:
+      'We use your chosen methods: company websites, major job boards (like Seek, LinkedIn, etc.), and any direct links you provide. Our service is tailored to the Australian market, so we know where Australian employers post roles.',
+  },
+  {
+    question: 'How is this different from a recruitment agency?',
+    answer:
+      'We work for you, not for employers. Agencies often match candidates to employers (and they typically represent companies, not you). Our sole focus is on getting you in front of as many relevant doors as possible. Think of us as your personal application team, not a headhunter.',
+  },
+  {
+    question: 'Can I see proof of applications?',
+    answer:
+      'Yes! You get access to a live dashboard where every submitted application is logged. You’ll know exactly where and when we applied on your behalf. No mysteries, no “hidden” applications – complete transparency.',
+  },
+  {
+    question: 'How does pricing and cancellation work?',
+    answer:
+      'Each package is a one-time payment. We have no recurring fees. Once you purchase, we start the process (after you submit your info). Because our team immediately begins handling your applications, we do not offer refunds after we’ve started the service. If you change your mind before we begin, we can cancel and refund you. But once applications are in progress, it’s non-refundable.',
+  },
+  {
+    question: 'Is my data secure?',
+    answer:
+      'Absolutely. We take your privacy seriously. We collect only the information needed to apply for jobs (your resume, contact info, preferences). This data is stored securely and used only for the purpose of job applications. We do not sell or share your personal info with anyone outside our team. You have full rights under the Australian Privacy Act – you can access, correct, or delete your data at any time (just let us know).',
+  },
+]
+.map((faq, index) => (
               <Box
                 key={index}
                 sx={{
@@ -1041,48 +959,29 @@ export default function Pricing() {
                   />
                 </Box>
 
-                {/* Answer Content */}
+                {/* Answer Content - always in DOM for smooth height transition */}
                 <Box
                   sx={{
-                    maxHeight: expandedFaq === index ? '500px' : '0',
+                    maxHeight: expandedFaq === index ? '800px' : 0,
                     overflow: 'hidden',
-                    transition: 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                    paddingX: expandedFaq === index ? { xs: '1rem', md: '1.75rem' } : 0,
-                    paddingBottom: expandedFaq === index ? { xs: '1.25rem', md: '1.5rem' } : 0,
-                    borderTop: expandedFaq === index ? '1px solid #E2E8F0' : 'none',
-                    opacity: expandedFaq === index ? 1 : 0,
-                    transition: 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, border-top 0.3s ease',
+                    transition: 'max-height 0.35s ease-out, border-top 0.25s ease-out',
+                    borderTop: expandedFaq === index ? '1px solid #E2E8F0' : '1px solid transparent',
                   }}
                 >
-                  {expandedFaq === index && (
-                    <Box
-                      sx={{
-                        animation: 'fadeInDown 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                        '@keyframes fadeInDown': {
-                          from: {
-                            opacity: 0,
-                            transform: 'translateY(-10px)',
-                          },
-                          to: {
-                            opacity: 1,
-                            transform: 'translateY(0)',
-                          },
-                        },
-                      }}
-                    >
-                    <Typography
-                      sx={{
-                        fontSize: { xs: '0.9375rem', md: '1rem' },
-                        color: '#64748B',
-                        fontFamily: 'inherit',
-                        lineHeight: 1.7,
-                        paddingTop: { xs: '1rem', md: '1.25rem' },
-                      }}
-                    >
-                      {faq.answer}
-                    </Typography>
-                    </Box>
-                  )}
+                  <Typography
+                    component="div"
+                    sx={{
+                      fontSize: { xs: '0.9375rem', md: '1rem' },
+                      color: '#64748B',
+                      fontFamily: 'inherit',
+                      lineHeight: 1.7,
+                      paddingTop: { xs: '1rem', md: '1.25rem' },
+                      paddingBottom: { xs: '1.25rem', md: '1.5rem' },
+                      paddingX: { xs: '1rem', md: '1.75rem' },
+                    }}
+                  >
+                    {faq.answer}
+                  </Typography>
                 </Box>
               </Box>
             ))}

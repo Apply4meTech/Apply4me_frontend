@@ -4,12 +4,25 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Box, Container, Typography, TextField } from '@mui/material';
 import Button from '../../Button';
 
+const DEFAULT_APPLICATIONS = 1000;
+
 export default function ROICalculator() {
-  const [hourlyRate, setHourlyRate] = useState(75);
-  const [calculatedSavings, setCalculatedSavings] = useState(7500);
-  const [hoursSaved] = useState(100);
+  const [hourlyIncome, setHourlyIncome] = useState('20');
+  const [minutesPerJob, setMinutesPerJob] = useState('10');
+  const [hoursSaved, setHoursSaved] = useState(167);
+  const [calculatedSavings, setCalculatedSavings] = useState(3333);
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef(null);
+
+  const recalc = (hourly, minutes) => {
+    const h = Math.max(0, parseFloat(hourly) || 0);
+    const m = Math.max(0, parseFloat(minutes) || 0);
+    const totalMinutes = DEFAULT_APPLICATIONS * m;
+    const hrs = totalMinutes / 60;
+    const savings = hrs * h;
+    setHoursSaved(Math.round(hrs));
+    setCalculatedSavings(Math.round(savings));
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -34,16 +47,19 @@ export default function ROICalculator() {
   }, []);
 
   const handleCalculate = () => {
-    // Calculate savings: hourly rate * hours saved
-    const savings = hourlyRate * hoursSaved;
-    setCalculatedSavings(savings);
+    recalc(hourlyIncome, minutesPerJob);
   };
 
-  const handleInputChange = (e) => {
-    const value = parseFloat(e.target.value) || 0;
-    setHourlyRate(value);
-    // Auto-calculate on input change
-    setCalculatedSavings(value * hoursSaved);
+  const handleHourlyChange = (e) => {
+    const raw = e.target.value;
+    setHourlyIncome(raw);
+    recalc(raw, minutesPerJob);
+  };
+
+  const handleMinutesChange = (e) => {
+    const raw = e.target.value;
+    setMinutesPerJob(raw);
+    recalc(hourlyIncome, raw);
   };
 
   return (
@@ -140,7 +156,7 @@ export default function ROICalculator() {
               Don't let job hunting become a second unpaid job. Calculate your potential ROI by delegating the grunt work to us.
             </Typography>
 
-            {/* Input Field */}
+            {/* Input: Hourly income */}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <Typography
                 component="label"
@@ -151,26 +167,21 @@ export default function ROICalculator() {
                   fontFamily: 'inherit',
                 }}
               >
-                Your Hourly Rate Estimate ($)
+                Your hourly income ($)
               </Typography>
               <TextField
                 type="number"
-                value={hourlyRate}
-                onChange={handleInputChange}
-                placeholder="75"
+                value={hourlyIncome}
+                onChange={handleHourlyChange}
+                placeholder="20"
+                inputProps={{ min: 0, step: 1 }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     backgroundColor: '#FFFFFF',
                     borderRadius: '0.5rem',
-                    '& fieldset': {
-                      borderColor: '#E5E7EB',
-                    },
-                    '&:hover fieldset': {
-                      borderColor: '#D1D5DB',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#3B82F6',
-                    },
+                    '& fieldset': { borderColor: '#E5E7EB' },
+                    '&:hover fieldset': { borderColor: '#D1D5DB' },
+                    '&.Mui-focused fieldset': { borderColor: '#3B82F6' },
                   },
                   '& .MuiInputBase-input': {
                     fontSize: { xs: '1rem', md: '1.125rem' },
@@ -180,15 +191,51 @@ export default function ROICalculator() {
                 }}
                 InputProps={{
                   startAdornment: (
-                    <Box
-                      component="span"
-                      sx={{
-                        color: '#6B7280',
-                        marginRight: '0.5rem',
-                        fontSize: { xs: '1rem', md: '1.125rem' },
-                      }}
-                    >
+                    <Box component="span" sx={{ color: '#6B7280', marginRight: '0.5rem', fontSize: { xs: '1rem', md: '1.125rem' } }}>
                       $
+                    </Box>
+                  ),
+                }}
+              />
+            </Box>
+
+            {/* Input: Minutes per job */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <Typography
+                component="label"
+                sx={{
+                  fontSize: { xs: '0.875rem', md: '1rem' },
+                  fontWeight: 500,
+                  color: '#374151',
+                  fontFamily: 'inherit',
+                }}
+              >
+                Minutes per job application
+              </Typography>
+              <TextField
+                type="number"
+                value={minutesPerJob}
+                onChange={handleMinutesChange}
+                placeholder="10"
+                inputProps={{ min: 0, step: 1 }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '0.5rem',
+                    '& fieldset': { borderColor: '#E5E7EB' },
+                    '&:hover fieldset': { borderColor: '#D1D5DB' },
+                    '&.Mui-focused fieldset': { borderColor: '#3B82F6' },
+                  },
+                  '& .MuiInputBase-input': {
+                    fontSize: { xs: '1rem', md: '1.125rem' },
+                    padding: { xs: '0.75rem', md: '0.875rem' },
+                    fontFamily: 'inherit',
+                  },
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <Box component="span" sx={{ color: '#6B7280', marginLeft: '0.5rem', fontSize: { xs: '1rem', md: '1.125rem' } }}>
+                      min
                     </Box>
                   ),
                 }}
@@ -338,7 +385,7 @@ export default function ROICalculator() {
                     fontFamily: 'inherit',
                   }}
                 >
-                  {hoursSaved}+ Hours Saved
+                  {hoursSaved.toLocaleString()}+ Hours Saved
                 </Typography>
               </Box>
 
@@ -352,7 +399,7 @@ export default function ROICalculator() {
                   lineHeight: 1.5,
                 }}
               >
-                Based on average application time of {hoursSaved} hours at your entered rate.
+                Based on {DEFAULT_APPLICATIONS.toLocaleString()} applications at {minutesPerJob || '0'} min per job and ${hourlyIncome || '0'}/hr.
               </Typography>
             </Box>
           </Box>

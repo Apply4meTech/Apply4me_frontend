@@ -137,7 +137,7 @@ const Header = () => {
                   style={{
                     color: isActive ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)',
                     textDecoration: 'none',
-                    fontSize: isActive ? '1rem' : '0.875rem',
+                    fontSize: isActive ? '1.125rem' : '1.0625rem',
                     fontWeight: isActive ? 700 : 500,
                     transition: 'color 0.3s ease',
                   }}
@@ -302,7 +302,7 @@ const Header = () => {
                   style={{
                     color: isActive ? '#2563EB' : '#FFFFFF',
                     textDecoration: 'none',
-                    fontSize: isMobile ? '0.875rem' : '1rem',
+                    fontSize: isMobile ? '1.0625rem' : '1.125rem',
                     fontWeight: isActive ? 700 : 400,
                     transition: 'opacity 0.3s ease',
                     padding: '0.5rem 0',

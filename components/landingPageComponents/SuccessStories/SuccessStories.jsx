@@ -7,26 +7,21 @@ import CompanyLogos from '../../CompanyLogos';
 const testimonials = [
   {
     id: 1,
-    quote: "I got 5 interviews in the first week without lifting a finger. The salary negotiation help alone paid for the service 10x over.",
-    name: "Sarah Jenkins",
-    title: "Product Manager at TechCo",
-    avatarColor: "#F5E6D3",
+    title: "Not a recruitment agency",
+    points: ["We work for you", "Not employers", "No placement promises"],
   },
   {
     id: 2,
-    quote: "Honestly, I was skeptical. But after they revamped my resume and started applying, my inbox exploded. Best investment ever.",
-    name: "Michael T.",
-    title: "Senior Developer",
-    avatarColor: "#D1FAE5",
+    title: "Not an AI apply tool",
+    points: ["No bots", "No mass submissions", "No shortcuts"],
   },
   {
     id: 3,
-    quote: "The team at APPLY FOR ME are wizards. They understood exactly what I wanted and found roles I wouldn't have found myself.",
-    name: "Elena Rodriguez",
-    title: "Marketing Director",
-    avatarColor: "#1F2937",
+    title: "Built for Australia",
+    points: ["Local job boards", "Local roles", "Australian market focus"],
   },
 ];
+
 
 export default function SuccessStories() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -156,7 +151,7 @@ export default function SuccessStories() {
             transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
           }}
         >
-          Success Stories
+          How We Are Different
         </Typography>
 
         {/* Slider Container */}
@@ -193,145 +188,69 @@ export default function SuccessStories() {
               },
             }}
           >
-            {testimonials.map((testimonial, index) => (
-              <Box
-                key={testimonial.id}
-                sx={{
-                  minWidth: { xs: '85%', sm: '70%', md: 'calc(33.333% - 1.33rem)', lg: 'calc(33.333% - 1.33rem)' },
-                  maxWidth: { xs: '85%', sm: '70%', md: 'calc(33.333% - 1.33rem)', lg: 'calc(33.333% - 1.33rem)' },
-                  width: { md: 'calc(33.333% - 1.33rem)' },
-                  scrollSnapAlign: { xs: 'start', md: 'none' },
-                  flexShrink: 0,
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: '1rem',
-                  padding: { xs: '1.5rem', md: '2rem' },
-                  boxShadow: '0 0.125rem 0.5rem rgba(0, 0, 0, 0.1)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '1rem',
-                  transition: 'transform 0.4s ease, box-shadow 0.4s ease',
-                  '&:hover': {
-                    transform: 'translateY(-0.5rem)',
-                    boxShadow: '0 0.5rem 1.5rem rgba(0, 0, 0, 0.15)',
-                  },
-                }}
-              >
-              {/* Star Rating */}
-              <Box
-                sx={{
-                  display: 'flex',
-                  gap: '0.25rem',
-                }}
-              >
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <svg
-                    key={star}
-                    width="1.25rem"
-                    height="1.25rem"
-                    viewBox="0 0 24 24"
-                    fill="#FBBF24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                  </svg>
-                ))}
-              </Box>
+          {testimonials.map((testimonial) => (
+  <Box
+    key={testimonial.id}
+    sx={{
+      minWidth: {
+        xs: "85%",
+        sm: "70%",
+        md: "calc(33.333% - 1.33rem)",
+      },
+      flexShrink: 0,
+      backgroundColor: "#FFFFFF",
+      borderRadius: "1.25rem",
+      padding: { xs: "1.75rem", md: "2.25rem" },
+      boxShadow: "0 0.25rem 1rem rgba(0,0,0,0.08)",
+      transition: "all 0.35s ease",
+      scrollSnapAlign: { xs: "start", md: "none" },
 
-              {/* Testimonial Quote */}
-              <Typography
-                component="p"
-                sx={{
-                  fontSize: '1.125rem',
-                  color: '#374151',
-                  fontStyle: 'italic',
-                  lineHeight: 1.75,
-                  fontFamily: 'inherit',
-                  flex: 1,
-                }}
-              >
-                "{testimonial.quote}"
-              </Typography>
+      "&:hover": {
+        transform: "translateY(-8px)",
+        boxShadow: "0 0.75rem 2rem rgba(0,0,0,0.12)",
+      },
+    }}
+  >
+    {/* Title */}
+    <Typography
+      sx={{
+        fontSize: { xs: "1.25rem", md: "1.4rem" },
+        fontWeight: 800,
+        color: "#111827",
+        marginBottom: "1.25rem",
+      }}
+    >
+      {testimonial.title}
+    </Typography>
 
-              {/* Reviewer Info */}
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem',
-                  marginTop: '0.5rem',
-                }}
-              >
-                {/* Avatar */}
-                <Box
-                  sx={{
-                    width: { xs: '2.5rem', md: '3rem' },
-                    height: { xs: '2.5rem', md: '3rem' },
-                    borderRadius: '50%',
-                    backgroundColor: testimonial.avatarColor,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  {testimonial.avatarColor === '#1F2937' ? (
-                    <svg
-                      width="60%"
-                      height="60%"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
-                        fill="#FFFFFF"
-                      />
-                      <path
-                        d="M12 14C7.58172 14 4 17.5817 4 22H20C20 17.5817 16.4183 14 12 14Z"
-                        fill="#FFFFFF"
-                      />
-                    </svg>
-                  ) : (
-                    <Box
-                      sx={{
-                        width: '60%',
-                        height: '60%',
-                        borderRadius: '50%',
-                        backgroundColor: testimonial.avatarColor === '#F5E6D3' ? '#D97706' : '#059669',
-                        opacity: 0.3,
-                      }}
-                    />
-                  )}
-                </Box>
+    {/* Bullet Points */}
+    <Box
+      component="ul"
+      sx={{
+        paddingLeft: "1.25rem",
+        margin: 0,
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.75rem",
+      }}
+    >
+      {testimonial.points.map((point, i) => (
+        <Typography
+          key={i}
+          component="li"
+          sx={{
+            fontSize: "1rem",
+            color: "#374151",
+            lineHeight: 1.6,
+          }}
+        >
+          {point}
+        </Typography>
+      ))}
+    </Box>
+  </Box>
+))}
 
-                {/* Name and Title */}
-                <Box>
-                  <Typography
-                    component="div"
-                    sx={{
-                      fontSize: { xs: '0.875rem', md: '1rem' },
-                      fontWeight: 700,
-                      color: '#1F2937',
-                      fontFamily: 'inherit',
-                      marginBottom: '0.25rem',
-                    }}
-                  >
-                    {testimonial.name}
-                  </Typography>
-                  <Typography
-                    component="div"
-                    sx={{
-                      fontSize: { xs: '0.75rem', md: '0.875rem' },
-                      color: '#6B7280',
-                      fontFamily: 'inherit',
-                    }}
-                  >
-                    {testimonial.title}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-            ))}
           </Box>
         </Box>
 

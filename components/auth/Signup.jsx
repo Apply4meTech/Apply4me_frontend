@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Typography, TextField, Button, Checkbox, FormHelperText, useMediaQuery, CircularProgress, Alert } from '@mui/material';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -64,6 +64,14 @@ export default function Signup() {
   const dispatch = useDispatch();
   const { loading, error: authError } = useSelector((state) => state.auth);
 
+  // Prevent body scroll on real mobile so the form stays fixed like in inspector
+  useEffect(() => {
+    if (!isMobileOrTablet) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [isMobileOrTablet]);
+
   const handleSignup = async (values) => {
     dispatch(clearError());
     dispatch(setLoading(true));
@@ -99,21 +107,27 @@ export default function Signup() {
     }
   };
 
-  // Mobile/Tablet View - Card with gradient background
+  // Mobile/Tablet View - Card with gradient background (fixed viewport so no page scroll on real mobile)
   if (isMobileOrTablet) {
     return (
       <Box
         sx={{
-          minHeight: '100vh',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
           width: '100%',
+          height: '100%',
+          minHeight: '100dvh', // real mobile: use dynamic viewport so no extra scroll (fallback: 100vh)
           bgcolor: '#1E293B',
-          position: 'relative',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           padding: { xs: 2, sm: 3 },
           fontFamily: '"Manrope", sans-serif',
-          overflow: 'hidden',
+          overflow: 'auto',
+          WebkitOverflowScrolling: 'touch',
         }}
       >
         {/* Decorative abstract circles */}
@@ -481,7 +495,7 @@ export default function Signup() {
           </Box>
 
           {/* Glass Stats */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+          {/* <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
             <Box
               sx={{
                 display: 'flex',
@@ -528,11 +542,11 @@ export default function Signup() {
               <Typography sx={{ color: 'white', fontSize: '1.875rem', fontWeight: 700 }}>40h</Typography>
               <Typography sx={{ color: '#cbd5e1', fontSize: '0.875rem' }}>Per candidate</Typography>
             </Box>
-          </Box>
+          </Box> */}
         </Box>
 
         {/* Bottom Content: Testimonial */}
-        <Box sx={{ position: 'relative', zIndex: 10, mt: 5 }}>
+        {/* <Box sx={{ position: 'relative', zIndex: 10, mt: 5 }}>
           <Box
             sx={{
               display: 'flex',
@@ -569,7 +583,7 @@ export default function Signup() {
               </Box>
             </Box>
           </Box>
-        </Box>
+        </Box> */}
       </Box>
 
       {/* Right Panel: Sign Up Form */}
@@ -774,7 +788,7 @@ export default function Signup() {
         {/* Simple Footer Info */}
         <Box sx={{ py: 3, textAlign: 'center' }}>
           <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-            © 2026 Apply For Me Inc. All rights reserved.
+            © 2026 Apply For Me. All rights reserved.
           </Typography>
         </Box>
       </Box>

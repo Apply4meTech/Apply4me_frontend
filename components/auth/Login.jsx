@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, TextField, Button, InputAdornment, IconButton, Link as MuiLink, useMediaQuery, useTheme, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -72,6 +72,14 @@ export default function Login() {
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
   const [forgotPasswordError, setForgotPasswordError] = useState(null);
   const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState(false);
+
+  // Prevent body scroll on real mobile so the form stays fixed like in inspector
+  useEffect(() => {
+    if (!isMobileOrTablet) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [isMobileOrTablet]);
 
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
@@ -157,20 +165,26 @@ export default function Login() {
     }
   };
 
-  // Mobile/Tablet View - Card with gradient background
+  // Mobile/Tablet View - Card with gradient background (fixed viewport so no page scroll on real mobile)
   const mobileView = isMobileOrTablet ? (
       <Box
         sx={{
-          minHeight: '100vh',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
           width: '100%',
+          height: '100%',
+          minHeight: '100dvh', // real mobile: use dynamic viewport so no extra scroll (fallback: 100vh)
           bgcolor: '#1E293B',
-          position: 'relative',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           padding: { xs: 2, sm: 3 },
           fontFamily: '"Manrope", sans-serif',
-          overflow: 'hidden',
+          overflow: 'auto',
+          WebkitOverflowScrolling: 'touch',
         }}
       >
         {/* Decorative abstract circles */}
@@ -532,7 +546,7 @@ export default function Login() {
           </Typography>
 
           {/* Testimonial / Social Proof Pill */}
-          <Box
+          {/* <Box
             sx={{
               mt: 4,
               display: 'flex',
@@ -574,13 +588,13 @@ export default function Login() {
                 Join the top 1% of applicants
               </Typography>
             </Box>
-          </Box>
+          </Box> */}
         </Box>
 
         {/* Footer Copy */}
         <Box sx={{ position: 'relative', zIndex: 10 }}>
           <Typography sx={{ color: '#94a3b8', fontSize: '0.875rem' }}>
-            © 2026 Apply For Me Inc.
+            © 2026 Apply For Me
           </Typography>
         </Box>
       </Box>
