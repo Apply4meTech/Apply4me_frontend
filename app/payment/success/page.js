@@ -1,23 +1,61 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { Box, Container, Typography, Button } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Box, Container, Typography, Button, CircularProgress } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useSelector } from 'react-redux';
 import MainLayout from '../../../components/layouts/MainLayout';
 import Link from 'next/link';
+import stripeService from '../../../utils/stripeService';
 
 export default function PaymentSuccess() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { token } = useSelector((state) => state.auth);
+  const [verifying, setVerifying] = useState(true);
+  const [verified, setVerified] = useState(false);
 
   useEffect(() => {
-    // Auto-redirect to dashboard after 5 seconds
-    const timer = setTimeout(() => {
-      router.push('/dashboard');
-    }, 5000);
+    const verifyPayment = async () => {
+      const paymentIntentId = searchParams.get('payment_intent');
+      
+      if (!paymentIntentId || !token) {
+        setVerifying(false);
+        return;
+      }
 
-    return () => clearTimeout(timer);
-  }, [router]);
+      try {
+        const verifyResult = await stripeService.verifyPayment(
+          { payment_intent_id: paymentIntentId },
+          token
+        );
+
+        if (verifyResult.success) {
+          setVerified(true);
+        } else {
+          console.error('Payment verification failed:', verifyResult.message);
+        }
+      } catch (error) {
+        console.error('Payment verification error:', error);
+      } finally {
+        setVerifying(false);
+      }
+    };
+
+    verifyPayment();
+  }, [searchParams, token]);
+
+  useEffect(() => {
+    if (!verifying && verified) {
+      // Auto-redirect to dashboard after 5 seconds
+      const timer = setTimeout(() => {
+        router.push('/dashboard');
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [verifying, verified, router]);
 
   return (
     <MainLayout>
@@ -60,17 +98,32 @@ export default function PaymentSuccess() {
             >
               Payment Successful!
             </Typography>
-            <Typography
-              sx={{
-                fontSize: '1rem',
-                color: '#64748B',
-                marginBottom: '2rem',
-                fontFamily: 'inherit',
-                lineHeight: 1.6,
-              }}
-            >
-              Thank you for your subscription. Your plan has been activated and you can now start using all the features.
-            </Typography>
+            {verifying ? (
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '2rem' }}>
+                <CircularProgress sx={{ marginBottom: '1rem' }} />
+                <Typography
+                  sx={{
+                    fontSize: '1rem',
+                    color: '#64748B',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  Verifying your payment...
+                </Typography>
+              </Box>
+            ) : (
+              <Typography
+                sx={{
+                  fontSize: '1rem',
+                  color: '#64748B',
+                  marginBottom: '2rem',
+                  fontFamily: 'inherit',
+                  lineHeight: 1.6,
+                }}
+              >
+                Thank you for your subscription. Your plan has been activated and you can now start using all the features.
+              </Typography>
+            )}
             <Box
               sx={{
                 display: 'flex',
@@ -119,16 +172,18 @@ export default function PaymentSuccess() {
                 View Plans
               </Button>
             </Box>
-            <Typography
-              sx={{
-                fontSize: '0.875rem',
-                color: '#94A3B8',
-                marginTop: '2rem',
-                fontFamily: 'inherit',
-              }}
-            >
-              Redirecting to dashboard in 5 seconds...
-            </Typography>
+            {!verifying && verified && (
+              <Typography
+                sx={{
+                  fontSize: '0.875rem',
+                  color: '#94A3B8',
+                  marginTop: '2rem',
+                  fontFamily: 'inherit',
+                }}
+              >
+                Redirecting to dashboard in 5 seconds...
+              </Typography>
+            )}
           </Box>
         </Container>
       </Box>

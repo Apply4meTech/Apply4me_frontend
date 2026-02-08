@@ -5,27 +5,27 @@ const getApiUrl = () => {
   return url.endsWith('/api') ? url.slice(0, -4) : url;
 };
 
-const RAZORPAY_API_BASE = getApiUrl();
+const STRIPE_API_BASE = getApiUrl();
 
 /**
- * Razorpay Service for frontend integration
- * Handles all Razorpay API calls and payment processing
+ * Stripe Service for frontend integration
+ * Handles all Stripe API calls and payment processing
  */
-class RazorpayService {
+class StripeService {
   constructor() {
-    this.apiBase = RAZORPAY_API_BASE;
+    this.apiBase = STRIPE_API_BASE;
   }
 
   /**
-   * Create a Razorpay order
+   * Create a Stripe payment intent
    * @param {Object} orderData - Order details
    * @param {string} token - Authentication token
-   * @returns {Promise<Object>} Order creation response
+   * @returns {Promise<Object>} Payment intent creation response
    */
-  async createOrder(orderData, token) {
+  async createPaymentIntent(orderData, token) {
     try {
       const response = await fetch(
-        `${this.apiBase}/api/payments/razorpay/create-order`,
+        `${this.apiBase}/api/payments/stripe/create-payment-intent`,
         {
           method: 'POST',
           headers: {
@@ -41,7 +41,7 @@ class RazorpayService {
       if (!response.ok) {
         return {
           success: false,
-          message: data.message || 'Failed to create order',
+          message: data.message || 'Failed to create payment intent',
           error: data || 'Unknown error'
         };
       }
@@ -49,21 +49,21 @@ class RazorpayService {
       return {
         success: true,
         data: data.data || data,
-        key_id: data.data?.key_id || data.key_id,
-        message: data.message || 'Order created successfully',
+        client_secret: data.data?.client_secret || data.client_secret,
+        message: data.message || 'Payment intent created successfully',
       };
     } catch (error) {
-      console.error('Error creating Razorpay order:', error);
+      console.error('Error creating Stripe payment intent:', error);
       return {
         success: false,
-        message: 'Failed to create order',
+        message: 'Failed to create payment intent',
         error: error.message
       };
     }
   }
 
   /**
-   * Verify payment signature
+   * Verify payment
    * @param {Object} paymentData - Payment verification data
    * @param {string} token - Authentication token
    * @returns {Promise<Object>} Verification response
@@ -71,7 +71,7 @@ class RazorpayService {
   async verifyPayment(paymentData, token) {
     try {
       const response = await fetch(
-        `${this.apiBase}/api/payments/razorpay/verify`,
+        `${this.apiBase}/api/payments/stripe/verify`,
         {
           method: 'POST',
           headers: {
@@ -109,48 +109,9 @@ class RazorpayService {
   }
 
   /**
-   * Load Razorpay SDK dynamically
-   * @returns {Promise<void>}
-   */
-  loadRazorpaySDK() {
-    return new Promise((resolve, reject) => {
-      if (typeof window !== 'undefined') {
-        if (window.Razorpay) {
-          resolve();
-          return;
-        }
-
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error('Failed to load Razorpay SDK'));
-        document.body.appendChild(script);
-      } else {
-        reject(new Error('Window object not available'));
-      }
-    });
-  }
-
-  /**
-   * Initialize Razorpay payment
-   * @param {Object} options - Razorpay options
-   * @returns {Promise<Object>} Razorpay instance
-   */
-  initializeRazorpay(options) {
-    return new Promise((resolve, reject) => {
-      if (typeof window !== 'undefined' && window.Razorpay) {
-        const rzp = new window.Razorpay(options);
-        resolve(rzp);
-      } else {
-        reject(new Error('Razorpay SDK not loaded'));
-      }
-    });
-  }
-
-  /**
-   * Format amount for Razorpay (convert to paise)
-   * @param {number} amount - Amount in rupees
-   * @returns {number} Amount in paise
+   * Format amount for Stripe (convert to cents)
+   * @param {number} amount - Amount in dollars
+   * @returns {number} Amount in cents
    */
   formatAmount(amount) {
     return Math.round(amount * 100);
@@ -164,16 +125,8 @@ class RazorpayService {
   validatePaymentData(paymentData) {
     const errors = [];
 
-    if (!paymentData.razorpay_order_id) {
-      errors.push('Order ID is required');
-    }
-
-    if (!paymentData.razorpay_payment_id) {
-      errors.push('Payment ID is required');
-    }
-
-    if (!paymentData.razorpay_signature) {
-      errors.push('Signature is required');
+    if (!paymentData.payment_intent_id) {
+      errors.push('Payment intent ID is required');
     }
 
     return {
@@ -184,6 +137,6 @@ class RazorpayService {
 }
 
 // Create and export a singleton instance
-const razorpayService = new RazorpayService();
-export default razorpayService;
+const stripeService = new StripeService();
+export default stripeService;
 

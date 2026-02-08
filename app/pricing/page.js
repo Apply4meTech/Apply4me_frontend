@@ -12,13 +12,15 @@ import CompanyLogos from '../../components/CompanyLogos';
 import { useScrollAnimation } from '../../hooks/useScrollAnimation';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
-import razorpayService from '../../utils/razorpayService';
+import { loadStripe } from '@stripe/stripe-js';
+import stripeService from '../../utils/stripeService';
 
 export default function Pricing() {
   const [billingPeriod, setBillingPeriod] = useState('monthly');
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [processingPlan, setProcessingPlan] = useState(null);
+  const [stripePromise, setStripePromise] = useState(null);
   
   // Redux and Router
   const { token, user, isAuthenticated } = useSelector((state) => state.auth);
@@ -38,11 +40,12 @@ export default function Pricing() {
     }
   };
 
-  // Load Razorpay SDK on component mount
+  // Load Stripe on component mount
   useEffect(() => {
-    razorpayService.loadRazorpaySDK().catch((error) => {
-      console.error('Failed to load Razorpay SDK:', error);
-    });
+    const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51SxLXK2Rp5kvhBdCpK4srBsylbANEUbN5O8BaP55FSJW57A6ZSXI3F2sWJx8Z3qaAqVwL4GIQvxzJBrNECMc5lpF00CJBNvuG2';
+    if (publishableKey) {
+      setStripePromise(loadStripe(publishableKey));
+    }
   }, []);
 
   // Handle payment initiation
@@ -50,6 +53,11 @@ export default function Pricing() {
     // Check if user is authenticated
     if (!isAuthenticated || !token) {
       router.push('/login?redirect=/pricing');
+      return;
+    }
+
+    if (!stripePromise) {
+      alert('Stripe is not loaded. Please refresh the page and try again.');
       return;
     }
 
@@ -71,72 +79,28 @@ export default function Pricing() {
         billingPeriod: billingPeriod
       };
 
-      // Create Razorpay order
-      const orderResult = await razorpayService.createOrder(orderData, token);
+      // Create Stripe payment intent
+      const paymentIntentResult = await stripeService.createPaymentIntent(orderData, token);
 
-      if (!orderResult.success) {
-        alert(orderResult.message || 'Failed to create order. Please try again.');
+      if (!paymentIntentResult.success) {
+        alert(paymentIntentResult.message || 'Failed to create payment intent. Please try again.');
         setProcessingPayment(false);
         setProcessingPlan(null);
         return;
       }
 
-      // Load Razorpay SDK if not already loaded
-      await razorpayService.loadRazorpaySDK();
+      const paymentIntentId = paymentIntentResult.data.payment_intent_id;
+      const clientSecret = paymentIntentResult.client_secret;
 
-      // Initialize Razorpay payment
-      const options = {
-        key: orderResult.key_id,
-        amount: orderResult.data.amount,
-        currency: orderResult.data.currency,
-        name: 'ApplyForMe',
-        description: `${plan.name} Plan - ${billingPeriod === 'monthly' ? 'Monthly' : 'Quarterly'} Subscription`,
-        order_id: orderResult.data.order_id,
-        handler: async function (response) {
-          // Verify payment on backend
-          try {
-            const verificationData = {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature
-            };
+      if (!clientSecret || !paymentIntentId) {
+        alert('Failed to initialize payment. Please try again.');
+        setProcessingPayment(false);
+        setProcessingPlan(null);
+        return;
+      }
 
-            const verifyResult = await razorpayService.verifyPayment(verificationData, token);
-
-            if (verifyResult.success) {
-              // Redirect to success page
-              router.push(verifyResult.redirect_url || '/payment/success');
-            } else {
-              // Redirect to failure page
-              router.push('/payment/failure');
-            }
-          } catch (error) {
-            console.error('Payment verification error:', error);
-            router.push('/payment/failure');
-          } finally {
-            setProcessingPayment(false);
-            setProcessingPlan(null);
-          }
-        },
-        prefill: {
-          name: user.name || '',
-          email: user.email || '',
-          contact: user.phone || ''
-        },
-        theme: {
-          color: '#2563EB'
-        },
-        modal: {
-          ondismiss: function() {
-            setProcessingPayment(false);
-            setProcessingPlan(null);
-          }
-        }
-      };
-
-      // Open Razorpay checkout
-      const rzp = await razorpayService.initializeRazorpay(options);
-      rzp.open();
+      // Redirect to payment page with payment intent details
+      router.push(`/payment/checkout?payment_intent=${paymentIntentId}&client_secret=${encodeURIComponent(clientSecret)}`);
 
     } catch (error) {
       console.error('Error initiating payment:', error);
