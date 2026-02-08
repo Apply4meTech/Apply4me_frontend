@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { Box, Container, Typography, Button, CircularProgress } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -9,7 +9,7 @@ import MainLayout from '../../../components/layouts/MainLayout';
 import Link from 'next/link';
 import stripeService from '../../../utils/stripeService';
 
-export default function PaymentSuccess() {
+function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { token } = useSelector((state) => state.auth);
@@ -188,6 +188,30 @@ export default function PaymentSuccess() {
         </Container>
       </Box>
     </MainLayout>
+  );
+}
+
+export default function PaymentSuccess() {
+  return (
+    <Suspense
+      fallback={
+        <MainLayout>
+          <Box
+            sx={{
+              minHeight: '100vh',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#F8FAFC',
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        </MainLayout>
+      }
+    >
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }
 
