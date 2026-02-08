@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { Box, Container, Typography, Button, CircularProgress, Dialog, DialogContent } from '@mui/material';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -132,7 +132,7 @@ function CheckoutForm({ clientSecret, paymentIntentId }) {
   );
 }
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [clientSecret, setClientSecret] = useState(null);
@@ -229,6 +229,32 @@ export default function CheckoutPage() {
         </Container>
       </Box>
     </MainLayout>
+  );
+}
+
+function CheckoutFallback() {
+  return (
+    <MainLayout>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#F8FAFC',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    </MainLayout>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<CheckoutFallback />}>
+      <CheckoutContent />
+    </Suspense>
   );
 }
 
