@@ -43,7 +43,7 @@ function CheckoutForm({ clientSecret, paymentIntentId }) {
         elements,
         clientSecret,
         confirmParams: {
-          return_url: `${window.location.origin}/payment/success?payment_intent=${paymentIntentId}`,
+          return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success?payment_intent=${paymentIntentId}`,
         },
         redirect: 'if_required',
       });
