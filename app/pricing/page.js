@@ -1178,7 +1178,7 @@ export default function Pricing() {
                 mx: 'auto',
               }}
             >
-              Join thousands of professionals who have accelerated their careers with our premium service.
+              Let us handle the applications so you can focus on interviews.
             </Typography>
             <Button
               sx={{

@@ -90,14 +90,14 @@ export default function Home() {
                 transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
               }}
             >
-              We apply to jobs for you — so you can{' '}
+              Stop spending hours {""}
               <Box
                 component="span"
                 sx={{
                   color: '#60A5FA',
                 }}
               >
-                focus on interviews.
+                applying to jobs.
               </Box>
             </Typography>
 
@@ -116,7 +116,7 @@ export default function Home() {
                 transition: 'opacity 0.8s ease-out 0.2s, transform 0.8s ease-out 0.2s',
               }}
             >
-              Finding and applying to jobs is time‑consuming and exhausting. ApplyForMe saves you time by applying to relevant roles on your behalf — manually, accurately, and transparently.
+              We handle your job applications manually using real people so you can focus on interviews preparation and life.
             </Typography>
 
             
@@ -162,6 +162,7 @@ export default function Home() {
                       Start Application
                     </Button>
                   </Link>
+                  <Link href="/pricing" style={{ textDecoration: 'none' }}>
                   <Button 
                     variant="secondary"
                     sx={{
@@ -172,8 +173,9 @@ export default function Home() {
                       transition: 'all 0.3s ease',
                     }}
                   >
-                    Book Strategy Call
+                    View Pricing
                   </Button>
+                  </Link>
                 </>
               )}
             </Box>
@@ -191,53 +193,15 @@ export default function Home() {
               }}
             >
               
-              <Box
-                sx={{
-                  display: 'flex',
-                  gap: '-0.5rem',
-                  marginRight: '0.5rem',
-                }}
-              >
-                {[1, 2, 3].map((index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      width: { xs: '2rem', md: '2.5rem' },
-                      height: { xs: '2rem', md: '2.5rem' },
-                      borderRadius: '50%',
-                      backgroundColor: index === 1 ? '#60A5FA' : '#FFFFFF',
-                      border: '0.125rem solid #FFFFFF',
-                      marginLeft: index > 1 ? '-0.5rem' : '0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      opacity: heroVisible ? 1 : 0,
-                      transform: heroVisible ? 'translateX(0) scale(1)' : 'translateX(-10px) scale(0.8)',
-                      transition: `opacity 0.6s ease-out ${0.7 + index * 0.1}s, transform 0.6s ease-out ${0.7 + index * 0.1}s`,
-                    }}
-                  >
-                    {index === 1 && (
-                      <Box
-                        sx={{
-                          width: '60%',
-                          height: '60%',
-                          backgroundColor: '#FFFFFF',
-                          borderRadius: '50%',
-                        }}
-                      />
-                    )}
-                  </Box>
-                ))}
-              </Box>
               <Typography
                 component="span"
                 sx={{
                   color: '#FFFFFF',
-                  fontSize: { xs: '0.875rem', md: '1rem' },
+                  fontSize: "22px",
                   fontFamily: 'inherit',
                 }}
               >
-                Trusted by 2,000+ Job Seekers
+                Built for Australian job seekers.
               </Typography>
             </Box>
           </Container>
@@ -252,8 +216,7 @@ export default function Home() {
           zIndex: 1,
         }}>
           <JobSearchingCard />
-          {/* Statistics Section */}
-          <StatisticsSection />
+          {/* <StatisticsSection /> */}
         </Box>
 
         <Box sx={{  

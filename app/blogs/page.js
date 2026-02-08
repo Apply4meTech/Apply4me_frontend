@@ -16,7 +16,8 @@ import {
   Stack,
   Pagination,
   Button,
-  ButtonGroup
+  ButtonGroup,
+  Skeleton
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
@@ -35,6 +36,43 @@ const getApiUrl = () => {
 };
 
 const API_URL = getApiUrl();
+
+const BlogSkeleton = () => {
+  return (
+    <Card
+      sx={{
+        width: '100%',
+        height: '100%',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+      }}
+    >
+      {/* Image Skeleton */}
+      <Skeleton variant="rectangular" height={240} />
+
+      <CardContent sx={{ p: 3 }}>
+        {/* Tag */}
+        <Skeleton variant="rounded" width={80} height={26} sx={{ mb: 2 }} />
+
+        {/* Title */}
+        <Skeleton variant="text" height={30} width="90%" />
+
+        {/* Description */}
+        <Skeleton variant="text" height={20} width="100%" />
+        <Skeleton variant="text" height={20} width="95%" />
+        <Skeleton variant="text" height={20} width="85%" />
+
+        {/* Footer */}
+        <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+          <Skeleton variant="text" width={80} />
+          <Skeleton variant="text" width={100} />
+        </Box>
+      </CardContent>
+    </Card>
+  );
+};
+
 
 export default function BlogsPage() {
   const router = useRouter();
@@ -188,26 +226,6 @@ export default function BlogsPage() {
                 mb: 2
               }}
             >
-              <Button
-                variant={filter === 'all' ? 'contained' : 'outlined'}
-                onClick={() => handleFilterChange('all')}
-                sx={{
-                  textTransform: 'none',
-                  borderRadius: '8px',
-                  px: 3,
-                  py: 1,
-                  fontWeight: 500,
-                  bgcolor: filter === 'all' ? '#000' : 'transparent',
-                  color: filter === 'all' ? '#fff' : '#000',
-                  borderColor: '#000',
-                  '&:hover': {
-                    bgcolor: filter === 'all' ? '#333' : 'rgba(0, 0, 0, 0.04)',
-                    borderColor: '#000'
-                  }
-                }}
-              >
-                All Blogs
-              </Button>
               
               {isAuthenticated && (
                 <>
@@ -260,10 +278,23 @@ export default function BlogsPage() {
           </Box>
 
           {loading && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-              <CircularProgress />
-            </Box>
-          )}
+  <Box
+    sx={{
+      display: 'grid',
+      gridTemplateColumns: {
+        xs: '1fr',
+        sm: 'repeat(2, 1fr)',
+        lg: 'repeat(3, 1fr)'
+      },
+      gap: { xs: 2, sm: 3 },
+      mb: 4
+    }}
+  >
+    {Array.from(new Array(6)).map((_, index) => (
+      <BlogSkeleton key={index} />
+    ))}
+  </Box>
+)}
 
           {error && (
             <Alert severity="error" sx={{ mb: 4 }}>

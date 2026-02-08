@@ -78,7 +78,7 @@ export default function CTASection() {
             transition: 'opacity 0.8s ease-out 0.4s, transform 0.8s ease-out 0.4s',
           }}
         >
-          Join thousands of professionals who have accelerated their careers with our premium service.
+          Let us handle the applications so you can focus on interviews.
         </Typography>
 
         {/* CTA Button */}

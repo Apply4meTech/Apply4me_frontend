@@ -17,7 +17,8 @@ import {
   TextField,
   Button,
   Snackbar,
-  Tooltip
+  Tooltip,
+  Skeleton
 } from '@mui/material';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -41,6 +42,62 @@ const getApiUrl = () => {
 };
 
 const API_URL = getApiUrl();
+
+const BlogDetailSkeleton = () => {
+  return (
+    <MainLayout>
+      <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#fff', py: 6 }}>
+        <Container maxWidth="md">
+          {/* Tag Skeleton */}
+          <Skeleton variant="rounded" width={100} height={32} sx={{ mb: 3 }} />
+
+          {/* Title Skeleton */}
+          <Skeleton variant="text" height={60} width="80%" sx={{ mx: "auto" }} />
+
+          {/* Description Skeleton */}
+          <Skeleton variant="text" height={25} width="90%" sx={{ mx: "auto" }} />
+          <Skeleton variant="text" height={25} width="70%" sx={{ mx: "auto", mb: 4 }} />
+
+          {/* Author Info Skeleton */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 2,
+              mb: 4
+            }}
+          >
+            <Skeleton variant="circular" width={40} height={40} />
+            <Box>
+              <Skeleton variant="text" width={120} height={20} />
+              <Skeleton variant="text" width={180} height={18} />
+            </Box>
+          </Box>
+
+          {/* Featured Image Skeleton */}
+          <Skeleton
+            variant="rectangular"
+            height={320}
+            sx={{ borderRadius: "8px", mb: 5 }}
+          />
+
+          {/* Blog Content Skeleton */}
+          {Array.from(new Array(6)).map((_, index) => (
+            <Skeleton
+              key={index}
+              variant="text"
+              height={22}
+              width={`${90 - index * 5}%`}
+              sx={{ mb: 1 }}
+            />
+          ))}
+        </Container>
+      </Box>
+    </MainLayout>
+  );
+};
+
 
 export default function BlogDetailPage() {
   const router = useRouter();
@@ -314,21 +371,7 @@ export default function BlogDetailPage() {
   };
 
   if (loading) {
-    return (
-      <MainLayout>
-        <Box
-          sx={{
-            minHeight: '100vh',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            bgcolor: 'background.default'
-          }}
-        >
-          <CircularProgress />
-        </Box>
-      </MainLayout>
-    );
+    return <BlogDetailSkeleton />;
   }
 
   if (error) {

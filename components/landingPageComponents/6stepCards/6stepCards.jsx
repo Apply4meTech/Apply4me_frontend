@@ -6,35 +6,27 @@ import { Box, Container, Typography } from '@mui/material';
 const steps = [
   {
     number: 1,
-    title: 'Profile Analysis',
-    description: 'We audit your experience and career goals to identify your perfect role fit.',
+    title: 'Share your details',
+    description:
+      'Tell us about your experience, the roles you are targeting, and where you want to work. Upload your resume and preferences through our onboarding form.',
+    bgColor: '#EFF6FF', // pastel blue
   },
   {
     number: 2,
-    title: 'Asset Optimization',
-    description: 'Expert writers revamp your resume, cover letter, and LinkedIn profile.',
+    title: 'Choose jobs to apply for',
+    description:
+      'Share job links you like or let us help shortlist suitable roles based on your criteria. You stay in control of what we apply to.',
+    bgColor: '#ECFDF3', // pastel green
   },
   {
     number: 3,
-    title: 'Strategic Targeting',
-    description: 'We identify high-probability opportunities aligned with your criteria.',
-  },
-  {
-    number: 4,
-    title: 'Application Management',
-    description: 'Our team manually applies to jobs daily, tailoring every submission.',
-  },
-  {
-    number: 5,
-    title: 'Interview Prep',
-    description: 'Mock interviews and coaching sessions to ensure you ace the meeting.',
-  },
-  {
-    number: 6,
-    title: 'Salary Negotiation',
-    description: 'We help you negotiate the best possible compensation package.',
+    title: 'We submit applications for you',
+    description:
+      'Our team manually applies to each role using your information. You can track progress and see what has been applied to.',
+    bgColor: '#FFF7ED', // pastel orange
   },
 ];
+
 
 export default function SixStepCards() {
   const [headingVisible, setHeadingVisible] = useState(false);
@@ -77,6 +69,7 @@ export default function SixStepCards() {
       sx={{
         padding: { xs: '2rem 1.5rem', md: '3rem 2rem' },
         paddingTop: { xs: '1rem', md: '2rem' },
+        marginTop:'50px'
       }}
     >
       <Container maxWidth="lg">
@@ -96,7 +89,7 @@ export default function SixStepCards() {
               transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
             }}
           >
-            How We Get You Hired
+            How ApplyForMe Works
           </Typography>
 
           {/* Subtitle */}
@@ -115,7 +108,8 @@ export default function SixStepCards() {
               transition: 'opacity 0.6s ease-out 0.2s, transform 0.6s ease-out 0.2s',
             }}
           >
-            Our proven 6-step process takes you from application to offer letter without the stress.
+Most job applications fail because they are rushed or generic.
+ We use real people to submit applications carefully and accurately on your behalf.
           </Typography>
         </Box>
 
@@ -136,7 +130,7 @@ export default function SixStepCards() {
             <Box
               key={step.number}
               sx={{
-                backgroundColor: '#FFFFFF',
+                backgroundColor: step.bgColor,
                 borderRadius: '1rem',
                 padding: { xs: '1.5rem', md: '2rem' },
                 boxShadow: '0 0.125rem 0.5rem rgba(0, 0, 0, 0.1)',
@@ -153,31 +147,6 @@ export default function SixStepCards() {
                 },
               }}
             >
-              {/* Numbered Blue Square */}
-              <Box
-                sx={{
-                  width: { xs: '2.5rem', md: '3rem' },
-                  height: { xs: '2.5rem', md: '3rem' },
-                  backgroundColor: '#3B82F6',
-                  borderRadius: '0.5rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <Typography
-                  component="span"
-                  sx={{
-                    fontSize: { xs: '1.25rem', md: '1.5rem' },
-                    fontWeight: 700,
-                    color: '#FFFFFF',
-                    fontFamily: 'inherit',
-                  }}
-                >
-                  {step.number}
-                </Typography>
-              </Box>
 
               {/* Title */}
               <Typography
@@ -190,7 +159,7 @@ export default function SixStepCards() {
                   marginTop: '0.5rem',
                 }}
               >
-                {step.title}
+                {step.number}. {step.title}
               </Typography>
 
               {/* Description */}
