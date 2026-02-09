@@ -176,6 +176,13 @@ function CheckoutContent() {
     appearance: {
       theme: 'stripe',
     },
+    defaultValues: {
+      billingDetails: {
+        address: {
+          country: 'AU', // Set default country to Australia
+        },
+      },
+    },
   };
 
   return (

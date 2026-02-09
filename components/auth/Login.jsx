@@ -5,7 +5,7 @@ import { Box, Typography, TextField, Button, InputAdornment, IconButton, Link as
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik, Form } from 'formik';
 import * as yup from 'yup';
@@ -64,6 +64,7 @@ export default function Login() {
   const theme = useTheme();
   const isMobileOrTablet = useMediaQuery('(max-width:900px)');
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
   const { loading, error: authError } = useSelector((state) => state.auth);
   
@@ -150,12 +151,41 @@ export default function Login() {
       
       if (data.success && data.token) {
         dispatch(loginSuccess({ token: data.token, user: data.user }));
-        // Check if onboarding is complete
-        const isOnboardingComplete = data.user?.isOnboardingComplete ?? false;
-        if (isOnboardingComplete) {
-          router.push('/dashboard');
+        
+        // Skip onboarding check for super_admin and admin users
+        const userRole = data.user?.role;
+        const isAdmin = userRole === 'super_admin' || userRole === 'admin';
+        
+        // Get redirect parameter from URL
+        const redirectPath = searchParams?.get('redirect');
+        
+        if (isAdmin) {
+          // Admins go directly to dashboard (or redirect path if specified)
+          if (redirectPath) {
+            router.push(redirectPath);
+          } else {
+            router.push('/dashboard');
+          }
         } else {
-          router.push('/onboarding');
+          // Check if onboarding is complete for regular users
+          const isOnboardingComplete = data.user?.isOnboardingComplete ?? false;
+          
+          if (isOnboardingComplete) {
+            // If redirect parameter exists, go to that page, otherwise go to dashboard
+            if (redirectPath) {
+              router.push(redirectPath);
+            } else {
+              router.push('/dashboard');
+            }
+          } else {
+            // If onboarding is not complete, go to onboarding
+            // If redirect parameter exists, pass it to onboarding so user can be redirected after completing onboarding
+            if (redirectPath) {
+              router.push(`/onboarding?redirect=${encodeURIComponent(redirectPath)}`);
+            } else {
+              router.push('/onboarding');
+            }
+          }
         }
       } else {
         throw new Error(data.message || 'Login failed. Please try again.');

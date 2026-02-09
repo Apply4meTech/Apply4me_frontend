@@ -22,6 +22,8 @@ import ImageIcon from '@mui/icons-material/Image';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import NoteIcon from '@mui/icons-material/Note';
+import SaveIcon from '@mui/icons-material/Save';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
 const getApiUrl = () => {
@@ -33,6 +35,8 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
   const [activeTab, setActiveTab] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [fileType, setFileType] = useState(null);
+  const [notes, setNotes] = useState('');
+  const [savingNotes, setSavingNotes] = useState(false);
 
   const formatFileSize = (bytes) => {
     if (!bytes) return '0 Bytes';
@@ -130,6 +134,51 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
     }
   };
 
+  // Load notes when job changes
+  useEffect(() => {
+    if (job) {
+      setNotes(job.notes || '');
+    }
+  }, [job]);
+
+  const handleSaveNotes = async () => {
+    if (!job) return;
+
+    try {
+      setSavingNotes(true);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Authentication required');
+        return;
+      }
+
+      const response = await fetch(`${getApiUrl()}/api/employee/jobs/${job.id}/notes`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ notes }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        alert('Notes saved successfully');
+        if (onUpdate) {
+          onUpdate();
+        }
+      } else {
+        alert(data.error || 'Failed to save notes');
+      }
+    } catch (error) {
+      console.error('Error saving notes:', error);
+      alert('Failed to save notes');
+    } finally {
+      setSavingNotes(false);
+    }
+  };
+
   if (!job) return null;
 
   return (
@@ -138,13 +187,59 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
         {mode === 'fill' ? 'Fill Data' : 'View Data'} - {job.jobTitle}
       </DialogTitle>
       <DialogContent>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-          <Tabs value={activeTab} onChange={handleTabChange}>
-            <Tab icon={<DescriptionIcon />} iconPosition="start" label="Resume" />
-            <Tab icon={<DescriptionIcon />} iconPosition="start" label="Cover Letter" />
-            <Tab icon={<ImageIcon />} iconPosition="start" label="Screenshot Proof" />
-          </Tabs>
-        </Box>
+        {mode === 'fill' ? (
+          // Fill Data mode - Only show Notes tab
+          <Box>
+            <TextField
+              fullWidth
+              multiline
+              rows={12}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add your notes here..."
+              sx={{
+                mt: 2,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '8px',
+                  fontFamily: 'inherit',
+                },
+              }}
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+              <Button
+                variant="contained"
+                startIcon={savingNotes ? <CircularProgress size={16} /> : <SaveIcon />}
+                onClick={handleSaveNotes}
+                disabled={savingNotes}
+                sx={{
+                  bgcolor: '#2463eb',
+                  color: 'white',
+                  textTransform: 'none',
+                  borderRadius: '8px',
+                  '&:hover': { bgcolor: '#1d4ed8' },
+                  '&:disabled': { bgcolor: '#cbd5e1' },
+                }}
+              >
+                {savingNotes ? 'Saving...' : 'Save Notes'}
+              </Button>
+            </Box>
+            {job.notesUpdatedAt && (
+              <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', mt: 1 }}>
+                Last updated: {new Date(job.notesUpdatedAt).toLocaleString()}
+              </Typography>
+            )}
+          </Box>
+        ) : (
+          // View mode - Show all tabs
+          <>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+              <Tabs value={activeTab} onChange={handleTabChange}>
+                <Tab icon={<DescriptionIcon />} iconPosition="start" label="Resume" />
+                <Tab icon={<DescriptionIcon />} iconPosition="start" label="Cover Letter" />
+                <Tab icon={<ImageIcon />} iconPosition="start" label="Screenshot Proof" />
+                <Tab icon={<NoteIcon />} iconPosition="start" label="Notes" />
+              </Tabs>
+            </Box>
 
         <Box sx={{ minHeight: '300px' }}>
           {/* Resume Tab */}
@@ -341,7 +436,81 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
               )}
             </Box>
           )}
+
+          {/* Notes Tab */}
+          {activeTab === 3 && (
+            <Box>
+              <TextField
+                fullWidth
+                multiline
+                rows={12}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add your notes here..."
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                    fontFamily: 'inherit',
+                  },
+                }}
+                disabled={mode === 'view'}
+              />
+              {mode === 'fill' && (
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                  <Button
+                    variant="contained"
+                    startIcon={savingNotes ? <CircularProgress size={16} /> : <SaveIcon />}
+                    onClick={handleSaveNotes}
+                    disabled={savingNotes}
+                    sx={{
+                      bgcolor: '#2463eb',
+                      color: 'white',
+                      textTransform: 'none',
+                      borderRadius: '8px',
+                      '&:hover': { bgcolor: '#1d4ed8' },
+                      '&:disabled': { bgcolor: '#cbd5e1' },
+                    }}
+                  >
+                    {savingNotes ? 'Saving...' : 'Save Notes'}
+                  </Button>
+                </Box>
+              )}
+              {job.notesUpdatedAt && (
+                <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', mt: 1 }}>
+                  Last updated: {new Date(job.notesUpdatedAt).toLocaleString()}
+                </Typography>
+              )}
+            </Box>
+          )}
+
+          {/* Notes Tab */}
+          {activeTab === 3 && (
+            <Box>
+              <TextField
+                fullWidth
+                multiline
+                rows={12}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add your notes here..."
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                    fontFamily: 'inherit',
+                  },
+                }}
+                disabled={true}
+              />
+              {job.notesUpdatedAt && (
+                <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', mt: 1 }}>
+                  Last updated: {new Date(job.notesUpdatedAt).toLocaleString()}
+                </Typography>
+              )}
+            </Box>
+          )}
         </Box>
+          </>
+        )}
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button onClick={onClose} sx={{ color: '#64748b', textTransform: 'none' }}>Close</Button>

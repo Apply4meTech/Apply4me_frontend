@@ -31,6 +31,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import CardMembershipIcon from '@mui/icons-material/CardMembership';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { logout, initializeAuth } from '../../store/authSlice';
 
 const drawerWidth = 260;
@@ -43,12 +44,22 @@ const LogoIcon = ({ color = '#2463eb', size = 32 }) => (
   </svg>
 );
 
-const menuItems = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-  { text: 'Applications', icon: <WorkIcon />, path: '/dashboard/applications' },
-  { text: 'Profile', icon: <PersonIcon />, path: '/dashboard/profile' },
-  // { text: 'Settings', icon: <SettingsIcon />, path: '/dashboard/settings' },
-];
+const getMenuItems = (userRole) => {
+  const baseItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
+    { text: 'Applications', icon: <WorkIcon />, path: '/dashboard/applications' },
+    { text: 'Profile', icon: <PersonIcon />, path: '/dashboard/profile' },
+  ];
+
+  // Add admin menu items for super_admin
+  if (userRole === 'super_admin') {
+    baseItems.push(
+      { text: 'Plan Management', icon: <AdminPanelSettingsIcon />, path: '/dashboard/admin/plans' }
+    );
+  }
+
+  return baseItems;
+};
 
 export default function DashboardLayout({ children }) {
   const theme = useTheme();
@@ -103,6 +114,11 @@ export default function DashboardLayout({ children }) {
   // Check onboarding completion status
   useEffect(() => {
     if (isInitialized && isAuthenticated && user) {
+      // Skip onboarding check for super_admin and admin users
+      if (user.role === 'super_admin' || user.role === 'admin') {
+        return;
+      }
+      
       const isOnboardingComplete = user.isOnboardingComplete ?? false;
       const currentPath = pathname;
       
@@ -212,8 +228,8 @@ export default function DashboardLayout({ children }) {
 
       {/* Menu Items */}
       <List sx={{ flex: 1, p: 2 }}>
-        {menuItems.map((item) => {
-          const isActive = pathname === item.path;
+        {getMenuItems(user?.role).map((item) => {
+          const isActive = pathname === item.path || (item.path !== '/dashboard' && pathname?.startsWith(item.path));
           return (
             <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
               <ListItemButton
@@ -342,7 +358,7 @@ export default function DashboardLayout({ children }) {
               )}
               {!isMobile && (
                 <Typography sx={{ color: '#0f172a', fontSize: '1.25rem', fontWeight: 600 }}>
-                  {menuItems.find(item => item.path === pathname)?.text || 'Dashboard'}
+                  {getMenuItems(user?.role).find(item => item.path === pathname || (item.path !== '/dashboard' && pathname?.startsWith(item.path)))?.text || 'Dashboard'}
                 </Typography>
               )}
             </Box>

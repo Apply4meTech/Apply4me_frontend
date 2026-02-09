@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { initializeAuth } from '../../store/authSlice';
 import {
@@ -26,6 +26,7 @@ const steps = ['Personal Information', 'Job Preferences', 'Documents & Links'];
 
 function OnboardingContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const {
@@ -182,8 +183,13 @@ function OnboardingContent() {
           localStorage.removeItem('onboardingData');
         }
 
-        // Redirect to dashboard
-        router.push('/dashboard');
+        // Check for redirect parameter, otherwise go to dashboard
+        const redirectPath = searchParams?.get('redirect');
+        if (redirectPath) {
+          router.push(redirectPath);
+        } else {
+          router.push('/dashboard');
+        }
       } else {
         throw new Error(data.error || 'Failed to save onboarding data. Please try again.');
       }
@@ -346,7 +352,13 @@ export default function OnboardingPage() {
 
   return (
     <OnboardingProvider>
-      <OnboardingContent />
+      <Suspense fallback={
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+          <CircularProgress />
+        </Box>
+      }>
+        <OnboardingContent />
+      </Suspense>
     </OnboardingProvider>
   );
 }

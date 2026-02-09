@@ -40,12 +40,24 @@ const LogoIcon = ({ color = '#2463eb', size = 32 }) => (
 );
 
 import ArticleIcon from '@mui/icons-material/Article';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
-const menuItems = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/employee/dashboard' },
-  { text: 'Blogs', icon: <ArticleIcon />, path: '/employee/blogs' },
-  { text: 'Profile', icon: <PersonIcon />, path: '/employee/profile' },
-];
+const getMenuItems = (userRole) => {
+  const items = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/employee/dashboard' },
+    { text: 'Profile', icon: <PersonIcon />, path: '/employee/profile' },
+  ];
+
+  // Add admin menu items for super_admin
+  if (userRole === 'super_admin') {
+    items.push(
+      { text: 'Blogs', icon: <ArticleIcon />, path: '/employee/blogs' },
+      { text: 'Plan Management', icon: <AdminPanelSettingsIcon />, path: '/dashboard/admin/plans' }
+    );
+  }
+
+  return items;
+};
 
 export default function EmployeeLayout({ children }) {
   const theme = useTheme();
@@ -176,12 +188,8 @@ export default function EmployeeLayout({ children }) {
 
       {/* Menu Items */}
       <List sx={{ flex: 1, p: 2 }}>
-        {menuItems.map((item) => {
-          // Hide Blogs menu item if user is not super admin
-          if (item.path === '/employee/blogs' && user?.role !== 'super_admin') {
-            return null;
-          }
-          const isActive = pathname === item.path;
+        {getMenuItems(user?.role).map((item) => {
+          const isActive = pathname === item.path || (item.path !== '/employee/dashboard' && pathname?.startsWith(item.path));
           return (
             <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
               <ListItemButton
@@ -280,7 +288,7 @@ export default function EmployeeLayout({ children }) {
               )}
               {!isMobile && (
                 <Typography sx={{ color: '#0f172a', fontSize: '1.25rem', fontWeight: 600 }}>
-                  {menuItems.find(item => item.path === pathname)?.text || 'Dashboard'}
+                  {getMenuItems(user?.role).find(item => item.path === pathname || (item.path !== '/employee/dashboard' && pathname?.startsWith(item.path)))?.text || 'Dashboard'}
                 </Typography>
               )}
             </Box>

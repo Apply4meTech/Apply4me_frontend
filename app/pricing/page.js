@@ -14,12 +14,19 @@ import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 import stripeService from '../../utils/stripeService';
+import planService from '../../utils/planService';
+import Link from 'next/link';
 
 export default function Pricing() {
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [processingPlan, setProcessingPlan] = useState(null);
   const [stripePromise, setStripePromise] = useState(null);
+  const [plans, setPlans] = useState([]);
+  const [plansLoading, setPlansLoading] = useState(true);
+  const [plansError, setPlansError] = useState(null);
+  const [userPlan, setUserPlan] = useState(null);
+  const [userPlanLoading, setUserPlanLoading] = useState(false);
   
   // Redux and Router
   const { token, user, isAuthenticated } = useSelector((state) => state.auth);
@@ -41,11 +48,89 @@ export default function Pricing() {
     }
   }, []);
 
+  // Fetch plans from API
+  useEffect(() => {
+    const fetchPlans = async () => {
+      setPlansLoading(true);
+      setPlansError(null);
+      try {
+        const result = await planService.getAllPlans(true);
+        if (result.success) {
+          // Sort plans by displayOrder
+          const sortedPlans = (result.data || []).sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+          setPlans(sortedPlans);
+        } else {
+          setPlansError(result.message || 'Failed to load plans');
+          // Fallback to empty array if API fails
+          setPlans([]);
+        }
+      } catch (error) {
+        console.error('Error fetching plans:', error);
+        setPlansError('Failed to load plans. Please refresh the page.');
+        setPlans([]);
+      } finally {
+        setPlansLoading(false);
+      }
+    };
+
+    fetchPlans();
+  }, []);
+
+  // Fetch user's current plan if authenticated
+  useEffect(() => {
+    const fetchUserPlan = async () => {
+      if (!isAuthenticated || !token) {
+        return;
+      }
+
+      setUserPlanLoading(true);
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+        const getApiUrl = () => {
+          const url = API_URL;
+          return url.endsWith('/api') ? url.slice(0, -4) : url;
+        };
+        const response = await fetch(`${getApiUrl()}/api/users/my-plan`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await response.json();
+        if (data.success && data.data) {
+          // Check if plan is active (not expired)
+          const subscription = data.data.subscription;
+          if (subscription) {
+            const now = new Date();
+            const isExpired = subscription.endDate && new Date(subscription.endDate) < now;
+            if (!isExpired && subscription.status === 'active') {
+              setUserPlan(data.data);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user plan:', error);
+      } finally {
+        setUserPlanLoading(false);
+      }
+    };
+
+    fetchUserPlan();
+  }, [isAuthenticated, token]);
+
   // Handle payment initiation
   const handleGetStarted = async (plan) => {
     // Check if user is authenticated
     if (!isAuthenticated || !token) {
       router.push('/login?redirect=/pricing');
+      return;
+    }
+
+    // Check if user already has an active plan
+    if (userPlan && userPlan.subscription && userPlan.subscription.status === 'active') {
+      alert(`You already have an active plan (${userPlan.subscription.planName}). Please wait for it to expire or contact support to upgrade.`);
+      router.push('/dashboard/plan');
       return;
     }
 
@@ -103,71 +188,7 @@ export default function Pricing() {
     }
   };
 
-  const plans = [
-    {
-      name: 'Starter',
-      price: 89,
-      actualPrice: 119,
-      description: '100 Job Applications',
-      features: [
-        { text: '100 Job Applications', included: true },
-        { text: 'Human Assistant', included: true },
-        { text: 'Standard cover letter (role-adjusted)', included: true },
-        { text: 'Real-time progress updates', included: true },
-      ],
-      isPopular: false,
-      badge: null,
-    },
-    {
-      name: 'Standard',
-      price: 149,
-      actualPrice: 199,
-      description: '175 Job Applications',
-      features: [
-        { text: '175 Job Applications', included: true },
-        { text: 'Human Assistant', included: true },
-        { text: 'Custom cover letters', included: true },
-        { text: 'Resume created by us, ATS-aligned', included: true },
-        { text: 'Real-time progress updates', included: true },
-      ],
-      isPopular: false,
-      badge: null,
-    },
-    {
-      name: 'Pro',
-      price: 229,
-      actualPrice: 299,
-      description: '250 Job Applications',
-      features: [
-        { text: '250 Job Applications', included: true },
-        { text: 'Human Assistant', included: true },
-        { text: 'Custom cover letters', included: true },
-        { text: 'Resume created by us for every job', included: true },
-        { text: 'Real-time progress updates', included: true },
-        { text: '1 Interview prep included + add-on', included: true },
-      ],
-      isPopular: true,
-      badge: 'Most Popular',
-    },
-    {
-      name: 'Premium',
-      price: 329,
-      actualPrice: 399,
-      description: '350 Job Applications',
-      features: [
-        { text: '350 Job Applications', included: true },
-        { text: 'Dedicated Human Assistant', included: true },
-        { text: 'Custom cover letters', included: true },
-        { text: 'Resume created by us for every job', included: true },
-        { text: 'LinkedIn Profile Optimisation', included: true },
-        { text: 'Priority Processing', included: true },
-        { text: 'Real-time progress updates', included: true },
-        { text: '3 Interview prep included + add-on', included: true },
-      ],
-      isPopular: false,
-      badge: 'Best Value',
-    },
-  ];
+  // Plans are now fetched from API - see useEffect above
 
   return (
     <MainLayout>
@@ -279,6 +300,33 @@ export default function Pricing() {
         }}
       >
         <Container maxWidth="lg">
+          {/* Alert if user has active plan */}
+          {userPlan && userPlan.subscription && userPlan.subscription.status === 'active' && (
+            <Box
+              sx={{
+                mt: { xs: '-2rem', md: '-4rem' },
+                mb: 3,
+                p: 2,
+                bgcolor: '#FEF3C7',
+                border: '1px solid #FCD34D',
+                borderRadius: '0.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+              }}
+            >
+              <Typography sx={{ color: '#92400E', fontSize: '0.875rem', flex: 1 }}>
+                <strong>You have an active plan:</strong> {userPlan.subscription.planName}. 
+                {userPlan.subscription.endDate && (
+                  <> It expires on {new Date(userPlan.subscription.endDate).toLocaleDateString()}.</>
+                )}
+                {' '}You can view your plan details in your{' '}
+                <Link href="/dashboard/plan" style={{ color: '#2563EB', textDecoration: 'underline' }}>
+                  dashboard
+                </Link>.
+              </Typography>
+            </Box>
+          )}
           <Box
             ref={plansRef}
             sx={{
@@ -297,7 +345,21 @@ export default function Pricing() {
               // transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
             }}
           >
-            {plans.map((plan, planIndex) => {
+            {plansLoading ? (
+              <Box sx={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', py: 8 }}>
+                <CircularProgress />
+              </Box>
+            ) : plansError ? (
+              <Box sx={{ gridColumn: '1 / -1', textAlign: 'center', py: 8 }}>
+                <Typography sx={{ color: '#ef4444', mb: 2 }}>{plansError}</Typography>
+                <Button onClick={() => window.location.reload()}>Retry</Button>
+              </Box>
+            ) : plans.length === 0 ? (
+              <Box sx={{ gridColumn: '1 / -1', textAlign: 'center', py: 8 }}>
+                <Typography sx={{ color: '#64748b' }}>No plans available at the moment.</Typography>
+              </Box>
+            ) : (
+              plans.map((plan, planIndex) => {
               return (
                 <Box
                   key={plan.name}
@@ -350,8 +412,30 @@ export default function Pricing() {
                       pointerEvents: 'none',
                     }}
                   />
-                  {/* Plan Badge (Most Popular / Best Value) */}
-                  {plan.badge && (
+                  {/* Plan Badge (Your Plan / Most Popular / Best Value) */}
+                  {userPlan && userPlan.subscription && userPlan.subscription.planName === plan.name ? (
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: '-0.75rem',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        backgroundColor: '#10B981',
+                        color: '#FFFFFF',
+                        padding: '0.25rem 0.75rem',
+                        borderRadius: '9999px',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        zIndex: '999999 !important',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.3), 0 2px 4px -1px rgba(16, 185, 129, 0.2)',
+                      }}
+                    >
+                      YOUR PLAN
+                    </Box>
+                  ) : plan.badge ? (
                     <Box
                       sx={{
                         position: 'absolute',
@@ -378,7 +462,7 @@ export default function Pricing() {
                     >
                       {plan.badge.toUpperCase()}
                     </Box>
-                  )}
+                  ) : null}
                   {/* Content wrapper with relative positioning */}
                   <Box
                     sx={{
@@ -413,18 +497,20 @@ export default function Pricing() {
                       marginBottom: '0.5rem',
                     }}
                   >
-                    <Typography
-                      component="span"
-                      sx={{
-                        fontSize: '1.375rem',
-                        fontWeight: 600,
-                        color: '#94A3B8',
-                        textDecoration: 'line-through',
-                        fontFamily: 'inherit',
-                      }}
-                    >
-                      ${plan.actualPrice}
-                    </Typography>
+                    {plan.actualPrice && plan.actualPrice > plan.price && (
+                      <Typography
+                        component="span"
+                        sx={{
+                          fontSize: '1.375rem',
+                          fontWeight: 600,
+                          color: '#94A3B8',
+                          textDecoration: 'line-through',
+                          fontFamily: 'inherit',
+                        }}
+                      >
+                        ${plan.actualPrice}
+                      </Typography>
+                    )}
                     <Typography
                       sx={{
                         fontSize: '2.5rem',
@@ -437,20 +523,22 @@ export default function Pricing() {
                     >
                       ${plan.price}
                     </Typography>
-                    <Box
-                      component="span"
-                      sx={{
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        color: '#FFFFFF',
-                        backgroundColor: '#10B981',
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '0.375rem',
-                        fontFamily: 'inherit',
-                      }}
-                    >
-                      Save ${plan.actualPrice - plan.price}
-                    </Box>
+                    {plan.actualPrice && plan.actualPrice > plan.price && (
+                      <Box
+                        component="span"
+                        sx={{
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          color: '#FFFFFF',
+                          backgroundColor: '#10B981',
+                          padding: '0.2rem 0.5rem',
+                          borderRadius: '0.375rem',
+                          fontFamily: 'inherit',
+                        }}
+                      >
+                        Save ${plan.actualPrice - plan.price}
+                      </Box>
+                    )}
                   </Box>
                   <Typography
                     sx={{
@@ -460,7 +548,7 @@ export default function Pricing() {
                       fontFamily: 'inherit',
                     }}
                   >
-                    One-time · AUD
+                    {plan.billingPeriod === 'onetime' ? 'One-time' : plan.billingPeriod.charAt(0).toUpperCase() + plan.billingPeriod.slice(1)} · {plan.currency || 'AUD'}
                   </Typography>
 
                   {/* Description */}
@@ -522,56 +610,91 @@ export default function Pricing() {
                   </Box>
 
                   {/* Get Started Button */}
-                  <Box
-                    component="button"
-                    onClick={() => handleGetStarted(plan)}
-                    disabled={processingPayment}
-                    sx={{
-                      padding: '0.75rem 1.5rem',
-                      borderRadius: '0.5rem',
-                      border: plan.isPopular ? 'none' : '1px solid #2563EB',
-                      backgroundColor: plan.isPopular ? '#2563EB' : '#FFFFFF',
-                      color: '#FFFFFF',
-                      fontSize: '1rem',
-                      fontWeight: 600,
-                      cursor: processingPayment ? 'not-allowed' : 'pointer',
-                      fontFamily: 'inherit',
-                      transition: 'all 0.3s ease',
-                      opacity: processingPayment ? 0.7 : 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.5rem',
-                      '&:hover': {
-                        backgroundColor: processingPayment 
-                          ? (plan.isPopular ? '#2563EB' : '#FFFFFF')
-                          : (plan.isPopular ? '#1E3A8A' : '#2563EB'),
-                        color: '#FFFFFF',
-                        transform: processingPayment ? 'none' : 'scale(1.02)',
-                      },
-                      ...(plan.isPopular
-                        ? {}
-                        : {
-                            color: '#2563EB',
-                            '&:hover': {
-                              color: '#FFFFFF',
-                            },
-                          }),
-                    }}
-                  >
-                    {processingPayment && processingPlan === plan.name ? (
-                      <>
-                        <CircularProgress size={16} sx={{ color: 'inherit' }} />
-                        Processing...
-                      </>
-                    ) : (
-                      'Get Started'
-                    )}
-                  </Box>
+                  {(() => {
+                    const isUserPlan = userPlan && userPlan.subscription && userPlan.subscription.planName === plan.name;
+                    const hasActivePlan = userPlan && userPlan.subscription && userPlan.subscription.status === 'active';
+                    const isDisabled = processingPayment || hasActivePlan;
+                    
+                    // Determine button colors based on plan state
+                    const getButtonColors = () => {
+                      if (isUserPlan) {
+                        return {
+                          bg: '#10B981',
+                          color: '#FFFFFF',
+                          border: '1px solid #10B981',
+                          hoverBg: '#059669',
+                          hoverColor: '#FFFFFF'
+                        };
+                      }
+                      if (plan.isPopular) {
+                        return {
+                          bg: '#2563EB',
+                          color: '#FFFFFF',
+                          border: 'none',
+                          hoverBg: '#1E3A8A',
+                          hoverColor: '#FFFFFF'
+                        };
+                      }
+                      // Non-popular plan (white background)
+                      return {
+                        bg: '#FFFFFF',
+                        color: '#2563EB',
+                        border: '1px solid #2563EB',
+                        hoverBg: '#2563EB',
+                        hoverColor: '#FFFFFF'
+                      };
+                    };
+                    
+                    const colors = getButtonColors();
+                    
+                    return (
+                      <Box
+                        component="button"
+                        onClick={() => !isDisabled && handleGetStarted(plan)}
+                        disabled={isDisabled}
+                        sx={{
+                          padding: '0.75rem 1.5rem',
+                          borderRadius: '0.5rem',
+                          border: colors.border,
+                          backgroundColor: colors.bg,
+                          color: colors.color,
+                          fontSize: '1rem',
+                          fontWeight: 600,
+                          cursor: isDisabled ? 'not-allowed' : 'pointer',
+                          fontFamily: 'inherit',
+                          transition: 'all 0.3s ease',
+                          opacity: isDisabled ? 0.6 : 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.5rem',
+                          '&:hover': {
+                            backgroundColor: isDisabled ? colors.bg : colors.hoverBg,
+                            color: colors.hoverColor,
+                            transform: isDisabled ? 'none' : 'scale(1.02)',
+                          },
+                        }}
+                      >
+                        {processingPayment && processingPlan === plan.name ? (
+                          <>
+                            <CircularProgress size={16} sx={{ color: 'inherit' }} />
+                            Processing...
+                          </>
+                        ) : isUserPlan ? (
+                          'Your Plan'
+                        ) : hasActivePlan ? (
+                          'Already Have Plan'
+                        ) : (
+                          'Get Started'
+                        )}
+                      </Box>
+                    );
+                  })()}
                   </Box>
                 </Box>
               );
-            })}
+              })
+            )}
           </Box>
         </Container>
       </Box>

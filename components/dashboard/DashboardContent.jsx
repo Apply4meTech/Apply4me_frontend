@@ -19,15 +19,28 @@ import {
   Button,
 } from '@mui/material';
 import { useSelector } from 'react-redux';
+import Link from 'next/link';
 import WorkIcon from '@mui/icons-material/Work';
-import PersonIcon from '@mui/icons-material/Person';
 import AddIcon from '@mui/icons-material/Add';
 import DescriptionIcon from '@mui/icons-material/Description';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import ImageIcon from '@mui/icons-material/Image';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
+import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import NoteIcon from '@mui/icons-material/Note';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import TextField from '@mui/material/TextField';
+import SaveIcon from '@mui/icons-material/Save';
 import AddJobModal from './AddJobModal';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
@@ -37,15 +50,21 @@ const getApiUrl = () => {
 };
 
 export default function DashboardContent() {
-  const { user } = useSelector((state) => state.auth);
+  const { user, token } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [userPlan, setUserPlan] = useState(null);
   const [dashboardData, setDashboardData] = useState({
     totalJobsApplied: 0,
     accountManagerName: 'Not Assigned',
     applications: []
   });
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedApplication, setSelectedApplication] = useState(null);
+  const [notesDialogOpen, setNotesDialogOpen] = useState(false);
+  const [notes, setNotes] = useState('');
+  const [savingNotes, setSavingNotes] = useState(false);
 
   const fetchDashboardData = async () => {
     try {
@@ -84,7 +103,35 @@ export default function DashboardContent() {
 
   useEffect(() => {
     fetchDashboardData();
+    fetchUserPlan();
   }, []);
+
+  const fetchUserPlan = async () => {
+    if (!token) return;
+    
+    try {
+      const response = await fetch(`${getApiUrl()}/api/users/my-plan`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (data.success && data.data) {
+        const subscription = data.data.subscription;
+        if (subscription) {
+          const now = new Date();
+          const isExpired = subscription.endDate && new Date(subscription.endDate) < now;
+          if (!isExpired && subscription.status === 'active') {
+            setUserPlan(data.data);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching user plan:', err);
+    }
+  };
 
   const handleJobAdded = () => {
     fetchDashboardData();
@@ -155,7 +202,7 @@ export default function DashboardContent() {
           
           <Grid container spacing={2}>
             {/* Total Jobs Applied Box */}
-            <Grid item xs={12} sm={6} md={5}>
+            <Grid item xs={12} sm={6} md={6}>
               <Paper
                 elevation={0}
                 sx={{
@@ -165,7 +212,7 @@ export default function DashboardContent() {
                   bgcolor: 'white',
                 }}
               >
-                <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
+                <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1.5 }}>
                   Total Jobs Applied
                 </Typography>
                 <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#0f172a' }}>
@@ -174,26 +221,65 @@ export default function DashboardContent() {
               </Paper>
             </Grid>
 
-            {/* Account Manager Box */}
-            <Grid item xs={12} sm={6} md={5}>
+            {/* Current Plan Box */}
+            <Grid item xs={12} sm={6} md={6}>
               <Paper
+                component={Link}
+                href="/dashboard/plan"
                 elevation={0}
                 sx={{
                   p: 3,
                   borderRadius: '12px',
                   border: '1px solid #e2e8f0',
                   bgcolor: 'white',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&:hover': {
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  },
                 }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                  <PersonIcon sx={{ color: '#64748b', fontSize: '1.25rem' }} />
+                {/* Blue left border bar */}
+                {userPlan && userPlan.plan && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: '4px',
+                      bgcolor: '#2463eb',
+                    }}
+                  />
+                )}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5, pl: userPlan && userPlan.plan ? 0 : 0 }}>
+                  <CardMembershipIcon sx={{ color: '#64748b', fontSize: '1.125rem' }} />
                   <Typography sx={{ fontSize: '0.875rem', color: '#64748b' }}>
-                    Account Manager
+                    Current Plan
                   </Typography>
                 </Box>
-                <Typography sx={{ fontSize: '1.25rem', fontWeight: 600, color: '#0f172a' }}>
-                  {accountManagerName}
-                </Typography>
+                {userPlan && userPlan.plan ? (
+                  <>
+                    <Typography sx={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', mb: 0.5, wordBreak: 'break-word' }}>
+                      {userPlan.plan.name}
+                    </Typography>
+                    <Typography sx={{ fontSize: '0.875rem', color: '#64748b', wordBreak: 'break-word' }}>
+                      ${userPlan.plan.price} {userPlan.plan.currency}
+                    </Typography>
+                  </>
+                ) : (
+                  <>
+                    <Typography sx={{ fontSize: '1.25rem', fontWeight: 600, color: '#94a3b8', mb: 0.5, wordBreak: 'break-word' }}>
+                      No active plan
+                    </Typography>
+                    <Typography sx={{ fontSize: '0.75rem', color: '#2463eb', wordBreak: 'break-word' }}>
+                      View Plans →
+                    </Typography>
+                  </>
+                )}
               </Paper>
             </Grid>
           </Grid>
@@ -213,23 +299,32 @@ export default function DashboardContent() {
           <Table>
             <TableHead>
               <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
-                  Job name
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word', width: '60px' }}>
+                  SR No
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                  Company Name
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>
                   Link
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>
                   Status
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>
                   Uploaded Files
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>
                   Date
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>
                   Source
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                  Notes
+                </TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', width: '60px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                  Action
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -237,7 +332,7 @@ export default function DashboardContent() {
               {applications.length === 0 ? (
                 // Empty state
                 <TableRow>
-                  <TableCell colSpan={6} sx={{ textAlign: 'center', py: 6 }}>
+                  <TableCell colSpan={9} sx={{ textAlign: 'center', py: 6 }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                       <WorkIcon sx={{ fontSize: '3rem', color: '#cbd5e1' }} />
                       <Typography sx={{ color: '#64748b', fontSize: '1rem' }}>
@@ -250,12 +345,15 @@ export default function DashboardContent() {
                   </TableCell>
                 </TableRow>
               ) : (
-                applications.map((application) => {
+                applications.map((application, index) => {
                   const statusColors = getStatusColor(application.status);
                   return (
                     <TableRow key={application.id} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
-                      <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>
-                        {application.jobName}
+                      <TableCell sx={{ color: '#64748b', fontSize: '0.875rem', fontWeight: 500 }}>
+                        {index + 1}
+                      </TableCell>
+                      <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem', fontWeight: 600 }}>
+                        {application.company || 'N/A'}
                       </TableCell>
                       <TableCell>
                         {application.link ? (
@@ -351,6 +449,35 @@ export default function DashboardContent() {
                       <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
                         {application.source}
                       </TableCell>
+                      <TableCell>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            setSelectedApplication(application);
+                            setNotes(application.notes || '');
+                            setNotesDialogOpen(true);
+                          }}
+                          sx={{
+                            color: application.notes ? '#2463eb' : '#94a3b8',
+                            '&:hover': {
+                              bgcolor: application.notes ? '#eff6ff' : '#f1f5f9',
+                            },
+                          }}
+                        >
+                          <NoteIcon fontSize="small" />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell>
+                        <IconButton 
+                          size="small" 
+                          onClick={(e) => {
+                            setAnchorEl(e.currentTarget);
+                            setSelectedApplication(application);
+                          }}
+                        >
+                          <MoreVertIcon fontSize="small" />
+                        </IconButton>
+                      </TableCell>
                     </TableRow>
                   );
                 })
@@ -359,6 +486,131 @@ export default function DashboardContent() {
           </Table>
         </TableContainer>
       </Paper>
+
+      {/* Action Menu */}
+      <Menu 
+        anchorEl={anchorEl} 
+        open={Boolean(anchorEl)} 
+        onClose={() => {
+          setAnchorEl(null);
+          setSelectedApplication(null);
+        }}
+      >
+        <MenuItem 
+          onClick={() => {
+            if (selectedApplication) {
+              setNotes(selectedApplication.notes || '');
+              setNotesDialogOpen(true);
+            }
+            setAnchorEl(null);
+          }}
+        >
+          <ListItemIcon><NoteIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Add Notes</ListItemText>
+        </MenuItem>
+      </Menu>
+
+      {/* Notes Dialog */}
+      <Dialog 
+        open={notesDialogOpen} 
+        onClose={() => {
+          setNotesDialogOpen(false);
+          setSelectedApplication(null);
+          setNotes('');
+        }} 
+        maxWidth="sm" 
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '12px' } }}
+      >
+        <DialogTitle sx={{ fontWeight: 600, color: '#0f172a' }}>
+          Notes - {selectedApplication?.company || selectedApplication?.jobName || 'Job Application'}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            multiline
+            rows={10}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Add your notes here..."
+            sx={{
+              mt: 2,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '8px',
+                fontFamily: 'inherit',
+              },
+              '& .MuiInputBase-input': {
+                fontSize: '0.875rem',
+              },
+            }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button 
+            onClick={() => {
+              setNotesDialogOpen(false);
+              setSelectedApplication(null);
+              setNotes('');
+            }}
+            disabled={savingNotes}
+            sx={{ textTransform: 'none' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={savingNotes ? <CircularProgress size={16} /> : <SaveIcon />}
+            onClick={async () => {
+              if (!selectedApplication) return;
+              
+              try {
+                setSavingNotes(true);
+                const token = localStorage.getItem('token');
+                if (!token) {
+                  alert('Authentication required');
+                  return;
+                }
+
+                const response = await fetch(`${getApiUrl()}/api/jobs/${selectedApplication.id}/notes`, {
+                  method: 'PATCH',
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ notes }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                  alert('Notes saved successfully');
+                  setNotesDialogOpen(false);
+                  setSelectedApplication(null);
+                  setNotes('');
+                  fetchDashboardData(); // Refresh data
+                } else {
+                  alert(data.error || 'Failed to save notes');
+                }
+              } catch (error) {
+                console.error('Error saving notes:', error);
+                alert('Failed to save notes');
+              } finally {
+                setSavingNotes(false);
+              }
+            }}
+            disabled={savingNotes}
+            sx={{
+              bgcolor: '#2463eb',
+              color: 'white',
+              textTransform: 'none',
+              '&:hover': { bgcolor: '#1d4ed8' },
+              '&:disabled': { bgcolor: '#cbd5e1' },
+            }}
+          >
+            {savingNotes ? 'Saving...' : 'Save Notes'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Add Job Modal */}
       <AddJobModal

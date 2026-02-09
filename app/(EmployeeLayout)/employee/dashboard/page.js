@@ -31,6 +31,7 @@ import {
   Input,
 } from '@mui/material';
 import { useSelector } from 'react-redux';
+import MuiLink from '@mui/material/Link';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EmailIcon from '@mui/icons-material/Email';
@@ -734,15 +735,15 @@ export default function EmployeeDashboard() {
           <Table>
             <TableHead>
               <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Job title</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Applicant</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', width: '60px', whiteSpace: 'normal', wordBreak: 'break-word' }}>SR No</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>Company Name</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>Link</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>Uploaded Files</TableCell>
                 {isSuperAdmin && (
-                  <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Assigned To</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>Assigned To</TableCell>
                 )}
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Link</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Date</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>Action</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -753,17 +754,53 @@ export default function EmployeeDashboard() {
                   </TableCell>
                 </TableRow>
               ) : (
-                dashboardData.jobs.map((job) => {
+                dashboardData.jobs.map((job, index) => {
                   const statusColors = getStatusColor(job.status);
+                  const hasFiles = job.resume || job.coverLetter || job.screenshotProof;
+                  const hasNotes = job.notes && job.notes.trim().length > 0;
+                  
                   return (
                     <TableRow key={job.id} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
-                      <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>{job.jobTitle}</TableCell>
-                      <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>{job.applicant}</TableCell>
-                      {isSuperAdmin && (
-                        <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>
-                          {job.assignedTo || 'Unassigned'}
-                        </TableCell>
-                      )}
+                      <TableCell sx={{ color: '#64748b', fontSize: '0.875rem', fontWeight: 500 }}>
+                        {index + 1}
+                      </TableCell>
+                      <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem', fontWeight: 600 }}>
+                        {job.company}
+                      </TableCell>
+                      <TableCell>
+                        {job.link ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <MuiLink
+                              href={job.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              sx={{
+                                color: '#2463eb',
+                                fontSize: '0.875rem',
+                                textDecoration: 'none',
+                                '&:hover': { textDecoration: 'underline' },
+                                maxWidth: '200px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              View Link
+                            </MuiLink>
+                            <IconButton 
+                              size="small" 
+                              onClick={() => handleCopyLink(job.link)} 
+                              sx={{ color: '#64748b', p: 0.5 }}
+                            >
+                              <ContentCopyIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        ) : (
+                          <Typography sx={{ color: '#94a3b8', fontSize: '0.875rem', fontStyle: 'italic' }}>
+                            No link
+                          </Typography>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <FormControl size="small" sx={{ minWidth: 120 }}>
                           <Select 
@@ -780,22 +817,38 @@ export default function EmployeeDashboard() {
                             }}
                           >
                             <MenuItem value="pending">Pending</MenuItem>
-                            <MenuItem value="assigned">Assigned</MenuItem>
-                            <MenuItem value="applied">Applied</MenuItem>
-                            <MenuItem value="response">Response</MenuItem>
-                            <MenuItem value="rejected">Rejected</MenuItem>
                             <MenuItem value="completed">Completed</MenuItem>
                           </Select>
                         </FormControl>
                       </TableCell>
                       <TableCell>
-                        <IconButton size="small" onClick={() => handleCopyLink(job.link)} sx={{ color: '#2463eb' }}>
-                          <ContentCopyIcon fontSize="small" />
-                        </IconButton>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => {
+                            setSelectedJob(job);
+                            setViewMode('view');
+                            setViewDataOpen(true);
+                          }}
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: hasFiles || hasNotes ? '#2463eb' : '#e2e8f0',
+                            color: hasFiles || hasNotes ? '#2463eb' : '#94a3b8',
+                            '&:hover': {
+                              borderColor: '#1d4ed8',
+                              bgcolor: '#eff6ff',
+                            },
+                          }}
+                        >
+                          {hasFiles || hasNotes ? 'View Files & Notes' : 'No Files'}
+                        </Button>
                       </TableCell>
-                      <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
-                        {new Date(job.date).toLocaleDateString()}
-                      </TableCell>
+                      {isSuperAdmin && (
+                        <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>
+                          {job.assignedTo || 'Unassigned'}
+                        </TableCell>
+                      )}
                       <TableCell>
                         <IconButton size="small" onClick={(e) => handleMenuOpen(e, job)}>
                           <MoreVertIcon fontSize="small" />
@@ -824,34 +877,22 @@ export default function EmployeeDashboard() {
             <ListItemText>Unassign Employee</ListItemText>
           </MenuItem>
         )}
-        <MenuItem onClick={() => handleAction('email')}>
-          <ListItemIcon><EmailIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Send Email</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => handleAction('upload-resume')}>
-          <ListItemIcon><AttachFileIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Upload Resume</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => handleAction('upload-coverletter')}>
-          <ListItemIcon><AttachFileIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Upload Cover Letter</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => handleAction('upload-screenshot')}>
-          <ListItemIcon><AttachFileIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Upload Screenshot Proof</ListItemText>
-        </MenuItem>
         <MenuItem onClick={() => handleAction('fill')}>
           <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Fill Data</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => handleAction('view')}>
-          <ListItemIcon><VisibilityIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>View Data</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => handleAction('delete')} sx={{ color: '#ef4444' }}>
-          <ListItemIcon sx={{ color: 'inherit' }}><DeleteIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>Delete</ListItemText>
-        </MenuItem>
+        {isSuperAdmin && (
+          <MenuItem onClick={() => handleAction('email')}>
+            <ListItemIcon><EmailIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>Send Email</ListItemText>
+          </MenuItem>
+        )}
+        {isSuperAdmin && (
+          <MenuItem onClick={() => handleAction('delete')} sx={{ color: '#ef4444' }}>
+            <ListItemIcon sx={{ color: 'inherit' }}><DeleteIcon fontSize="small" /></ListItemIcon>
+            <ListItemText>Delete</ListItemText>
+          </MenuItem>
+        )}
       </Menu>
 
       {/* Email Dialog */}
