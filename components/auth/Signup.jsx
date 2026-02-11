@@ -97,7 +97,10 @@ export default function Signup() {
       
       if (data.success && data.token) {
         dispatch(loginSuccess({ token: data.token, user: data.user }));
-        // New users always go to onboarding
+        // Clear any stale onboarding data so new user gets fresh form (only name + email prefilled)
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('onboardingData');
+        }
         router.push('/onboarding');
       } else {
         throw new Error(data.message || 'Signup failed. Please try again.');
@@ -279,7 +282,7 @@ export default function Signup() {
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="name@company.com"
+                    placeholder="abc@gmail.com"
                     value={values.email}
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -677,7 +680,7 @@ export default function Signup() {
                       id="email-desktop"
                       name="email"
                       type="email"
-                      placeholder="name@company.com"
+                      placeholder="abc@gmail.com"
                       value={values.email}
                       onChange={handleChange}
                       onBlur={handleBlur}
