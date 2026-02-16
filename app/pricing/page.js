@@ -1183,8 +1183,9 @@ export default function Pricing() {
                 },
                 transition: 'all 0.3s',
               }}
+              onClick={() => router.push('/signup')}
             >
-              Start your free trial
+              Sign up Now
             </Button>
           </Box>
         </Box>

@@ -31,13 +31,16 @@ export const OnboardingProvider = ({ children }) => {
       }
     }
 
-    // If there's saved onboarding data, merge it (saved data takes precedence)
+    // If there's saved onboarding data, merge it ONLY if it belongs to current user
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('onboardingData');
       if (saved) {
         try {
           const savedData = JSON.parse(saved);
-          // Merge saved data with prefilled data (saved data takes precedence)
+          // Discard saved data if it's from a different user (e.g. previous signup)
+          if (user?.email && savedData.email && savedData.email !== user.email) {
+            return initialData;
+          }
           return { ...initialData, ...savedData };
         } catch (e) {
           return initialData;
@@ -52,11 +55,11 @@ export const OnboardingProvider = ({ children }) => {
     // Step 1: Personal Information
     fullName: '',
     email: '',
-    phoneCode: '',
+    phoneCode: '+61', // Australia by default
     phone: '',
     address: '',
     openToRelocate: false,
-    countryOfWork: '',
+    countryOfWork: 'Australia', // Australia by default
     visaSponsorshipRequired: false,
     
     // Step 2: Job Preferences & Compensation

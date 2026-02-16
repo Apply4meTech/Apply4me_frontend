@@ -14,7 +14,7 @@ export default function PaymentPolicy() {
           fontFamily: '"Manrope", sans-serif',
         }}
       >
-        {/* Hero Section */}
+
         <Box
           sx={{
             background: 'linear-gradient(180deg, #1E3A8A 0%, #0F172A 100%)',
