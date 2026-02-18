@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   TextField,
@@ -15,11 +15,39 @@ import {
 import { useOnboarding } from './OnboardingContext';
 
 export default function OnboardingStep1() {
-  const { formData, updateFormData, errors, setFieldError } = useOnboarding();
+  const { formData, updateFormData, errors, setFieldError, updateMultipleFields } = useOnboarding();
   const [countries, setCountries] = useState([]);
   const [phoneCodes, setPhoneCodes] = useState([]);
   const [loadingCountries, setLoadingCountries] = useState(true);
   const [loadingPhoneCodes, setLoadingPhoneCodes] = useState(true);
+  
+  // Address autocomplete states
+  const [addressInput, setAddressInput] = useState('');
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [loadingAddress, setLoadingAddress] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const autocompleteRef = useRef(null);
+  const debounceTimerRef = useRef(null);
+  
+  // Get API URL
+  const getApiUrl = () => {
+    const url = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+    return url.endsWith('/api') ? url.slice(0, -4) : url;
+  };
+  const API_URL = getApiUrl();
+  
+  // Sync addressInput with formData.address on mount and when formData changes
+  useEffect(() => {
+    // Build address from components if available, otherwise use address field
+    if (formData.houseNumber || formData.streetName || formData.suburb) {
+      const builtAddress = `${formData.houseNumber || ''} ${formData.streetName || ''}, ${formData.suburb || ''}, ${formData.state || ''} ${formData.postcode || ''}`.trim();
+      if (builtAddress && builtAddress !== addressInput) {
+        setAddressInput(builtAddress);
+      }
+    } else if (formData.address && formData.address !== addressInput) {
+      setAddressInput(formData.address);
+    }
+  }, [formData.address, formData.houseNumber, formData.streetName, formData.suburb, formData.state, formData.postcode]);
 
   // Fetch countries from REST Countries API
   useEffect(() => {
@@ -99,6 +127,111 @@ export default function OnboardingStep1() {
     };
 
     fetchPhoneCodes();
+  }, []);
+
+  // Fetch address suggestions from backend API
+  const fetchAddressSuggestions = async (input) => {
+    if (!input || input.trim().length < 2) {
+      setAddressSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    setLoadingAddress(true);
+    try {
+      const response = await fetch(`${API_URL}/api/address/suggestions?input=${encodeURIComponent(input.trim())}`);
+      const data = await response.json();
+
+      if (data.success && data.suggestions) {
+        setAddressSuggestions(data.suggestions);
+        setShowSuggestions(true);
+      } else {
+        setAddressSuggestions([]);
+        setShowSuggestions(false);
+      }
+    } catch (error) {
+      console.error('Error fetching address suggestions:', error);
+      setAddressSuggestions([]);
+      setShowSuggestions(false);
+    } finally {
+      setLoadingAddress(false);
+    }
+  };
+
+  // Handle address input change with debouncing
+  const handleAddressInputChange = (event, newInputValue) => {
+    const value = newInputValue || event.target.value;
+    setAddressInput(value);
+    
+    // Clear previous timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // If user clears the input, clear all address fields
+    if (!value) {
+      updateMultipleFields({
+        houseNumber: '',
+        streetName: '',
+        suburb: '',
+        state: '',
+        postcode: '',
+        address: ''
+      });
+      setAddressSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    // Save manual entry to address field
+    updateFormData('address', value);
+
+    // Debounce API call
+    debounceTimerRef.current = setTimeout(() => {
+      fetchAddressSuggestions(value);
+    }, 300);
+  };
+
+  // Handle address selection
+  const handleAddressSelect = async (suggestion) => {
+    setAddressInput(suggestion.description);
+    setShowSuggestions(false);
+    setAddressSuggestions([]);
+
+    // Fetch place details to get address components
+    if (suggestion.placeId) {
+      try {
+        setLoadingAddress(true);
+        const response = await fetch(`${API_URL}/api/address/details?placeId=${encodeURIComponent(suggestion.placeId)}`);
+        const data = await response.json();
+
+        if (data.success && data.place) {
+          const { formattedAddress, addressComponents } = data.place;
+          setAddressInput(formattedAddress);
+          updateMultipleFields({
+            houseNumber: addressComponents.houseNumber || '',
+            streetName: addressComponents.streetName || '',
+            suburb: addressComponents.suburb || '',
+            state: addressComponents.state || '',
+            postcode: addressComponents.postcode || '',
+            address: formattedAddress
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching place details:', error);
+      } finally {
+        setLoadingAddress(false);
+      }
+    }
+  };
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
   }, []);
 
   const handleChange = (field) => (e) => {
@@ -239,20 +372,123 @@ export default function OnboardingStep1() {
 </Box>
 
 
-        {/* Address */}
-        <TextField
-          fullWidth
-          label="Address"
-          value={formData.address}
-          onChange={handleChange('address')}
-          multiline
-          rows={2}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
-            },
-          }}
-        />
+        {/* Address Autocomplete */}
+        <Box sx={{ position: 'relative' }}>
+          <TextField
+            id="address-autocomplete-input"
+            fullWidth
+            label="Address"
+            placeholder="Start typing your address (e.g., 20a esther)"
+            value={addressInput || formData.address || ''}
+            onChange={(e) => {
+              handleAddressInputChange(e, e.target.value);
+            }}
+            onFocus={() => {
+              if (addressSuggestions.length > 0) {
+                setShowSuggestions(true);
+              }
+            }}
+            onBlur={() => {
+              // Delay hiding suggestions to allow click events
+              setTimeout(() => setShowSuggestions(false), 200);
+            }}
+            error={!!errors.address}
+            helperText={errors.address || 'Start typing to see address suggestions'}
+            InputProps={{
+              endAdornment: loadingAddress ? <CircularProgress size={20} /> : null,
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '8px',
+              },
+            }}
+          />
+          
+          {/* Address Suggestions Dropdown */}
+          {showSuggestions && addressSuggestions.length > 0 && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                zIndex: 1000,
+                mt: 0.5,
+                bgcolor: 'white',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                maxHeight: '300px',
+                overflowY: 'auto',
+              }}
+            >
+              {addressSuggestions.map((suggestion, index) => (
+                <Box
+                  key={suggestion.placeId || index}
+                  onClick={() => handleAddressSelect(suggestion)}
+                  sx={{
+                    p: 1.5,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      bgcolor: '#f8fafc',
+                    },
+                    borderBottom: index < addressSuggestions.length - 1 ? '1px solid #e2e8f0' : 'none',
+                  }}
+                >
+                  <Typography sx={{ fontSize: '0.875rem', color: '#0f172a' }}>
+                    {suggestion.description}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          )}
+          
+          {/* Display parsed address components */}
+          {(formData.houseNumber || formData.streetName || formData.suburb || formData.state || formData.postcode) && (
+            <Box sx={{ mt: 2, p: 2, bgcolor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <Typography sx={{ fontSize: '0.75rem', color: '#64748b', mb: 1, fontWeight: 600 }}>
+                Address Details:
+              </Typography>
+              <Grid container spacing={1}>
+                {formData.houseNumber && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography sx={{ fontSize: '0.75rem', color: '#0f172a' }}>
+                      <strong>House Number:</strong> {formData.houseNumber}
+                    </Typography>
+                  </Grid>
+                )}
+                {formData.streetName && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography sx={{ fontSize: '0.75rem', color: '#0f172a' }}>
+                      <strong>Street:</strong> {formData.streetName}
+                    </Typography>
+                  </Grid>
+                )}
+                {formData.suburb && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography sx={{ fontSize: '0.75rem', color: '#0f172a' }}>
+                      <strong>Suburb:</strong> {formData.suburb}
+                    </Typography>
+                  </Grid>
+                )}
+                {formData.state && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography sx={{ fontSize: '0.75rem', color: '#0f172a' }}>
+                      <strong>State:</strong> {formData.state}
+                    </Typography>
+                  </Grid>
+                )}
+                {formData.postcode && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography sx={{ fontSize: '0.75rem', color: '#0f172a' }}>
+                      <strong>Postcode:</strong> {formData.postcode}
+                    </Typography>
+                  </Grid>
+                )}
+              </Grid>
+            </Box>
+          )}
+        </Box>
 
         {/* Open to Relocate */}
         <FormControlLabel

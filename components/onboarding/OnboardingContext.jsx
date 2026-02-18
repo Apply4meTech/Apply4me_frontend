@@ -58,6 +58,12 @@ export const OnboardingProvider = ({ children }) => {
     phoneCode: '+61', // Australia by default
     phone: '',
     address: '',
+    // Separate address fields
+    houseNumber: '',
+    streetName: '',
+    suburb: '',
+    state: '',
+    postcode: '',
     openToRelocate: false,
     countryOfWork: 'Australia', // Australia by default
     visaSponsorshipRequired: false,
