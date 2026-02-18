@@ -75,6 +75,7 @@ export default function ProfilePage() {
     linkedinProfile: '',
     personalBlog: '',
     resume_details: null,
+    optimizedResumeDetails: null,
     cv_details: null,
     profilePicture: null,
   });
@@ -154,6 +155,7 @@ export default function ProfilePage() {
           linkedinProfile: data.user.linkedinProfile || '',
           personalBlog: data.user.personalBlog || '',
           resume_details: data.user.resume_details || null,
+          optimizedResumeDetails: data.user.optimizedResumeDetails || null,
           cv_details: data.user.cv_details || null,
           profilePicture: data.user.profilePicture || null,
         });
@@ -631,6 +633,56 @@ export default function ProfilePage() {
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
                 />
                 
+                {formData.optimizedResumeDetails && (
+                  <Paper 
+                    sx={{ 
+                      p: 2, 
+                      border: '1px solid #e2e8f0', 
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      bgcolor: '#f0fdf4',
+                      borderColor: '#16a34a',
+                      '&:hover': {
+                        borderColor: '#16a34a',
+                        bgcolor: '#dcfce7',
+                      }
+                    }}
+                    onClick={() => {
+                      if (formData.optimizedResumeDetails?.url) {
+                        window.open(formData.optimizedResumeDetails.url, '_blank');
+                      }
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <DescriptionIcon sx={{ color: '#16a34a', fontSize: 32 }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
+                            {formData.optimizedResumeDetails.fileName}
+                          </Typography>
+                          <Chip 
+                            label="ATS Optimized" 
+                            size="small" 
+                            sx={{ 
+                              height: 20, 
+                              fontSize: '0.65rem',
+                              bgcolor: '#16a34a',
+                              color: 'white',
+                              fontWeight: 600
+                            }} 
+                          />
+                        </Box>
+                        <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                          {formatFileSize(formData.optimizedResumeDetails.fileSize)}
+                        </Typography>
+                      </Box>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: 500 }}>
+                        Click to view
+                      </Typography>
+                    </Box>
+                  </Paper>
+                )}
+                
                 {formData.resume_details && (
                   <Paper 
                     sx={{ 
@@ -652,9 +704,22 @@ export default function ProfilePage() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <DescriptionIcon sx={{ color: '#2463eb', fontSize: 32 }} />
                       <Box sx={{ flex: 1 }}>
-                        <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
-                          {formData.resume_details.fileName}
-                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
+                            {formData.resume_details.fileName}
+                          </Typography>
+                          <Chip 
+                            label="Original" 
+                            size="small" 
+                            sx={{ 
+                              height: 20, 
+                              fontSize: '0.65rem',
+                              bgcolor: '#64748b',
+                              color: 'white',
+                              fontWeight: 600
+                            }} 
+                          />
+                        </Box>
                         <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
                           {formatFileSize(formData.resume_details.fileSize)}
                         </Typography>

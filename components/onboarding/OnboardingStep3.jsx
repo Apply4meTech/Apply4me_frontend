@@ -16,6 +16,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import ResumeATSReport from './ResumeATSReport';
 
 // Ensure API_URL doesn't end with /api to avoid double /api/api
 const getApiUrl = () => {
@@ -28,6 +29,7 @@ export default function OnboardingStep3() {
   const { formData, updateFormData, errors, setFieldError } = useOnboarding();
   const [uploadingResume, setUploadingResume] = useState(false);
   const [uploadingCV, setUploadingCV] = useState(false);
+  const [resumeUploaded, setResumeUploaded] = useState(false);
 
   const handleChange = (field) => (e) => {
     const value = e.target.value;
@@ -121,6 +123,11 @@ export default function OnboardingStep3() {
         // Save file details to form data
         const detailsKey = isResume ? 'resume_details' : 'cv_details';
         updateFormData(detailsKey, data.fileDetails);
+        
+        // If resume was uploaded, trigger ATS report display
+        if (isResume) {
+          setResumeUploaded(true);
+        }
       } else {
         throw new Error('Invalid response from server');
       }
@@ -161,6 +168,11 @@ export default function OnboardingStep3() {
       if (response.ok && data.success) {
         // Remove from form data
         updateFormData(detailsKey, null);
+        
+        // If resume was deleted, reset ATS report state
+        if (isResume) {
+          setResumeUploaded(false);
+        }
       } else {
         throw new Error(data.error || 'Failed to delete file');
       }
@@ -277,6 +289,19 @@ export default function OnboardingStep3() {
             </Box>
           )}
         </Box>
+
+        {/* ATS Report - Show after resume is uploaded */}
+        {formData.resume_details && (
+          <Box sx={{ mt: 3 }}>
+            <ResumeATSReport 
+              resumeUploaded={resumeUploaded}
+              onOptimizeComplete={(data) => {
+                console.log('Resume optimized:', data);
+                // Optionally refresh or show success message
+              }}
+            />
+          </Box>
+        )}
 
         {/* CV (Cover Letter) Upload */}
         <Box>

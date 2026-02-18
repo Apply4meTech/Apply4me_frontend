@@ -233,53 +233,40 @@ export default function DashboardContent() {
                   border: '1px solid #e2e8f0',
                   bgcolor: 'white',
                   textDecoration: 'none',
+                  color: 'inherit',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
-                  position: 'relative',
-                  overflow: 'hidden',
+                  display: 'block',
                   '&:hover': {
                     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                   },
+                  '& *': {
+                    textDecoration: 'none',
+                  },
                 }}
               >
-                {/* Blue left border bar */}
-                {userPlan && userPlan.plan && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      bottom: 0,
-                      width: '4px',
-                      bgcolor: '#2463eb',
-                    }}
-                  />
-                )}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5, pl: userPlan && userPlan.plan ? 0 : 0 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
                   <CardMembershipIcon sx={{ color: '#64748b', fontSize: '1.125rem' }} />
                   <Typography sx={{ fontSize: '0.875rem', color: '#64748b' }}>
                     Current Plan
                   </Typography>
                 </Box>
-                {userPlan && userPlan.plan ? (
-                  <>
-                    <Typography sx={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', mb: 0.5, wordBreak: 'break-word' }}>
-                      {userPlan.plan.name}
-                    </Typography>
-                    <Typography sx={{ fontSize: '0.875rem', color: '#64748b', wordBreak: 'break-word' }}>
-                      ${userPlan.plan.price} {userPlan.plan.currency}
-                    </Typography>
-                  </>
-                ) : (
-                  <>
-                    <Typography sx={{ fontSize: '1.25rem', fontWeight: 600, color: '#94a3b8', mb: 0.5, wordBreak: 'break-word' }}>
-                      No active plan
-                    </Typography>
-                    <Typography sx={{ fontSize: '0.75rem', color: '#2463eb', wordBreak: 'break-word' }}>
-                      View Plans →
-                    </Typography>
-                  </>
-                )}
+                <Typography sx={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', mb: 1, wordBreak: 'break-word' }}>
+                  {userPlan && userPlan.plan ? userPlan.plan.name : 'No current plan'}
+                </Typography>
+                <Typography 
+                  sx={{ 
+                    fontSize: '0.875rem', 
+                    color: '#2463eb', 
+                    wordBreak: 'break-word',
+                    display: 'block',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  {userPlan && userPlan.plan ? 'View Plan →' : 'Go to Plan →'}
+                </Typography>
               </Paper>
             </Grid>
           </Grid>
@@ -391,17 +378,46 @@ export default function DashboardContent() {
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
                           {application.files?.resume && (
-                            <Tooltip title={`Resume: ${application.files.resume.fileName}`} arrow>
-                              <IconButton
-                                size="small"
-                                onClick={() => window.open(application.files.resume.url, '_blank')}
-                                sx={{
-                                  color: '#2463eb',
-                                  '&:hover': { bgcolor: '#eff6ff' },
-                                }}
-                              >
-                                <DescriptionIcon fontSize="small" />
-                              </IconButton>
+                            <Tooltip 
+                              title={
+                                application.files.resume.type === 'optimized' 
+                                  ? `ATS Optimized Resume: ${application.files.resume.fileName}` 
+                                  : application.files.resume.type === 'original'
+                                  ? `Original Resume: ${application.files.resume.fileName}`
+                                  : `Resume: ${application.files.resume.fileName}`
+                              } 
+                              arrow
+                            >
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => window.open(application.files.resume.url, '_blank')}
+                                  sx={{
+                                    color: application.files.resume.type === 'optimized' ? '#16a34a' : '#2463eb',
+                                    '&:hover': { 
+                                      bgcolor: application.files.resume.type === 'optimized' ? '#dcfce7' : '#eff6ff' 
+                                    },
+                                  }}
+                                >
+                                  <DescriptionIcon fontSize="small" />
+                                </IconButton>
+                                {application.files.resume.type === 'optimized' && (
+                                  <Chip 
+                                    label="ATS" 
+                                    size="small" 
+                                    sx={{ 
+                                      height: 18, 
+                                      fontSize: '0.6rem',
+                                      bgcolor: '#16a34a',
+                                      color: 'white',
+                                      fontWeight: 600,
+                                      '& .MuiChip-label': {
+                                        px: 0.75
+                                      }
+                                    }} 
+                                  />
+                                )}
+                              </Box>
                             </Tooltip>
                           )}
                           {application.files?.coverLetter && (

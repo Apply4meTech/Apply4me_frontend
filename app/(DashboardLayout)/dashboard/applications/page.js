@@ -341,17 +341,46 @@ export default function ApplicationsPage() {
                           <TableCell>
                             <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
                               {application.files?.resume && (
-                                <Tooltip title={`Resume: ${application.files.resume.fileName}`} arrow>
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => window.open(application.files.resume.url, '_blank')}
-                                    sx={{
-                                      color: '#2463eb',
-                                      '&:hover': { bgcolor: '#eff6ff' },
-                                    }}
-                                  >
-                                    <DescriptionIcon fontSize="small" />
-                                  </IconButton>
+                                <Tooltip 
+                                  title={
+                                    application.files.resume.type === 'optimized' 
+                                      ? `ATS Optimized Resume: ${application.files.resume.fileName}` 
+                                      : application.files.resume.type === 'original'
+                                      ? `Original Resume: ${application.files.resume.fileName}`
+                                      : `Resume: ${application.files.resume.fileName}`
+                                  } 
+                                  arrow
+                                >
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => window.open(application.files.resume.url, '_blank')}
+                                      sx={{
+                                        color: application.files.resume.type === 'optimized' ? '#16a34a' : '#2463eb',
+                                        '&:hover': { 
+                                          bgcolor: application.files.resume.type === 'optimized' ? '#dcfce7' : '#eff6ff' 
+                                        },
+                                      }}
+                                    >
+                                      <DescriptionIcon fontSize="small" />
+                                    </IconButton>
+                                    {application.files.resume.type === 'optimized' && (
+                                      <Chip 
+                                        label="ATS" 
+                                        size="small" 
+                                        sx={{ 
+                                          height: 18, 
+                                          fontSize: '0.6rem',
+                                          bgcolor: '#16a34a',
+                                          color: 'white',
+                                          fontWeight: 600,
+                                          '& .MuiChip-label': {
+                                            px: 0.75
+                                          }
+                                        }} 
+                                      />
+                                    )}
+                                  </Box>
                                 </Tooltip>
                               )}
                               {application.files?.coverLetter && (
