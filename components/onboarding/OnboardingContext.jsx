@@ -100,7 +100,6 @@ export const OnboardingProvider = ({ children }) => {
     if (user) {
       setFormData((prev) => {
         const updated = { ...prev };
-        // Only prefill if fields are empty
         if (!updated.email && user.email) {
           updated.email = user.email;
         }
@@ -112,7 +111,6 @@ export const OnboardingProvider = ({ children }) => {
     }
   }, [user]);
 
-  // Save to localStorage whenever formData changes (for temporary storage during form filling)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('onboardingData', JSON.stringify(formData));
