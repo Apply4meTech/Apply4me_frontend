@@ -24,6 +24,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import NoteIcon from '@mui/icons-material/Note';
 import SaveIcon from '@mui/icons-material/Save';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
 const getApiUrl = () => {
@@ -37,6 +38,9 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
   const [fileType, setFileType] = useState(null);
   const [notes, setNotes] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
+  const [jobDescription, setJobDescription] = useState('');
+  const [savingMetadata, setSavingMetadata] = useState(false);
+  const [customizingResume, setCustomizingResume] = useState(false);
 
   const formatFileSize = (bytes) => {
     if (!bytes) return '0 Bytes';
@@ -134,10 +138,11 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
     }
   };
 
-  // Load notes when job changes
+  // Load notes and job description when job changes
   useEffect(() => {
     if (job) {
       setNotes(job.notes || '');
+      setJobDescription((job.metadata && job.metadata.description) || '');
     }
   }, [job]);
 
@@ -179,6 +184,91 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
     }
   };
 
+  const handleSaveJobDescription = async () => {
+    if (!job) return;
+
+    try {
+      setSavingMetadata(true);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Authentication required');
+        return;
+      }
+
+      const response = await fetch(`${getApiUrl()}/api/employee/jobs/${job.id}/metadata`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ description: jobDescription }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        alert('Job description saved. You can now use "Customize resume" if this user has a Pro/Standard/Premium plan.');
+        if (onUpdate) {
+          onUpdate();
+        }
+      } else {
+        alert(data.error || 'Failed to save job description');
+      }
+    } catch (error) {
+      console.error('Error saving job description:', error);
+      alert('Failed to save job description');
+    } finally {
+      setSavingMetadata(false);
+    }
+  };
+
+  const handleCustomizeResume = async () => {
+    if (!job || !job.canCustomizeResume) return;
+
+    const desc = jobDescription.trim() || (job.metadata && job.metadata.description) || '';
+    if (!desc || desc.length < 20) {
+      alert('Please paste the job description above (at least 20 characters), then click Customize resume.');
+      return;
+    }
+
+    try {
+      setCustomizingResume(true);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Authentication required');
+        return;
+      }
+
+      const response = await fetch(`${getApiUrl()}/api/employee/jobs/${job.id}/customize-resume`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ description: desc }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        if (data.downloadUrl) {
+          window.open(data.downloadUrl, '_blank');
+        }
+        alert(
+          (data.message || 'Customized resume ready.') +
+          ' Download the file, then upload it as Resume above and upload a screenshot proof.'
+        );
+      } else {
+        alert(data.error || 'Failed to generate customized resume');
+      }
+    } catch (error) {
+      console.error('Error customizing resume:', error);
+      alert('Failed to generate customized resume');
+    } finally {
+      setCustomizingResume(false);
+    }
+  };
+
   if (!job) return null;
 
   return (
@@ -188,46 +278,111 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
       </DialogTitle>
       <DialogContent>
         {mode === 'fill' ? (
-          // Fill Data mode - Only show Notes tab
-          <Box>
-            <TextField
-              fullWidth
-              multiline
-              rows={12}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add your notes here..."
-              sx={{
-                mt: 2,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: '8px',
-                  fontFamily: 'inherit',
-                },
-              }}
-            />
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-              <Button
-                variant="contained"
-                startIcon={savingNotes ? <CircularProgress size={16} /> : <SaveIcon />}
-                onClick={handleSaveNotes}
-                disabled={savingNotes}
-                sx={{
-                  bgcolor: '#2463eb',
-                  color: 'white',
-                  textTransform: 'none',
-                  borderRadius: '8px',
-                  '&:hover': { bgcolor: '#1d4ed8' },
-                  '&:disabled': { bgcolor: '#cbd5e1' },
-                }}
-              >
-                {savingNotes ? 'Saving...' : 'Save Notes'}
-              </Button>
-            </Box>
-            {job.notesUpdatedAt && (
-              <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', mt: 1 }}>
-                Last updated: {new Date(job.notesUpdatedAt).toLocaleString()}
+          // Fill Data mode - Job description, Customize resume (if eligible), Uploads, Notes
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {/* Job description - paste then save so Customize resume can use it */}
+            <Box>
+              <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', mb: 1 }}>
+                Job description (paste from job posting)
               </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={6}
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                placeholder="Paste the full job description here. Save before using Customize resume."
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                    fontFamily: 'inherit',
+                  },
+                }}
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={savingMetadata ? <CircularProgress size={16} /> : <SaveIcon />}
+                  onClick={handleSaveJobDescription}
+                  disabled={savingMetadata}
+                  sx={{ textTransform: 'none', borderRadius: '8px' }}
+                >
+                  {savingMetadata ? 'Saving...' : 'Save job description'}
+                </Button>
+              </Box>
+            </Box>
+
+            {/* Customize resume - only for non-Starter (Pro/Standard/Premium) */}
+            {job.canCustomizeResume && (
+              <Paper sx={{ p: 2, bgcolor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px' }}>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#166534', mb: 1 }}>
+                  Customized resume (this user has {job.userPlanName || 'Pro'} plan)
+                </Typography>
+                <Typography sx={{ fontSize: '0.8rem', color: '#15803d', mb: 2 }}>
+                  Generate a resume tailored to the job description above. Then upload the downloaded file as Resume and add a screenshot proof.
+                </Typography>
+                <Button
+                  variant="contained"
+                  startIcon={customizingResume ? <CircularProgress size={18} color="inherit" /> : <AutoAwesomeIcon />}
+                  onClick={handleCustomizeResume}
+                  disabled={customizingResume}
+                  sx={{
+                    bgcolor: '#16a34a',
+                    textTransform: 'none',
+                    borderRadius: '8px',
+                    '&:hover': { bgcolor: '#15803d' },
+                    '&:disabled': { bgcolor: '#94a3b8' },
+                  }}
+                >
+                  {customizingResume ? 'Generating...' : 'Customize resume'}
+                </Button>
+              </Paper>
             )}
+
+            {/* Notes */}
+            <Box>
+              <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', mb: 1 }}>
+                Notes
+              </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={6}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add your notes here..."
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                    fontFamily: 'inherit',
+                  },
+                }}
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={savingNotes ? <CircularProgress size={16} /> : <SaveIcon />}
+                  onClick={handleSaveNotes}
+                  disabled={savingNotes}
+                  sx={{
+                    bgcolor: '#2463eb',
+                    textTransform: 'none',
+                    borderRadius: '8px',
+                    '&:hover': { bgcolor: '#1d4ed8' },
+                    '&:disabled': { bgcolor: '#cbd5e1' },
+                  }}
+                >
+                  {savingNotes ? 'Saving...' : 'Save Notes'}
+                </Button>
+              </Box>
+              {job.notesUpdatedAt && (
+                <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', mt: 0.5 }}>
+                  Last updated: {new Date(job.notesUpdatedAt).toLocaleString()}
+                </Typography>
+              )}
+            </Box>
           </Box>
         ) : (
           // View mode - Show all tabs
@@ -475,32 +630,6 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
                   </Button>
                 </Box>
               )}
-              {job.notesUpdatedAt && (
-                <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', mt: 1 }}>
-                  Last updated: {new Date(job.notesUpdatedAt).toLocaleString()}
-                </Typography>
-              )}
-            </Box>
-          )}
-
-          {/* Notes Tab */}
-          {activeTab === 3 && (
-            <Box>
-              <TextField
-                fullWidth
-                multiline
-                rows={12}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add your notes here..."
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                    fontFamily: 'inherit',
-                  },
-                }}
-                disabled={true}
-              />
               {job.notesUpdatedAt && (
                 <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', mt: 1 }}>
                   Last updated: {new Date(job.notesUpdatedAt).toLocaleString()}

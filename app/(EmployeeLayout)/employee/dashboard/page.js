@@ -43,6 +43,8 @@ import PeopleIcon from '@mui/icons-material/People';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import SettingsIcon from '@mui/icons-material/Settings';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import Tooltip from '@mui/material/Tooltip';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import ViewDataModal from '../../../../components/employee/ViewDataModal';
@@ -765,7 +767,14 @@ export default function EmployeeDashboard() {
                         {index + 1}
                       </TableCell>
                       <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem', fontWeight: 600 }}>
-                        {job.company}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {job.canCustomizeResume && (
+                            <Tooltip title={`Customized resume available (${job.userPlanName || 'Pro'} plan)`}>
+                              <AutoAwesomeIcon sx={{ color: '#16a34a', fontSize: '1.1rem' }} />
+                            </Tooltip>
+                          )}
+                          {job.company}
+                        </Box>
                       </TableCell>
                       <TableCell>
                         {job.link ? (
