@@ -127,7 +127,6 @@ export default function Footer() {
             </Box>
           </Box>
 
-          {/* Legal links */}
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography component="span" sx={sectionHeadingSx}>
               Legal
