@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   TextField,
@@ -11,8 +11,17 @@ import {
   Chip,
   Autocomplete,
   Grid,
+  CircularProgress,
+  InputAdornment,
+  Button,
 } from '@mui/material';
 import { useOnboarding } from './OnboardingContext';
+
+const OTHERS_OPTION = '__OTHERS__';
+const getApiUrl = () => {
+  const url = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+  return url.endsWith('/api') ? url.slice(0, -4) : url;
+};
 
 const seniorityLevels = [
   'Intern',
@@ -36,7 +45,61 @@ const workLocations = [
 
 export default function OnboardingStep2() {
   const { formData, updateFormData, errors, setFieldError } = useOnboarding();
-  const [jobTitleInput, setJobTitleInput] = useState('');
+  const [jobTitlesMasterList, setJobTitlesMasterList] = useState([]);
+  const [loadingJobTitles, setLoadingJobTitles] = useState(true);
+  const [showCustomJobTitleInput, setShowCustomJobTitleInput] = useState(false);
+  const [customJobTitleValue, setCustomJobTitleValue] = useState('');
+  const [addingCustomTitle, setAddingCustomTitle] = useState(false);
+  const API_URL = getApiUrl();
+
+  useEffect(() => {
+    const fetchJobTitles = async () => {
+      try {
+        setLoadingJobTitles(true);
+        const res = await fetch(`${API_URL}/api/job-titles`);
+        const data = await res.json();
+        if (data.success && Array.isArray(data.jobTitles)) {
+          setJobTitlesMasterList(data.jobTitles);
+        }
+      } catch (err) {
+        console.error('Error fetching job titles:', err);
+      } finally {
+        setLoadingJobTitles(false);
+      }
+    };
+    fetchJobTitles();
+  }, []);
+
+  const options = [...jobTitlesMasterList, OTHERS_OPTION];
+
+  const handleAddCustomJobTitle = async () => {
+    const trimmed = customJobTitleValue?.trim();
+    if (!trimmed || formData.primaryJobTitles?.length >= 3) return;
+    if (formData.primaryJobTitles?.includes(trimmed)) {
+      setCustomJobTitleValue('');
+      setShowCustomJobTitleInput(false);
+      return;
+    }
+    setAddingCustomTitle(true);
+    try {
+      await fetch(`${API_URL}/api/job-titles`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: trimmed }),
+      });
+      setJobTitlesMasterList((prev) => (prev.includes(trimmed) ? prev : [...prev, trimmed]));
+      updateFormData('primaryJobTitles', [...(formData.primaryJobTitles || []), trimmed]);
+      setCustomJobTitleValue('');
+      setShowCustomJobTitleInput(false);
+    } catch (err) {
+      console.error('Error adding job title:', err);
+      updateFormData('primaryJobTitles', [...(formData.primaryJobTitles || []), trimmed]);
+      setCustomJobTitleValue('');
+      setShowCustomJobTitleInput(false);
+    } finally {
+      setAddingCustomTitle(false);
+    }
+  };
 
   const handleChange = (field) => (e) => {
     let value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
@@ -77,42 +140,54 @@ export default function OnboardingStep2() {
             Primary Job Title (Max 3) <span style={{ color: '#dc2626' }}>*</span>
           </Typography>
           <Autocomplete
-            freeSolo
             multiple
-            options={[]}
+            options={options}
             value={formData.primaryJobTitles || []}
+            loading={loadingJobTitles}
+            getOptionLabel={(option) => (option === OTHERS_OPTION ? 'Others (enter custom)' : option)}
             onChange={(event, newValue) => {
-              // Limit to 3 job titles
-              if (newValue.length <= 3) {
-                updateFormData('primaryJobTitles', newValue);
+              const filtered = newValue.filter((v) => v !== OTHERS_OPTION);
+              if (newValue.includes(OTHERS_OPTION)) {
+                setShowCustomJobTitleInput(true);
+              }
+              if (filtered.length <= 3) {
+                updateFormData('primaryJobTitles', filtered);
               }
             }}
-            inputValue={jobTitleInput}
-            onInputChange={(event, newInputValue) => {
-              setJobTitleInput(newInputValue);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' && jobTitleInput.trim() && formData.primaryJobTitles.length < 3) {
-                event.preventDefault();
-                const trimmedValue = jobTitleInput.trim();
-                if (!formData.primaryJobTitles.includes(trimmedValue)) {
-                  updateFormData('primaryJobTitles', [...formData.primaryJobTitles, trimmedValue]);
-                  setJobTitleInput('');
-                }
-              }
+            filterOptions={(opts, { inputValue }) => {
+              const list = opts.filter((o) => o !== OTHERS_OPTION);
+              const others = opts.find((o) => o === OTHERS_OPTION);
+              if (!inputValue) return opts;
+              const search = inputValue.toLowerCase();
+              const filtered = list.filter((o) => o.toLowerCase().includes(search));
+              return others !== undefined ? [...filtered, OTHERS_OPTION] : filtered;
             }}
             renderInput={(params) => (
               <TextField
                 {...params}
-                placeholder="Enter job title and press Enter"
-                error={errors.primaryJobTitles ? true : false}
-                helperText={errors.primaryJobTitles || (formData.primaryJobTitles.length >= 3 ? 'Maximum 3 job titles reached' : 'Press Enter to add job title')}
+                placeholder="Select from list or choose Others for custom"
+                error={!!errors.primaryJobTitles}
+                helperText={errors.primaryJobTitles || (formData.primaryJobTitles?.length >= 3 ? 'Maximum 3 job titles reached' : 'Select from list or choose Others to enter custom job title')}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {loadingJobTitles ? <CircularProgress size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '8px',
                   },
                 }}
               />
+            )}
+            renderOption={(props, option) => (
+              <Box component="li" {...props} key={option}>
+                {option === OTHERS_OPTION ? 'Others (enter custom)' : option}
+              </Box>
             )}
             renderTags={(value, getTagProps) =>
               value.map((option, index) => {
@@ -134,6 +209,59 @@ export default function OnboardingStep2() {
               })
             }
           />
+          {showCustomJobTitleInput && (
+            <Box sx={{ mt: 2, display: 'flex', gap: 1, alignItems: 'center' }}>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Enter your job title"
+                value={customJobTitleValue}
+                onChange={(e) => setCustomJobTitleValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddCustomJobTitle();
+                  }
+                }}
+                disabled={formData.primaryJobTitles?.length >= 3 || addingCustomTitle}
+                InputProps={{
+                  endAdornment: addingCustomTitle ? (
+                    <InputAdornment position="end">
+                      <CircularProgress size={20} />
+                    </InputAdornment>
+                  ) : null,
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                  },
+                }}
+              />
+              <Button
+                variant="contained"
+                size="small"
+                onClick={handleAddCustomJobTitle}
+                disabled={!customJobTitleValue?.trim() || formData.primaryJobTitles?.length >= 3 || addingCustomTitle}
+                sx={{
+                  bgcolor: '#2463eb',
+                  textTransform: 'none',
+                  borderRadius: '8px',
+                }}
+              >
+                Add
+              </Button>
+              <Button
+                size="small"
+                onClick={() => {
+                  setShowCustomJobTitleInput(false);
+                  setCustomJobTitleValue('');
+                }}
+                sx={{ textTransform: 'none' }}
+              >
+                Cancel
+              </Button>
+            </Box>
+          )}
         </Box>
 
         {/* Total Years of Experience */}

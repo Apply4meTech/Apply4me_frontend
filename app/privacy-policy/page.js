@@ -203,7 +203,7 @@ export default function PrivacyPolicy() {
               </Typography>
               <Box sx={{ mt: 2, p: 3, bgcolor: '#f1f5f9', borderRadius: '8px' }}>
                 <Typography sx={{ color: '#1E293B', fontWeight: 600 }}>ApplyForMe</Typography>
-                <Typography sx={{ color: '#475569' }}>📧 Contact: contactus@applyforme.com</Typography>
+                <Typography sx={{ color: '#475569' }}>📧 Contact: contactus@applyforme.com.au</Typography>
               </Box>
             </Box>
           </Box>
