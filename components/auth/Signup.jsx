@@ -97,7 +97,6 @@ export default function Signup() {
       
       if (data.success && data.token) {
         dispatch(loginSuccess({ token: data.token, user: data.user }));
-        // Clear any stale onboarding data so new user gets fresh form (only name + email prefilled)
         if (typeof window !== 'undefined') {
           localStorage.removeItem('onboardingData');
         }
