@@ -109,7 +109,6 @@ export default function Signup() {
     }
   };
 
-  // Mobile/Tablet View - Card with gradient background (fixed viewport so no page scroll on real mobile)
   if (isMobileOrTablet) {
     return (
       <Box
