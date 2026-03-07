@@ -52,7 +52,7 @@ const getMenuItems = (userRole) => {
   if (userRole === 'super_admin') {
     items.push(
       { text: 'Blogs', icon: <ArticleIcon />, path: '/employee/blogs' },
-      { text: 'Plan Management', icon: <AdminPanelSettingsIcon />, path: '/dashboard/admin/plans' }
+      { text: 'Plan Management', icon: <AdminPanelSettingsIcon />, path: '/employee/admin/plans' }
     );
   }
 

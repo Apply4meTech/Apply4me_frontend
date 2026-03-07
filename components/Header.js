@@ -12,7 +12,7 @@ const Header = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down(650));
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -156,7 +156,7 @@ const Header = () => {
 
           {/* CTA Button */}
           {isAuthenticated ? (
-            <Link href="/dashboard" style={{ textDecoration: 'none' }}>
+            <Link href={user?.isEmployee ? '/employee/dashboard' : '/dashboard'} style={{ textDecoration: 'none' }}>
               <Button variant="primary">Dashboard</Button>
             </Link>
           ) : (
@@ -323,7 +323,7 @@ const Header = () => {
           {/* CTA Button at Bottom */}
           <Box sx={{ marginTop: 'auto', paddingTop: '1.5rem' }}>
             {isAuthenticated ? (
-              <Link href="/dashboard" style={{ textDecoration: 'none', width: '100%', display: 'block' }} onClick={() => setMobileMenuOpen(false)}>
+              <Link href={user?.isEmployee ? '/employee/dashboard' : '/dashboard'} style={{ textDecoration: 'none', width: '100%', display: 'block' }} onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="primary" fullWidth>
                   Dashboard
                 </Button>

@@ -92,6 +92,14 @@ export default function DashboardLayout({ children }) {
   }, [dispatch, isAuthenticated]);
 
   useEffect(() => {
+    // Redirect employees to their dashboard - they use Employee auth, not User auth
+    if (isInitialized && isAuthenticated && user?.isEmployee) {
+      // Preserve Plan Management destination if they came from /dashboard/admin/plans
+      const isPlansPage = pathname?.startsWith('/dashboard/admin/plans');
+      router.push(isPlansPage ? '/employee/admin/plans' : '/employee/dashboard');
+      return;
+    }
+
     // Only redirect if we've checked localStorage and still not authenticated
     if (isInitialized && !isAuthenticated) {
       // Double-check localStorage before redirecting
@@ -109,7 +117,7 @@ export default function DashboardLayout({ children }) {
       // Only redirect if truly not authenticated
       router.push('/login');
     }
-  }, [isInitialized, isAuthenticated, router, dispatch]);
+  }, [isInitialized, isAuthenticated, user, pathname, router, dispatch]);
 
   // Check onboarding completion status
   useEffect(() => {

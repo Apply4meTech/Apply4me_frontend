@@ -17,7 +17,7 @@ import MainLayout from '../components/layouts/MainLayout';
 // comment
 
 export default function Home() {
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const router = useRouter();
   const [heroVisible, setHeroVisible] = useState(false);
 
@@ -38,7 +38,7 @@ export default function Home() {
   }, []);
 
   const handleDashboardClick = () => {
-    router.push('/dashboard');
+    router.push(user?.isEmployee ? '/employee/dashboard' : '/dashboard');
   };
 
   return (
