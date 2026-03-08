@@ -28,7 +28,6 @@ export default function Pricing() {
   const [userPlan, setUserPlan] = useState(null);
   const [userPlanLoading, setUserPlanLoading] = useState(false);
   
-  // Redux and Router
   const { token, user, isAuthenticated } = useSelector((state) => state.auth);
   const router = useRouter();
   
