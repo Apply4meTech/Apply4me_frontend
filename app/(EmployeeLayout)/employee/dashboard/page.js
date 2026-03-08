@@ -19,6 +19,7 @@ import {
   Chip, 
   Select, 
   FormControl, 
+  InputLabel,
   ListItemIcon, 
   ListItemText,
   CircularProgress,
@@ -29,7 +30,15 @@ import {
   DialogActions,
   TextField,
   Input,
+  TablePagination,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  InputAdornment,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useSelector } from 'react-redux';
 import MuiLink from '@mui/material/Link';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -41,13 +50,16 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PeopleIcon from '@mui/icons-material/People';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
+import DescriptionIcon from '@mui/icons-material/Description';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import NoteIcon from '@mui/icons-material/Note';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import Tooltip from '@mui/material/Tooltip';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import ViewDataModal from '../../../../components/employee/ViewDataModal';
+import NotesModal from '../../../../components/employee/NotesModal';
 import CreateEmployeeModal from '../../../../components/employee/CreateEmployeeModal';
 import AllEmployeesModal from '../../../../components/employee/AllEmployeesModal';
 
@@ -64,6 +76,7 @@ export default function EmployeeDashboard() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
   const [viewDataOpen, setViewDataOpen] = useState(false);
+  const [notesDialogOpen, setNotesDialogOpen] = useState(false);
   const [createEmployeeOpen, setCreateEmployeeOpen] = useState(false);
   const [allEmployeesOpen, setAllEmployeesOpen] = useState(false);
   const [viewMode, setViewMode] = useState('view');
@@ -87,16 +100,21 @@ export default function EmployeeDashboard() {
     totalPending: 0,
     jobs: []
   });
-  
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
+  const [searchInput, setSearchInput] = useState('');
+  const [filters, setFilters] = useState({ status: 'all', search: '' });
   const isSuperAdmin = user?.role === 'super_admin';
 
   useEffect(() => {
-    fetchDashboardData();
     if (isSuperAdmin) {
       fetchSettings();
       fetchEmployeeStats();
     }
   }, [isSuperAdmin]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [filters, pagination.page, pagination.limit]);
 
   const fetchDashboardData = async () => {
     try {
@@ -108,7 +126,14 @@ export default function EmployeeDashboard() {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`${getApiUrl()}/api/employee/dashboard`, {
+      const params = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+        ...(filters.status !== 'all' && { status: filters.status }),
+        ...(filters.search && { search: filters.search })
+      });
+
+      const response = await fetch(`${getApiUrl()}/api/employee/dashboard?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -122,6 +147,10 @@ export default function EmployeeDashboard() {
 
       if (data.success) {
         setDashboardData(data.data);
+        if (data.data.pagination) {
+          setPagination(data.data.pagination);
+        }
+        return data.data;
       }
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
@@ -129,6 +158,35 @@ export default function EmployeeDashboard() {
     } finally {
       setLoading(false);
     }
+    return null;
+  };
+
+  const handleSearch = () => {
+    setFilters(prev => ({ ...prev, search: searchInput.trim() }));
+    setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
+  const handleClear = () => {
+    setSearchInput('');
+    setFilters(prev => ({ ...prev, search: '' }));
+    setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
+  const handleFilterChange = (field, value) => {
+    setFilters(prev => ({ ...prev, [field]: value }));
+    setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
+  const handlePageChange = (e, page) => {
+    setPagination(prev => ({ ...prev, page: page + 1 }));
+  };
+
+  const handleRowsPerPageChange = (e) => {
+    setPagination(prev => ({
+      ...prev,
+      limit: parseInt(e.target.value, 10),
+      page: 1
+    }));
   };
 
   const handleMenuOpen = (event, job) => {
@@ -183,6 +241,12 @@ export default function EmployeeDashboard() {
         setViewDataOpen(true);
         handleMenuClose(false); // Don't clear selectedJob yet
         return; // Return early to preserve selectedJob
+      }
+    } else if (action === 'notes') {
+      if (selectedJob) {
+        setNotesDialogOpen(true);
+        handleMenuClose(false);
+        return;
       }
     } else if (action === 'email') {
       if (selectedJob) {
@@ -731,50 +795,126 @@ export default function EmployeeDashboard() {
         </Grid>
       </Grid>
 
+      {/* Search & Filters - Accordion for mobile */}
+      <Accordion
+        defaultExpanded={false}
+        sx={{
+          mb: 3,
+          borderRadius: '12px !important',
+          border: '1px solid #e2e8f0',
+          '&:before': { display: 'none' },
+          boxShadow: 'none',
+        }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{
+            bgcolor: '#f8fafc',
+            borderRadius: '12px',
+            '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1 },
+          }}
+        >
+          <SearchIcon sx={{ color: '#64748b' }} />
+          <Typography sx={{ fontWeight: 600, color: '#0f172a' }}>
+            Search & Filters
+            {(filters.search || filters.status !== 'all') && (
+              <Chip label="Active" size="small" sx={{ ml: 1, height: 20, fontSize: '0.7rem' }} />
+            )}
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, flexWrap: 'wrap' }}>
+            <TextField
+              fullWidth
+              placeholder="Search by company, job title..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: '#64748b' }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ flex: { md: 1 }, minWidth: { md: 200 }, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
+            />
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <Button variant="contained" onClick={handleSearch} sx={{ textTransform: 'none', borderRadius: '8px' }}>
+                Search
+              </Button>
+              <Button variant="outlined" onClick={handleClear} startIcon={<ClearIcon />} sx={{ textTransform: 'none', borderRadius: '8px' }}>
+                Clear
+              </Button>
+            </Box>
+            <FormControl sx={{ minWidth: { xs: '100%', md: 160 } }}>
+              <InputLabel>Status</InputLabel>
+              <Select value={filters.status} label="Status" onChange={(e) => handleFilterChange('status', e.target.value)} sx={{ borderRadius: '8px' }}>
+                <MenuItem value="all">All</MenuItem>
+                <MenuItem value="pending">Pending</MenuItem>
+                <MenuItem value="assigned">Assigned</MenuItem>
+                <MenuItem value="completed">Completed</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </AccordionDetails>
+      </Accordion>
+
       {/* Jobs Table */}
       <Paper elevation={0} sx={{ borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-        <TableContainer>
+        <TableContainer sx={{ overflowX: 'auto' }}>
           <Table>
             <TableHead>
               <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', width: '60px', whiteSpace: 'normal', wordBreak: 'break-word' }}>SR No</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>Company Name</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>Link</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>Uploaded Files</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', width: '60px', whiteSpace: 'nowrap' }}>SR No</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>User Name</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Company Name</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Link</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Resume</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Cover Letter</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Date</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Uploaded Files</TableCell>
                 {isSuperAdmin && (
-                  <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>Assigned To</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Assigned To</TableCell>
                 )}
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>Action</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {dashboardData.jobs.length === 0 ? (
+              {                dashboardData.jobs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={isSuperAdmin ? 7 : 6} sx={{ textAlign: 'center', py: 6 }}>
+                  <TableCell colSpan={isSuperAdmin ? 11 : 10} sx={{ textAlign: 'center', py: 6 }}>
                     <Typography sx={{ color: '#64748b' }}>No jobs found</Typography>
                   </TableCell>
                 </TableRow>
               ) : (
                 dashboardData.jobs.map((job, index) => {
                   const statusColors = getStatusColor(job.status);
-                  const hasFiles = job.resume || job.coverLetter || job.screenshotProof;
+                  const hasResume = !!job.resume;
+                  const hasCoverLetter = !!job.coverLetter;
+                  const hasScreenshot = !!job.screenshotProof;
                   const hasNotes = job.notes && job.notes.trim().length > 0;
+                  const fileCount = (hasResume ? 1 : 0) + (hasCoverLetter ? 1 : 0) + (hasScreenshot ? 1 : 0) + (hasNotes ? 1 : 0);
+                  const hasFiles = hasResume || hasCoverLetter || hasScreenshot;
                   
                   return (
                     <TableRow key={job.id} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
                       <TableCell sx={{ color: '#64748b', fontSize: '0.875rem', fontWeight: 500 }}>
-                        {index + 1}
+                        {(pagination.page - 1) * pagination.limit + index + 1}
                       </TableCell>
-                      <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem', fontWeight: 600 }}>
+                      <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem', fontWeight: 500 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           {job.canCustomizeResume && (
-                            <Tooltip title={`Customized resume available (${job.userPlanName || 'Pro'} plan)`}>
+                            <Tooltip title={`User has ${job.userPlanName || 'Pro'} plan – add job description in Fill Data to customize resume`}>
                               <AutoAwesomeIcon sx={{ color: '#16a34a', fontSize: '1.1rem' }} />
                             </Tooltip>
                           )}
-                          {job.company}
+                          {job.userName || job.applicant || 'N/A'}
                         </Box>
+                      </TableCell>
+                      <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem', fontWeight: 600 }}>
+                        {job.company}
                       </TableCell>
                       <TableCell>
                         {job.link ? (
@@ -831,26 +971,67 @@ export default function EmployeeDashboard() {
                         </FormControl>
                       </TableCell>
                       <TableCell>
+                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                          {job.userResumes?.length > 0 ? (
+                            job.userResumes.map((r, i) => (
+                              <Tooltip key={i} title={`${r.label}: ${r.fileName}`}>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => window.open(r.url, '_blank')}
+                                  sx={{
+                                    color: r.type === 'ats' ? '#16a34a' : '#2463eb',
+                                    '&:hover': { bgcolor: r.type === 'ats' ? '#dcfce7' : '#eff6ff' },
+                                    p: 0.5,
+                                  }}
+                                >
+                                  <DescriptionIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            ))
+                          ) : (
+                            <Typography sx={{ color: '#94a3b8', fontSize: '0.75rem', fontStyle: 'italic' }}>—</Typography>
+                          )}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        {job.coverLetter?.url || job.coverLetter?.key ? (
+                          <Tooltip title={job.coverLetter.fileName}>
+                            <IconButton
+                              size="small"
+                              onClick={() => window.open(job.coverLetter?.url || '#', '_blank')}
+                              sx={{ color: '#16a34a', '&:hover': { bgcolor: '#dcfce7' }, p: 0.5 }}
+                            >
+                              <DescriptionIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        ) : (
+                          <Typography sx={{ color: '#94a3b8', fontSize: '0.75rem', fontStyle: 'italic' }}>—</Typography>
+                        )}
+                      </TableCell>
+                      <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
+                        {job.date ? new Date(job.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                      </TableCell>
+                      <TableCell>
                         <Button
                           size="small"
                           variant="outlined"
                           onClick={() => {
                             setSelectedJob(job);
-                            setViewMode('view');
+                            setViewMode(fileCount === 0 ? 'fill' : 'view');
                             setViewDataOpen(true);
                           }}
                           sx={{
                             textTransform: 'none',
                             fontSize: '0.75rem',
-                            borderColor: hasFiles || hasNotes ? '#2463eb' : '#e2e8f0',
-                            color: hasFiles || hasNotes ? '#2463eb' : '#94a3b8',
+                            borderColor: fileCount > 0 ? '#2463eb' : '#16a34a',
+                            color: fileCount > 0 ? '#2463eb' : '#16a34a',
                             '&:hover': {
-                              borderColor: '#1d4ed8',
-                              bgcolor: '#eff6ff',
+                              borderColor: fileCount > 0 ? '#1d4ed8' : '#15803d',
+                              bgcolor: fileCount > 0 ? '#eff6ff' : '#dcfce7',
                             },
                           }}
                         >
-                          {hasFiles || hasNotes ? 'View Files & Notes' : 'No Files'}
+                          {fileCount > 0 ? `View Files & Notes (${fileCount})` : 'Upload Files'}
                         </Button>
                       </TableCell>
                       {isSuperAdmin && (
@@ -870,6 +1051,20 @@ export default function EmployeeDashboard() {
             </TableBody>
           </Table>
         </TableContainer>
+        <TablePagination
+          component="div"
+          count={pagination.total}
+          page={pagination.page - 1}
+          onPageChange={handlePageChange}
+          rowsPerPage={pagination.limit}
+          onRowsPerPageChange={handleRowsPerPageChange}
+          rowsPerPageOptions={[5, 10, 25, 50]}
+          labelRowsPerPage="Rows per page:"
+          sx={{
+            borderTop: '1px solid #e2e8f0',
+            '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': { fontSize: '0.875rem' },
+          }}
+        />
       </Paper>
 
       {/* Action Menu */}
@@ -889,6 +1084,10 @@ export default function EmployeeDashboard() {
         <MenuItem onClick={() => handleAction('fill')}>
           <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Fill Data</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleAction('notes')}>
+          <ListItemIcon><NoteIcon fontSize="small" /></ListItemIcon>
+          <ListItemText>Notes</ListItemText>
         </MenuItem>
         {isSuperAdmin && (
           <MenuItem onClick={() => handleAction('email')}>
@@ -1032,7 +1231,30 @@ export default function EmployeeDashboard() {
         }} 
         job={selectedJob} 
         mode={viewMode}
-        onUpdate={fetchDashboardData}
+        onUpdate={async () => {
+          const data = await fetchDashboardData();
+          if (data?.jobs && selectedJob) {
+            const freshJob = data.jobs.find((j) => j.id === selectedJob.id);
+            if (freshJob) setSelectedJob(freshJob);
+          }
+        }}
+      />
+
+      {/* Notes Modal */}
+      <NotesModal
+        open={notesDialogOpen}
+        onClose={() => {
+          setNotesDialogOpen(false);
+          setSelectedJob(null);
+        }}
+        job={selectedJob}
+        onUpdate={async () => {
+          const data = await fetchDashboardData();
+          if (data?.jobs && selectedJob) {
+            const freshJob = data.jobs.find((j) => j.id === selectedJob.id);
+            if (freshJob) setSelectedJob(freshJob);
+          }
+        }}
       />
       
       {/* Create Employee Modal */}

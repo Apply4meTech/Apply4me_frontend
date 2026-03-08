@@ -4,14 +4,17 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { Box, Container, Typography, Button, CircularProgress } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import MainLayout from '../../../components/layouts/MainLayout';
 import Link from 'next/link';
 import stripeService from '../../../utils/stripeService';
+import { updateUser } from '../../../store/authSlice';
 
 function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const returnTo = searchParams?.get('return_to');
+  const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
   const [verifying, setVerifying] = useState(true);
   const [verified, setVerified] = useState(false);
@@ -33,6 +36,24 @@ function PaymentSuccessContent() {
 
         if (verifyResult.success) {
           setVerified(true);
+          const planName = verifyResult.data?.planName;
+          if (planName === 'ATS_ADDON') {
+            const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+            const base = API_URL.endsWith('/api') ? API_URL.slice(0, -4) : API_URL;
+            try {
+              const planRes = await fetch(`${base}/api/users/my-plan`, { headers: { Authorization: `Bearer ${token}` } });
+              const planData = await planRes.json();
+              if (planData.success && planData.data?.purchasedAddons) {
+                dispatch(updateUser({ purchasedAddons: planData.data.purchasedAddons }));
+              } else {
+                dispatch(updateUser({ purchasedAddons: [{ name: 'resume_rewrite', purchasedAt: new Date() }] }));
+              }
+            } catch {
+              dispatch(updateUser({ purchasedAddons: [{ name: 'resume_rewrite', purchasedAt: new Date() }] }));
+            }
+          } else if (planName) {
+            dispatch(updateUser({ hasActiveSubscription: true, subscription: { planName, status: 'active' } }));
+          }
         } else {
           console.error('Payment verification failed:', verifyResult.message);
         }
@@ -44,18 +65,16 @@ function PaymentSuccessContent() {
     };
 
     verifyPayment();
-  }, [searchParams, token]);
+  }, [searchParams, token, dispatch]);
 
   useEffect(() => {
     if (!verifying && verified) {
-      // Auto-redirect to dashboard after 5 seconds
-      const timer = setTimeout(() => {
-        router.push('/dashboard');
-      }, 5000);
-
+      const returnTo = searchParams?.get('return_to');
+      const redirectPath = returnTo === 'onboarding' ? '/onboarding' : '/dashboard';
+      const timer = setTimeout(() => router.push(redirectPath), 3000);
       return () => clearTimeout(timer);
     }
-  }, [verifying, verified, router]);
+  }, [verifying, verified, router, searchParams]);
 
   return (
     <MainLayout>
@@ -121,7 +140,7 @@ function PaymentSuccessContent() {
                   lineHeight: 1.6,
                 }}
               >
-                Thank you for your subscription. Your plan has been activated and you can now start using all the features.
+                Thank you for your subscription. Your plan has been activated. Complete your onboarding to get started.
               </Typography>
             )}
             <Box
@@ -134,7 +153,7 @@ function PaymentSuccessContent() {
             >
               <Button
                 component={Link}
-                href="/dashboard"
+                href={returnTo === 'onboarding' ? '/onboarding' : '/dashboard'}
                 variant="contained"
                 sx={{
                   backgroundColor: '#2563EB',
@@ -149,7 +168,7 @@ function PaymentSuccessContent() {
                   },
                 }}
               >
-                Go to Dashboard
+                {returnTo === 'onboarding' ? 'Continue to Onboarding' : 'Go to Dashboard'}
               </Button>
               <Button
                 component={Link}
@@ -181,7 +200,7 @@ function PaymentSuccessContent() {
                   fontFamily: 'inherit',
                 }}
               >
-                Redirecting to dashboard in 5 seconds...
+                Redirecting in 3 seconds...
               </Typography>
             )}
           </Box>

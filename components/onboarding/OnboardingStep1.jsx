@@ -8,7 +8,6 @@ import {
   Switch,
   MenuItem,
   Typography,
-  Grid,
   CircularProgress,
   Autocomplete,
 } from '@mui/material';
@@ -440,52 +439,6 @@ export default function OnboardingStep1() {
                   </Typography>
                 </Box>
               ))}
-            </Box>
-          )}
-          
-          {/* Display parsed address components */}
-          {(formData.houseNumber || formData.streetName || formData.suburb || formData.state || formData.postcode) && (
-            <Box sx={{ mt: 2, p: 2, bgcolor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <Typography sx={{ fontSize: '0.75rem', color: '#64748b', mb: 1, fontWeight: 600 }}>
-                Address Details:
-              </Typography>
-              <Grid container spacing={1}>
-                {formData.houseNumber && (
-                  <Grid item xs={12} sm={6}>
-                    <Typography sx={{ fontSize: '0.75rem', color: '#0f172a' }}>
-                      <strong>House Number:</strong> {formData.houseNumber}
-                    </Typography>
-                  </Grid>
-                )}
-                {formData.streetName && (
-                  <Grid item xs={12} sm={6}>
-                    <Typography sx={{ fontSize: '0.75rem', color: '#0f172a' }}>
-                      <strong>Street:</strong> {formData.streetName}
-                    </Typography>
-                  </Grid>
-                )}
-                {formData.suburb && (
-                  <Grid item xs={12} sm={6}>
-                    <Typography sx={{ fontSize: '0.75rem', color: '#0f172a' }}>
-                      <strong>Suburb:</strong> {formData.suburb}
-                    </Typography>
-                  </Grid>
-                )}
-                {formData.state && (
-                  <Grid item xs={12} sm={6}>
-                    <Typography sx={{ fontSize: '0.75rem', color: '#0f172a' }}>
-                      <strong>State:</strong> {formData.state}
-                    </Typography>
-                  </Grid>
-                )}
-                {formData.postcode && (
-                  <Grid item xs={12} sm={6}>
-                    <Typography sx={{ fontSize: '0.75rem', color: '#0f172a' }}>
-                      <strong>Postcode:</strong> {formData.postcode}
-                    </Typography>
-                  </Grid>
-                )}
-              </Grid>
             </Box>
           )}
         </Box>

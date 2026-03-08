@@ -17,13 +17,21 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Pagination,
+  TablePagination,
   CircularProgress,
   Alert,
   Link as MuiLink,
   InputAdornment,
+  Button,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import WorkIcon from '@mui/icons-material/Work';
 import DescriptionIcon from '@mui/icons-material/Description';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -38,6 +46,8 @@ const getApiUrl = () => {
 };
 
 export default function ApplicationsPage() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [applications, setApplications] = useState([]);
@@ -47,6 +57,7 @@ export default function ApplicationsPage() {
     total: 0,
     totalPages: 0
   });
+  const [searchInput, setSearchInput] = useState('');
   const [filters, setFilters] = useState({
     status: 'all',
     platform: 'all',
@@ -131,11 +142,30 @@ export default function ApplicationsPage() {
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
-    setPagination(prev => ({ ...prev, page: 1 })); // Reset to page 1 on filter change
+    setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
+  const handleSearch = () => {
+    setFilters(prev => ({ ...prev, search: searchInput.trim() }));
+    setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
+  const handleClear = () => {
+    setSearchInput('');
+    setFilters(prev => ({ ...prev, search: '' }));
+    setPagination(prev => ({ ...prev, page: 1 }));
   };
 
   const handlePageChange = (event, value) => {
     setPagination(prev => ({ ...prev, page: value }));
+  };
+
+  const handleRowsPerPageChange = (event) => {
+    setPagination(prev => ({
+      ...prev,
+      limit: parseInt(event.target.value, 10),
+      page: 1
+    }));
   };
 
   const getStatusColor = (status) => {
@@ -165,36 +195,64 @@ export default function ApplicationsPage() {
         </Typography>
       </Box>
 
-      {/* Filters */}
-      <Paper
-        elevation={0}
+      {/* Search & Filters - Accordion so you can collapse on mobile */}
+      <Accordion
+        defaultExpanded={!isMobile}
         sx={{
-          p: 3,
           mb: 3,
-          borderRadius: '12px',
+          borderRadius: '12px !important',
           border: '1px solid #e2e8f0',
+          '&:before': { display: 'none' },
+          boxShadow: 'none',
         }}
       >
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{
+            bgcolor: '#f8fafc',
+            borderRadius: '12px',
+            minHeight: 56,
+            '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1 },
+          }}
+        >
+          <SearchIcon sx={{ color: '#64748b' }} />
+          <Typography sx={{ fontWeight: 600, color: '#0f172a' }}>
+            Search & Filters
+            {(filters.search || filters.status !== 'all' || filters.platform !== 'all') && (
+              <Chip label="Active" size="small" sx={{ ml: 1, height: 20, fontSize: '0.7rem' }} />
+            )}
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails sx={{ p: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, alignItems: { xs: 'stretch', sm: 'center' }, flexWrap: 'wrap' }}>
           <TextField
-            fullWidth
             placeholder="Search by job title, company, or location..."
-            value={filters.search}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            size="small"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ color: '#64748b' }} />
+                  <SearchIcon sx={{ color: '#64748b', fontSize: '1.2rem' }} />
                 </InputAdornment>
               ),
             }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: '8px',
-              },
-            }}
+            sx={{ flex: { sm: '1 1 200px' }, minWidth: { xs: '100%', sm: 180 }, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
           />
-          <FormControl sx={{ minWidth: { xs: '100%', md: 200 } }}>
+          <Button variant="contained" onClick={handleSearch} size="medium" sx={{ textTransform: 'none', borderRadius: '8px', flexShrink: 0 }}>
+            Search
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={handleClear}
+            startIcon={<ClearIcon />}
+            size="medium"
+            sx={{ textTransform: 'none', borderRadius: '8px', flexShrink: 0 }}
+          >
+            Clear
+          </Button>
+          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 140 }, flexShrink: 0 }}>
             <InputLabel>Status</InputLabel>
             <Select
               value={filters.status}
@@ -210,7 +268,7 @@ export default function ApplicationsPage() {
               <MenuItem value="rejected">Rejected</MenuItem>
             </Select>
           </FormControl>
-          <FormControl sx={{ minWidth: { xs: '100%', md: 200 } }}>
+          <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 140 }, flexShrink: 0 }}>
             <InputLabel>Platform</InputLabel>
             <Select
               value={filters.platform}
@@ -227,7 +285,8 @@ export default function ApplicationsPage() {
             </Select>
           </FormControl>
         </Box>
-      </Paper>
+        </AccordionDetails>
+      </Accordion>
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
@@ -250,204 +309,92 @@ export default function ApplicationsPage() {
           </Box>
         ) : (
           <>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                    <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
-                      Job Name
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
-                      Company
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
-                      Location
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
-                      Link
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
-                      Status
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
-                      Uploaded Files
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
-                      Source
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem' }}>
-                      Date
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {applications.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={8} sx={{ textAlign: 'center', py: 6 }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                          <WorkIcon sx={{ fontSize: '3rem', color: '#cbd5e1' }} />
-                          <Typography sx={{ color: '#64748b', fontSize: '1rem' }}>
-                            No applications found
-                          </Typography>
-                          <Typography sx={{ color: '#94a3b8', fontSize: '0.875rem' }}>
-                            {filters.search || filters.status !== 'all' || filters.platform !== 'all'
-                              ? 'Try adjusting your filters'
-                              : 'Your job applications will appear here'}
-                          </Typography>
-                        </Box>
-                      </TableCell>
+            <TableContainer sx={{ overflowX: 'auto' }}>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ bgcolor: '#f8fafc' }}>
+                      <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Job Name</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Company</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Location</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Link</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Status</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Uploaded Files</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Source</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Date</TableCell>
                     </TableRow>
-                  ) : (
-                    applications.map((application) => {
+                  </TableHead>
+                  <TableBody>
+                    {applications.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={8} sx={{ textAlign: 'center', py: 6 }}>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                            <WorkIcon sx={{ fontSize: '3rem', color: '#cbd5e1' }} />
+                            <Typography sx={{ color: '#64748b', fontSize: '1rem' }}>No applications found</Typography>
+                            <Typography sx={{ color: '#94a3b8', fontSize: '0.875rem' }}>
+                              {filters.search || filters.status !== 'all' || filters.platform !== 'all' ? 'Try adjusting your filters' : 'Your job applications will appear here'}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    ) : applications.map((application) => {
                       const statusColors = getStatusColor(application.status);
                       return (
                         <TableRow key={application.id} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
-                          <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>
-                            {application.jobName}
-                          </TableCell>
-                          <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
-                            {application.company}
-                          </TableCell>
-                          <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
-                            {application.location || 'N/A'}
+                          <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem' }}>{application.jobName}</TableCell>
+                          <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>{application.company}</TableCell>
+                          <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>{application.location || 'N/A'}</TableCell>
+                          <TableCell>
+                            <MuiLink href={application.link} target="_blank" rel="noopener noreferrer" sx={{ color: '#2463eb', fontSize: '0.875rem', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>View Job</MuiLink>
                           </TableCell>
                           <TableCell>
-                            <MuiLink
-                              href={application.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              sx={{
-                                color: '#2463eb',
-                                fontSize: '0.875rem',
-                                textDecoration: 'none',
-                                '&:hover': { textDecoration: 'underline' },
-                              }}
-                            >
-                              View Job
-                            </MuiLink>
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              label={formatStatus(application.status)}
-                              size="small"
-                              sx={{
-                                bgcolor: statusColors.bg,
-                                color: statusColors.color,
-                                fontWeight: 500,
-                                fontSize: '0.75rem',
-                              }}
-                            />
+                            <Chip label={formatStatus(application.status)} size="small" sx={{ bgcolor: statusColors.bg, color: statusColors.color, fontWeight: 500, fontSize: '0.75rem' }} />
                           </TableCell>
                           <TableCell>
                             <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
                               {application.files?.resume && (
-                                <Tooltip 
-                                  title={
-                                    application.files.resume.type === 'optimized' 
-                                      ? `ATS Optimized Resume: ${application.files.resume.fileName}` 
-                                      : application.files.resume.type === 'original'
-                                      ? `Original Resume: ${application.files.resume.fileName}`
-                                      : `Resume: ${application.files.resume.fileName}`
-                                  } 
-                                  arrow
-                                >
-                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => window.open(application.files.resume.url, '_blank')}
-                                      sx={{
-                                        color: application.files.resume.type === 'optimized' ? '#16a34a' : '#2463eb',
-                                        '&:hover': { 
-                                          bgcolor: application.files.resume.type === 'optimized' ? '#dcfce7' : '#eff6ff' 
-                                        },
-                                      }}
-                                    >
-                                      <DescriptionIcon fontSize="small" />
-                                    </IconButton>
-                                    {application.files.resume.type === 'optimized' && (
-                                      <Chip 
-                                        label="ATS" 
-                                        size="small" 
-                                        sx={{ 
-                                          height: 18, 
-                                          fontSize: '0.6rem',
-                                          bgcolor: '#16a34a',
-                                          color: 'white',
-                                          fontWeight: 600,
-                                          '& .MuiChip-label': {
-                                            px: 0.75
-                                          }
-                                        }} 
-                                      />
-                                    )}
-                                  </Box>
+                                <Tooltip title={`Resume: ${application.files.resume.fileName}`} arrow>
+                                  <IconButton size="small" onClick={() => window.open(application.files.resume.url, '_blank')} sx={{ color: '#2463eb', '&:hover': { bgcolor: '#eff6ff' } }}><DescriptionIcon fontSize="small" /></IconButton>
                                 </Tooltip>
                               )}
                               {application.files?.coverLetter && (
                                 <Tooltip title={`Cover Letter: ${application.files.coverLetter.fileName}`} arrow>
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => window.open(application.files.coverLetter.url, '_blank')}
-                                    sx={{
-                                      color: '#16a34a',
-                                      '&:hover': { bgcolor: '#dcfce7' },
-                                    }}
-                                  >
-                                    <PictureAsPdfIcon fontSize="small" />
-                                  </IconButton>
+                                  <IconButton size="small" onClick={() => window.open(application.files.coverLetter.url, '_blank')} sx={{ color: '#16a34a', '&:hover': { bgcolor: '#dcfce7' } }}><PictureAsPdfIcon fontSize="small" /></IconButton>
                                 </Tooltip>
                               )}
                               {application.files?.screenshotProof && (
                                 <Tooltip title={`Screenshot Proof: ${application.files.screenshotProof.fileName}`} arrow>
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => window.open(application.files.screenshotProof.url, '_blank')}
-                                    sx={{
-                                      color: '#f59e0b',
-                                      '&:hover': { bgcolor: '#fef3c7' },
-                                    }}
-                                  >
-                                    <ImageIcon fontSize="small" />
-                                  </IconButton>
+                                  <IconButton size="small" onClick={() => window.open(application.files.screenshotProof.url, '_blank')} sx={{ color: '#f59e0b', '&:hover': { bgcolor: '#fef3c7' } }}><ImageIcon fontSize="small" /></IconButton>
                                 </Tooltip>
                               )}
                               {(!application.files?.resume && !application.files?.coverLetter && !application.files?.screenshotProof) && (
-                                <Typography sx={{ color: '#94a3b8', fontSize: '0.75rem', fontStyle: 'italic' }}>
-                                  No files
-                                </Typography>
+                                <Typography sx={{ color: '#94a3b8', fontSize: '0.75rem', fontStyle: 'italic' }}>No files</Typography>
                               )}
                             </Box>
                           </TableCell>
-                          <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
-                            {application.source}
-                          </TableCell>
-                          <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
-                            {new Date(application.date).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric'
-                            })}
-                          </TableCell>
+                          <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>{(application.source || '').charAt(0).toUpperCase() + (application.source || '').slice(1).toLowerCase()}</TableCell>
+                          <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>{new Date(application.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</TableCell>
                         </TableRow>
                       );
-                    })
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                    })}
+                  </TableBody>
+          </Table>
+        </TableContainer>
 
-            {/* Pagination */}
-            {pagination.totalPages > 1 && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                <Pagination
-                  count={pagination.totalPages}
-                  page={pagination.page}
-                  onChange={handlePageChange}
-                  color="primary"
-                  shape="rounded"
-                />
-              </Box>
-            )}
+            {/* TablePagination */}
+            <TablePagination
+              component="div"
+              count={pagination.total}
+              page={pagination.page - 1}
+              onPageChange={(e, page) => handlePageChange(e, page + 1)}
+              rowsPerPage={pagination.limit}
+              onRowsPerPageChange={handleRowsPerPageChange}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              labelRowsPerPage="Rows per page:"
+              sx={{
+                borderTop: '1px solid #e2e8f0',
+                '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': { fontSize: '0.875rem' },
+              }}
+            />
           </>
         )}
       </Paper>

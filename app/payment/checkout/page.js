@@ -13,7 +13,7 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51SxLXK2Rp5kvhBdCpK4srBsylbANEUbN5O8BaP55FSJW57A6ZSXI3F2sWJx8Z3qaAqVwL4GIQvxzJBrNECMc5lpF00CJBNvuG2'
 );
 
-function CheckoutForm({ clientSecret, paymentIntentId }) {
+function CheckoutForm({ clientSecret, paymentIntentId, returnTo }) {
   const stripe = useStripe();
   const elements = useElements();
   const router = useRouter();
@@ -39,12 +39,12 @@ function CheckoutForm({ clientSecret, paymentIntentId }) {
         return;
       }
 
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
+      const returnUrl = `${baseUrl}/payment/success?payment_intent=${paymentIntentId}${returnTo ? `&return_to=${returnTo}` : ''}`;
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         clientSecret,
-        confirmParams: {
-          return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success?payment_intent=${paymentIntentId}`,
-        },
+        confirmParams: { return_url: returnUrl },
         redirect: 'if_required',
       });
 
@@ -60,7 +60,8 @@ function CheckoutForm({ clientSecret, paymentIntentId }) {
           );
 
           if (verifyResult.success) {
-            router.push(verifyResult.redirect_url || '/payment/success');
+            const qs = returnTo ? `&return_to=${returnTo}` : '';
+            router.push(`/payment/success?payment_intent=${paymentIntentId}${qs}`);
           } else {
             setErrorMessage('Payment verification failed. Please contact support.');
             setIsProcessing(false);
@@ -137,11 +138,13 @@ function CheckoutContent() {
   const router = useRouter();
   const [clientSecret, setClientSecret] = useState(null);
   const [paymentIntentId, setPaymentIntentId] = useState(null);
+  const [returnTo, setReturnTo] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const paymentIntent = searchParams.get('payment_intent');
     const secret = searchParams.get('client_secret');
+    const returnToParam = searchParams.get('return_to');
 
     if (!paymentIntent || !secret) {
       router.push('/pricing');
@@ -150,6 +153,7 @@ function CheckoutContent() {
 
     setPaymentIntentId(paymentIntent);
     setClientSecret(decodeURIComponent(secret));
+    setReturnTo(returnToParam);
     setLoading(false);
   }, [searchParams, router]);
 
@@ -230,7 +234,7 @@ function CheckoutContent() {
             </Typography>
 
             <Elements options={options} stripe={stripePromise}>
-              <CheckoutForm clientSecret={clientSecret} paymentIntentId={paymentIntentId} />
+              <CheckoutForm clientSecret={clientSecret} paymentIntentId={paymentIntentId} returnTo={returnTo} />
             </Elements>
           </Box>
         </Container>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress } from '@mui/material';
+import { Box, Container, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, CircularProgress, Button as MuiButton } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -118,6 +118,44 @@ export default function Pricing() {
 
     fetchUserPlan();
   }, [isAuthenticated, token]);
+
+  const isDevFakePaymentEnabled =
+    process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_ENABLE_DEV_FAKE_PAYMENT === 'true';
+
+  const handleDevFakePayment = async (plan) => {
+    if (!isAuthenticated || !token) {
+      router.push('/login?redirect=/pricing');
+      return;
+    }
+    if (userPlan?.subscription?.status === 'active') {
+      alert(`You already have an active plan.`);
+      return;
+    }
+    setProcessingPayment(true);
+    setProcessingPlan(plan.name);
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+      const base = API_URL.endsWith('/api') ? API_URL.slice(0, -4) : API_URL;
+      const res = await fetch(`${base}/api/payments/stripe/dev-fake-payment`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ planName: plan.name }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.message || 'Dev fake payment failed');
+      }
+      router.push(`/payment/success?payment_intent=${data.data.payment_intent_id}`);
+    } catch (err) {
+      alert(err.message || 'Test payment failed');
+    } finally {
+      setProcessingPayment(false);
+      setProcessingPlan(null);
+    }
+  };
 
   // Handle payment initiation
   const handleGetStarted = async (plan) => {
@@ -690,6 +728,24 @@ export default function Pricing() {
                       </Box>
                     );
                   })()}
+                  {/* Dev: Test Payment button - bypasses Stripe for full flow testing */}
+                  {isDevFakePaymentEnabled && userPlan?.subscription?.status !== 'active' && (
+                    <MuiButton
+                      size="small"
+                      variant="outlined"
+                      onClick={() => handleDevFakePayment(plan)}
+                      disabled={processingPayment || !isAuthenticated}
+                      sx={{
+                        mt: 1,
+                        fontSize: '0.75rem',
+                        borderColor: '#94a3b8',
+                        color: '#64748b',
+                        '&:hover': { borderColor: '#64748b', bgcolor: 'rgba(100,116,139,0.04)' },
+                      }}
+                    >
+                      {processingPayment && processingPlan === plan.name ? '...' : 'Test Payment (Dev)'}
+                    </MuiButton>
+                  )}
                   </Box>
                 </Box>
               );
@@ -768,19 +824,19 @@ export default function Pricing() {
               >
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', paddingLeft: 0, borderBottom: '1px solid #E2E8F0', width: '22%' }}>
+                    <TableCell sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', paddingLeft: 0, borderBottom: '1px solid #E2E8F0', width: '22%', whiteSpace: 'nowrap' }}>
                       Feature
                     </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#1E293B', width: '19%' }}>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#1E293B', width: '19%', whiteSpace: 'nowrap' }}>
                       Starter
                     </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#1E293B', width: '19%' }}>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#1E293B', width: '19%', whiteSpace: 'nowrap' }}>
                       Standard
                     </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#2563EB', width: '19%' }}>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#2563EB', width: '19%', whiteSpace: 'nowrap' }}>
                       Pro
                     </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#1E293B', width: '19%' }}>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#1E293B', width: '19%', whiteSpace: 'nowrap' }}>
                       Premium
                     </TableCell>
                   </TableRow>

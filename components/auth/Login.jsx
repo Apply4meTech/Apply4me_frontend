@@ -146,49 +146,44 @@ export default function Login() {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed. Please check your credentials.');
+        throw new Error(data.error || data.message || 'Login failed. Please check your credentials.');
       }
       
       if (data.success && data.token) {
         dispatch(loginSuccess({ token: data.token, user: data.user }));
         
-        // Skip onboarding check for super_admin and admin users
         const userRole = data.user?.role;
+        const isEmployee = data.user?.isEmployee === true;
         const isAdmin = userRole === 'super_admin' || userRole === 'admin';
-        
-        // Get redirect parameter from URL
         const redirectPath = searchParams?.get('redirect');
         
+        // Employees (including super_admin from Employee) -> employee dashboard
+        if (isEmployee) {
+          router.push(redirectPath && redirectPath.startsWith('/employee') ? redirectPath : '/employee/dashboard');
+          return;
+        }
+        
+        // Admins from User model -> main dashboard
         if (isAdmin) {
-          // Admins go directly to dashboard (or redirect path if specified)
-          if (redirectPath) {
-            router.push(redirectPath);
-          } else {
-            router.push('/dashboard');
-          }
+          router.push(redirectPath || '/dashboard');
+          return;
+        }
+        
+        // Regular users - payment first, then onboarding
+        const hasActiveSubscription = data.user?.hasActiveSubscription === true;
+        const isOnboardingComplete = data.user?.isOnboardingComplete ?? false;
+
+        if (!hasActiveSubscription) {
+          router.push('/pricing');
+          return;
+        }
+        if (isOnboardingComplete) {
+          router.push(redirectPath || '/dashboard');
         } else {
-          // Check if onboarding is complete for regular users
-          const isOnboardingComplete = data.user?.isOnboardingComplete ?? false;
-          
-          if (isOnboardingComplete) {
-            // If redirect parameter exists, go to that page, otherwise go to dashboard
-            if (redirectPath) {
-              router.push(redirectPath);
-            } else {
-              router.push('/dashboard');
-            }
-          } else {
-            // If onboarding is not complete, go to onboarding
-            // If redirect parameter exists, pass it to onboarding so user can be redirected after completing onboarding
-            if (redirectPath) {
-              router.push(`/onboarding?redirect=${encodeURIComponent(redirectPath)}`);
-            } else {
-              router.push('/onboarding');
-            }
-          }
+          router.push(redirectPath ? `/onboarding?redirect=${encodeURIComponent(redirectPath)}` : '/onboarding');
         }
       } else {
-        throw new Error(data.message || 'Login failed. Please try again.');
+        throw new Error(data.error || data.message || 'Login failed. Please try again.');
       }
     } catch (err) {
       dispatch(loginFailure(err.message));

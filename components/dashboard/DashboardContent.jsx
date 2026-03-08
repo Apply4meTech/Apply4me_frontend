@@ -17,7 +17,20 @@ import {
   CircularProgress,
   Alert,
   Button,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TablePagination,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  InputAdornment,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useSelector } from 'react-redux';
 import Link from 'next/link';
 import WorkIcon from '@mui/icons-material/Work';
@@ -30,7 +43,6 @@ import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -39,7 +51,6 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import TextField from '@mui/material/TextField';
 import SaveIcon from '@mui/icons-material/Save';
 import AddJobModal from './AddJobModal';
 
@@ -58,8 +69,12 @@ export default function DashboardContent() {
   const [dashboardData, setDashboardData] = useState({
     totalJobsApplied: 0,
     accountManagerName: 'Not Assigned',
-    applications: []
+    applications: [],
+    platforms: []
   });
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
+  const [searchInput, setSearchInput] = useState('');
+  const [filters, setFilters] = useState({ status: 'all', platform: 'all', search: '' });
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [notesDialogOpen, setNotesDialogOpen] = useState(false);
@@ -76,7 +91,15 @@ export default function DashboardContent() {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`${getApiUrl()}/api/dashboard`, {
+      const params = new URLSearchParams({
+        page: pagination.page.toString(),
+        limit: pagination.limit.toString(),
+        ...(filters.status !== 'all' && { status: filters.status }),
+        ...(filters.platform !== 'all' && { platform: filters.platform }),
+        ...(filters.search && { search: filters.search })
+      });
+
+      const response = await fetch(`${getApiUrl()}/api/dashboard?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -89,7 +112,13 @@ export default function DashboardContent() {
       }
 
       if (data.success) {
-        setDashboardData(data.data);
+        setDashboardData(prev => ({
+          ...data.data,
+          platforms: data.data.platforms || prev.platforms || []
+        }));
+        if (data.data.pagination) {
+          setPagination(data.data.pagination);
+        }
       } else {
         throw new Error(data.error || 'Failed to fetch dashboard data');
       }
@@ -102,9 +131,12 @@ export default function DashboardContent() {
   };
 
   useEffect(() => {
-    fetchDashboardData();
     fetchUserPlan();
   }, []);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [filters, pagination.page, pagination.limit]);
 
   const fetchUserPlan = async () => {
     if (!token) return;
@@ -134,7 +166,36 @@ export default function DashboardContent() {
   };
 
   const handleJobAdded = () => {
+    setPagination(prev => ({ ...prev, page: 1 }));
     fetchDashboardData();
+  };
+
+  const handleSearch = () => {
+    setFilters(prev => ({ ...prev, search: searchInput.trim() }));
+    setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
+  const handleClear = () => {
+    setSearchInput('');
+    setFilters(prev => ({ ...prev, search: '' }));
+    setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
+  const handleFilterChange = (field, value) => {
+    setFilters(prev => ({ ...prev, [field]: value }));
+    setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
+  const handlePageChange = (e, page) => {
+    setPagination(prev => ({ ...prev, page: page + 1 }));
+  };
+
+  const handleRowsPerPageChange = (e) => {
+    setPagination(prev => ({
+      ...prev,
+      limit: parseInt(e.target.value, 10),
+      page: 1
+    }));
   };
 
   const getStatusColor = (status) => {
@@ -273,6 +334,82 @@ export default function DashboardContent() {
         </Box>
       </Box>
 
+      {/* Search & Filters - Accordion for mobile */}
+      <Accordion
+        defaultExpanded={false}
+        sx={{
+          mb: 3,
+          borderRadius: '12px !important',
+          border: '1px solid #e2e8f0',
+          '&:before': { display: 'none' },
+          boxShadow: 'none',
+        }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{
+            bgcolor: '#f8fafc',
+            borderRadius: '12px',
+            '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1 },
+          }}
+        >
+          <SearchIcon sx={{ color: '#64748b' }} />
+          <Typography sx={{ fontWeight: 600, color: '#0f172a' }}>
+            Search & Filters
+            {(filters.search || filters.status !== 'all' || filters.platform !== 'all') && (
+              <Chip label="Active" size="small" sx={{ ml: 1, height: 20, fontSize: '0.7rem' }} />
+            )}
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, flexWrap: 'wrap' }}>
+            <TextField
+              fullWidth
+              placeholder="Search by company, job title..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ color: '#64748b' }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ flex: { md: 1 }, minWidth: { md: 200 }, '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
+            />
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <Button variant="contained" onClick={handleSearch} sx={{ textTransform: 'none', borderRadius: '8px' }}>
+                Search
+              </Button>
+              <Button variant="outlined" onClick={handleClear} startIcon={<ClearIcon />} sx={{ textTransform: 'none', borderRadius: '8px' }}>
+                Clear
+              </Button>
+            </Box>
+            <FormControl sx={{ minWidth: { xs: '100%', md: 160 } }}>
+              <InputLabel>Status</InputLabel>
+              <Select value={filters.status} label="Status" onChange={(e) => handleFilterChange('status', e.target.value)} sx={{ borderRadius: '8px' }}>
+                <MenuItem value="all">All Status</MenuItem>
+                <MenuItem value="pending">Pending</MenuItem>
+                <MenuItem value="assigned">Assigned</MenuItem>
+                <MenuItem value="applied">Applied</MenuItem>
+                <MenuItem value="response">Response</MenuItem>
+                <MenuItem value="rejected">Rejected</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl sx={{ minWidth: { xs: '100%', md: 160 } }}>
+              <InputLabel>Platform</InputLabel>
+              <Select value={filters.platform} label="Platform" onChange={(e) => handleFilterChange('platform', e.target.value)} sx={{ borderRadius: '8px' }}>
+                <MenuItem value="all">All Platforms</MenuItem>
+                {(dashboardData.platforms || []).map((p) => (
+                  <MenuItem key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+        </AccordionDetails>
+      </Accordion>
+
       {/* Job Applications Table */}
       <Paper
         elevation={0}
@@ -282,35 +419,35 @@ export default function DashboardContent() {
           overflow: 'hidden',
         }}
       >
-        <TableContainer>
+        <TableContainer sx={{ overflowX: 'auto' }}>
           <Table>
             <TableHead>
               <TableRow sx={{ bgcolor: '#f8fafc' }}>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word', width: '60px' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap', width: '60px' }}>
                   SR No
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>
                   Company Name
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>
                   Link
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>
                   Status
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>
                   Uploaded Files
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>
                   Date
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>
                   Source
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>
                   Notes
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', width: '60px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', width: '60px', whiteSpace: 'nowrap' }}>
                   Action
                 </TableCell>
               </TableRow>
@@ -337,7 +474,7 @@ export default function DashboardContent() {
                   return (
                     <TableRow key={application.id} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
                       <TableCell sx={{ color: '#64748b', fontSize: '0.875rem', fontWeight: 500 }}>
-                        {index + 1}
+                        {(pagination.page - 1) * pagination.limit + index + 1}
                       </TableCell>
                       <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem', fontWeight: 600 }}>
                         {application.company || 'N/A'}
@@ -378,46 +515,17 @@ export default function DashboardContent() {
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
                           {application.files?.resume && (
-                            <Tooltip 
-                              title={
-                                application.files.resume.type === 'optimized' 
-                                  ? `ATS Optimized Resume: ${application.files.resume.fileName}` 
-                                  : application.files.resume.type === 'original'
-                                  ? `Original Resume: ${application.files.resume.fileName}`
-                                  : `Resume: ${application.files.resume.fileName}`
-                              } 
-                              arrow
-                            >
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <IconButton
-                                  size="small"
-                                  onClick={() => window.open(application.files.resume.url, '_blank')}
-                                  sx={{
-                                    color: application.files.resume.type === 'optimized' ? '#16a34a' : '#2463eb',
-                                    '&:hover': { 
-                                      bgcolor: application.files.resume.type === 'optimized' ? '#dcfce7' : '#eff6ff' 
-                                    },
-                                  }}
-                                >
-                                  <DescriptionIcon fontSize="small" />
-                                </IconButton>
-                                {application.files.resume.type === 'optimized' && (
-                                  <Chip 
-                                    label="ATS" 
-                                    size="small" 
-                                    sx={{ 
-                                      height: 18, 
-                                      fontSize: '0.6rem',
-                                      bgcolor: '#16a34a',
-                                      color: 'white',
-                                      fontWeight: 600,
-                                      '& .MuiChip-label': {
-                                        px: 0.75
-                                      }
-                                    }} 
-                                  />
-                                )}
-                              </Box>
+                            <Tooltip title={`Resume: ${application.files.resume.fileName}`} arrow>
+                              <IconButton
+                                size="small"
+                                onClick={() => window.open(application.files.resume.url, '_blank')}
+                                sx={{
+                                  color: '#2463eb',
+                                  '&:hover': { bgcolor: '#eff6ff' },
+                                }}
+                              >
+                                <DescriptionIcon fontSize="small" />
+                              </IconButton>
                             </Tooltip>
                           )}
                           {application.files?.coverLetter && (
@@ -463,7 +571,7 @@ export default function DashboardContent() {
                         })}
                       </TableCell>
                       <TableCell sx={{ color: '#64748b', fontSize: '0.875rem' }}>
-                        {application.source}
+                        {(application.source || '').charAt(0).toUpperCase() + (application.source || '').slice(1).toLowerCase()}
                       </TableCell>
                       <TableCell>
                         <IconButton
@@ -501,6 +609,20 @@ export default function DashboardContent() {
             </TableBody>
           </Table>
         </TableContainer>
+        <TablePagination
+          component="div"
+          count={pagination.total}
+          page={pagination.page - 1}
+          onPageChange={handlePageChange}
+          rowsPerPage={pagination.limit}
+          onRowsPerPageChange={handleRowsPerPageChange}
+          rowsPerPageOptions={[5, 10, 25, 50]}
+          labelRowsPerPage="Rows per page:"
+          sx={{
+            borderTop: '1px solid #e2e8f0',
+            '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': { fontSize: '0.875rem' },
+          }}
+        />
       </Paper>
 
       {/* Action Menu */}

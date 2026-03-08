@@ -16,6 +16,7 @@ import {
   Input,
   IconButton,
   CircularProgress,
+  Chip,
 } from '@mui/material';
 import DescriptionIcon from '@mui/icons-material/Description';
 import ImageIcon from '@mui/icons-material/Image';
@@ -254,10 +255,8 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
         if (data.downloadUrl) {
           window.open(data.downloadUrl, '_blank');
         }
-        alert(
-          (data.message || 'Customized resume ready.') +
-          ' Download the file, then upload it as Resume above and upload a screenshot proof.'
-        );
+        if (onUpdate) onUpdate();
+        alert(data.message || 'Customized resume generated and saved. Preview and download it below. Add screenshot proof when done.');
       } else {
         alert(data.error || 'Failed to generate customized resume');
       }
@@ -278,8 +277,34 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
       </DialogTitle>
       <DialogContent>
         {mode === 'fill' ? (
-          // Fill Data mode - Job description, Customize resume (if eligible), Uploads, Notes
+          // Fill Data mode - Prefetched resumes, Job description, Customize resume, Uploads, Notes
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {/* Prefetched User Resumes & CV - for reference when uploading */}
+            {job.userResumes?.length > 0 && (
+              <Paper sx={{ p: 2, bgcolor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px' }}>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#1e40af', mb: 1.5 }}>
+                  User's Resume & CV (prefetched)
+                </Typography>
+                <Typography sx={{ fontSize: '0.8rem', color: '#3b82f6', mb: 2 }}>
+                  Download these when uploading Job Resume below. Use ATS resume if available.
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  {job.userResumes.map((r, i) => (
+                    <Button
+                      key={i}
+                      variant="outlined"
+                      size="small"
+                      startIcon={<DescriptionIcon />}
+                      onClick={() => window.open(r.url, '_blank')}
+                      sx={{ textTransform: 'none', borderRadius: '8px', borderColor: r.type === 'ats' ? '#16a34a' : '#2463eb', color: r.type === 'ats' ? '#16a34a' : '#2463eb' }}
+                    >
+                      {r.label} Resume
+                    </Button>
+                  ))}
+                </Box>
+              </Paper>
+            )}
+
             {/* Job description - paste then save so Customize resume can use it */}
             <Box>
               <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', mb: 1 }}>
@@ -320,7 +345,7 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
                   Customized resume (this user has {job.userPlanName || 'Pro'} plan)
                 </Typography>
                 <Typography sx={{ fontSize: '0.8rem', color: '#15803d', mb: 2 }}>
-                  Generate a resume tailored to the job description above. Then upload the downloaded file as Resume and add a screenshot proof.
+                  Generate a resume tailored to the job description above. It will be saved automatically so you can preview and download below. Add screenshot proof when done.
                 </Typography>
                 <Button
                   variant="contained"
@@ -340,48 +365,82 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
               </Paper>
             )}
 
-            {/* Notes */}
+            {/* Upload Files - Resume, Cover Letter, Screenshot Proof */}
             <Box>
-              <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', mb: 1 }}>
-                Notes
+              <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', mb: 2 }}>
+                Upload Files
               </Typography>
-              <TextField
-                fullWidth
-                multiline
-                rows={6}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add your notes here..."
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                    fontFamily: 'inherit',
-                  },
-                }}
-              />
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-                <Button
-                  variant="contained"
-                  size="small"
-                  startIcon={savingNotes ? <CircularProgress size={16} /> : <SaveIcon />}
-                  onClick={handleSaveNotes}
-                  disabled={savingNotes}
-                  sx={{
-                    bgcolor: '#2463eb',
-                    textTransform: 'none',
-                    borderRadius: '8px',
-                    '&:hover': { bgcolor: '#1d4ed8' },
-                    '&:disabled': { bgcolor: '#cbd5e1' },
-                  }}
-                >
-                  {savingNotes ? 'Saving...' : 'Save Notes'}
-                </Button>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {/* Resume */}
+                <Paper sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+                    <Box>
+                      <Typography sx={{ fontSize: '0.875rem', fontWeight: 600 }}>Job Resume</Typography>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>PDF, DOC, DOCX</Typography>
+                    </Box>
+                    {job.resume ? (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Button size="small" onClick={() => handleViewFile(job.resume)} sx={{ textTransform: 'none' }}>View</Button>
+                        <Button size="small" color="error" onClick={() => handleDeleteFile('resume')} sx={{ textTransform: 'none' }}>Remove</Button>
+                      </Box>
+                    ) : (
+                      <Button variant="outlined" component="label" size="small" startIcon={<CloudUploadIcon />} disabled={uploading && fileType === 'resume'} sx={{ borderRadius: '8px', textTransform: 'none' }}>
+                        {uploading && fileType === 'resume' ? 'Uploading...' : 'Upload'}
+                        <Input type="file" accept=".pdf,.doc,.docx" onChange={(e) => handleFileUpload(e, 'resume')} sx={{ display: 'none' }} disabled={uploading} />
+                      </Button>
+                    )}
+                  </Box>
+                </Paper>
+                {/* Cover Letter - job.coverLetter is effective (job-specific or user's default from onboarding) */}
+                <Paper sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+                    <Box>
+                      <Typography sx={{ fontSize: '0.875rem', fontWeight: 600 }}>Cover Letter</Typography>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        {job.jobCoverLetter ? 'Job-specific' : job.userCoverLetter ? 'From user profile (onboarding)' : 'PDF, DOC, DOCX, TXT'}
+                      </Typography>
+                    </Box>
+                    {job.coverLetter ? (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Button size="small" onClick={() => handleViewFile(job.coverLetter)} sx={{ textTransform: 'none' }}>View</Button>
+                        {job.jobCoverLetter ? (
+                          <Button size="small" color="error" onClick={() => handleDeleteFile('coverLetter')} sx={{ textTransform: 'none' }}>Remove</Button>
+                        ) : (
+                          <Button variant="outlined" component="label" size="small" startIcon={<CloudUploadIcon />} disabled={uploading && fileType === 'coverLetter'} sx={{ borderRadius: '8px', textTransform: 'none' }}>
+                            {uploading && fileType === 'coverLetter' ? 'Uploading...' : 'Upload different'}
+                            <Input type="file" accept=".pdf,.doc,.docx,.txt" onChange={(e) => handleFileUpload(e, 'coverLetter')} sx={{ display: 'none' }} disabled={uploading} />
+                          </Button>
+                        )}
+                      </Box>
+                    ) : (
+                      <Button variant="outlined" component="label" size="small" startIcon={<CloudUploadIcon />} disabled={uploading && fileType === 'coverLetter'} sx={{ borderRadius: '8px', textTransform: 'none' }}>
+                        {uploading && fileType === 'coverLetter' ? 'Uploading...' : 'Upload'}
+                        <Input type="file" accept=".pdf,.doc,.docx,.txt" onChange={(e) => handleFileUpload(e, 'coverLetter')} sx={{ display: 'none' }} disabled={uploading} />
+                      </Button>
+                    )}
+                  </Box>
+                </Paper>
+                {/* Screenshot Proof */}
+                <Paper sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+                    <Box>
+                      <Typography sx={{ fontSize: '0.875rem', fontWeight: 600 }}>Screenshot Proof</Typography>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>Image or PDF of application confirmation</Typography>
+                    </Box>
+                    {job.screenshotProof ? (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Button size="small" onClick={() => handleViewFile(job.screenshotProof)} sx={{ textTransform: 'none' }}>View</Button>
+                        <Button size="small" color="error" onClick={() => handleDeleteFile('screenshotProof')} sx={{ textTransform: 'none' }}>Remove</Button>
+                      </Box>
+                    ) : (
+                      <Button variant="outlined" component="label" size="small" startIcon={<CloudUploadIcon />} disabled={uploading && fileType === 'screenshotProof'} sx={{ borderRadius: '8px', textTransform: 'none' }}>
+                        {uploading && fileType === 'screenshotProof' ? 'Uploading...' : 'Upload'}
+                        <Input type="file" accept="image/*,.pdf" onChange={(e) => handleFileUpload(e, 'screenshotProof')} sx={{ display: 'none' }} disabled={uploading} />
+                      </Button>
+                    )}
+                  </Box>
+                </Paper>
               </Box>
-              {job.notesUpdatedAt && (
-                <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', mt: 0.5 }}>
-                  Last updated: {new Date(job.notesUpdatedAt).toLocaleString()}
-                </Typography>
-              )}
             </Box>
           </Box>
         ) : (
@@ -389,7 +448,8 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
           <>
             <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
               <Tabs value={activeTab} onChange={handleTabChange}>
-                <Tab icon={<DescriptionIcon />} iconPosition="start" label="Resume" />
+                <Tab icon={<DescriptionIcon />} iconPosition="start" label="User Resumes" />
+                <Tab icon={<DescriptionIcon />} iconPosition="start" label="Job Resume" />
                 <Tab icon={<DescriptionIcon />} iconPosition="start" label="Cover Letter" />
                 <Tab icon={<ImageIcon />} iconPosition="start" label="Screenshot Proof" />
                 <Tab icon={<NoteIcon />} iconPosition="start" label="Notes" />
@@ -397,8 +457,42 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
             </Box>
 
         <Box sx={{ minHeight: '300px' }}>
-          {/* Resume Tab */}
+          {/* User Resumes Tab - ATS + Original */}
           {activeTab === 0 && (
+            <Box>
+              {job.userResumes?.length > 0 ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {job.userResumes.map((r, i) => (
+                    <Paper key={i} sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
+                          <DescriptionIcon sx={{ color: r.type === 'ats' ? '#16a34a' : '#2463eb', fontSize: 32 }} />
+                          <Box sx={{ flex: 1 }}>
+                            <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
+                              {r.fileName}
+                            </Typography>
+                            <Chip label={r.label} size="small" sx={{ mt: 0.5, height: 20, fontSize: '0.65rem', bgcolor: r.type === 'ats' ? '#dcfce7' : '#eff6ff', color: r.type === 'ats' ? '#166534' : '#1e40af' }} />
+                          </Box>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <IconButton size="small" onClick={() => window.open(r.url, '_blank')} sx={{ color: '#2463eb', '&:hover': { bgcolor: '#eff6ff' } }} title="Preview / Download">
+                            <VisibilityIcon />
+                          </IconButton>
+                        </Box>
+                      </Box>
+                    </Paper>
+                  ))}
+                </Box>
+              ) : (
+                <Paper sx={{ p: 3, bgcolor: '#f8fafc', borderRadius: '8px', textAlign: 'center' }}>
+                  <Typography sx={{ color: '#64748b' }}>No user resumes on file</Typography>
+                </Paper>
+              )}
+            </Box>
+          )}
+
+          {/* Job Resume Tab */}
+          {activeTab === 1 && (
             <Box>
               {job.resume ? (
                 <Paper sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: '8px' }}>
@@ -423,47 +517,43 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
                       >
                         <VisibilityIcon />
                       </IconButton>
-                      {mode === 'fill' && (
-                        <IconButton
-                          size="small"
-                          onClick={() => handleDeleteFile('resume')}
-                          sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}
-                          title="Delete file"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      )}
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteFile('resume')}
+                        sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}
+                        title="Delete file"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
                     </Box>
                   </Box>
                 </Paper>
               ) : (
                 <Paper sx={{ p: 3, bgcolor: '#f8fafc', borderRadius: '8px', textAlign: 'center' }}>
                   <Typography sx={{ color: '#64748b', mb: 2 }}>No resume uploaded</Typography>
-                  {mode === 'fill' && (
-                    <Button
-                      variant="outlined"
-                      component="label"
-                      startIcon={<CloudUploadIcon />}
-                      disabled={uploading && fileType === 'resume'}
-                      sx={{ borderRadius: '8px', textTransform: 'none' }}
-                    >
-                      {uploading && fileType === 'resume' ? 'Uploading...' : 'Upload Resume'}
-                      <Input
-                        type="file"
-                        accept=".pdf,.doc,.docx"
-                        onChange={(e) => handleFileUpload(e, 'resume')}
-                        sx={{ display: 'none' }}
-                        disabled={uploading}
-                      />
-                    </Button>
-                  )}
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    startIcon={<CloudUploadIcon />}
+                    disabled={uploading && fileType === 'resume'}
+                    sx={{ borderRadius: '8px', textTransform: 'none' }}
+                  >
+                    {uploading && fileType === 'resume' ? 'Uploading...' : 'Upload Resume'}
+                    <Input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={(e) => handleFileUpload(e, 'resume')}
+                      sx={{ display: 'none' }}
+                      disabled={uploading}
+                    />
+                  </Button>
                 </Paper>
               )}
             </Box>
           )}
 
-          {/* Cover Letter Tab */}
-          {activeTab === 1 && (
+          {/* Cover Letter Tab - job.coverLetter is effective (job-specific or user's default from onboarding) */}
+          {activeTab === 2 && (
             <Box>
               {job.coverLetter ? (
                 <Paper sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: '8px' }}>
@@ -475,6 +565,7 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
                           {job.coverLetter.fileName}
                         </Typography>
                         <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                          {job.userCoverLetter && !job.jobCoverLetter && 'From user profile (onboarding) • '}
                           {formatFileSize(job.coverLetter.fileSize)}
                         </Typography>
                       </Box>
@@ -488,7 +579,7 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
                       >
                         <VisibilityIcon />
                       </IconButton>
-                      {mode === 'fill' && (
+                      {job.jobCoverLetter && (
                         <IconButton
                           size="small"
                           onClick={() => handleDeleteFile('coverLetter')}
@@ -504,31 +595,29 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
               ) : (
                 <Paper sx={{ p: 3, bgcolor: '#f8fafc', borderRadius: '8px', textAlign: 'center' }}>
                   <Typography sx={{ color: '#64748b', mb: 2 }}>No cover letter uploaded</Typography>
-                  {mode === 'fill' && (
-                    <Button
-                      variant="outlined"
-                      component="label"
-                      startIcon={<CloudUploadIcon />}
-                      disabled={uploading && fileType === 'coverLetter'}
-                      sx={{ borderRadius: '8px', textTransform: 'none' }}
-                    >
-                      {uploading && fileType === 'coverLetter' ? 'Uploading...' : 'Upload Cover Letter'}
-                      <Input
-                        type="file"
-                        accept=".pdf,.doc,.docx,.txt"
-                        onChange={(e) => handleFileUpload(e, 'coverLetter')}
-                        sx={{ display: 'none' }}
-                        disabled={uploading}
-                      />
-                    </Button>
-                  )}
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    startIcon={<CloudUploadIcon />}
+                    disabled={uploading && fileType === 'coverLetter'}
+                    sx={{ borderRadius: '8px', textTransform: 'none' }}
+                  >
+                    {uploading && fileType === 'coverLetter' ? 'Uploading...' : 'Upload Cover Letter'}
+                    <Input
+                      type="file"
+                      accept=".pdf,.doc,.docx,.txt"
+                      onChange={(e) => handleFileUpload(e, 'coverLetter')}
+                      sx={{ display: 'none' }}
+                      disabled={uploading}
+                    />
+                  </Button>
                 </Paper>
               )}
             </Box>
           )}
 
           {/* Screenshot Proof Tab */}
-          {activeTab === 2 && (
+          {activeTab === 3 && (
             <Box>
               {job.screenshotProof ? (
                 <Paper sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: '8px' }}>
@@ -553,47 +642,43 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
                       >
                         <VisibilityIcon />
                       </IconButton>
-                      {mode === 'fill' && (
-                        <IconButton
-                          size="small"
-                          onClick={() => handleDeleteFile('screenshotProof')}
-                          sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}
-                          title="Delete file"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      )}
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteFile('screenshotProof')}
+                        sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }}
+                        title="Delete file"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
                     </Box>
                   </Box>
                 </Paper>
               ) : (
                 <Paper sx={{ p: 3, bgcolor: '#f8fafc', borderRadius: '8px', textAlign: 'center' }}>
                   <Typography sx={{ color: '#64748b', mb: 2 }}>No screenshot proof uploaded</Typography>
-                  {mode === 'fill' && (
-                    <Button
-                      variant="outlined"
-                      component="label"
-                      startIcon={<CloudUploadIcon />}
-                      disabled={uploading && fileType === 'screenshotProof'}
-                      sx={{ borderRadius: '8px', textTransform: 'none' }}
-                    >
-                      {uploading && fileType === 'screenshotProof' ? 'Uploading...' : 'Upload Screenshot Proof'}
-                      <Input
-                        type="file"
-                        accept="image/*,.pdf"
-                        onChange={(e) => handleFileUpload(e, 'screenshotProof')}
-                        sx={{ display: 'none' }}
-                        disabled={uploading}
-                      />
-                    </Button>
-                  )}
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    startIcon={<CloudUploadIcon />}
+                    disabled={uploading && fileType === 'screenshotProof'}
+                    sx={{ borderRadius: '8px', textTransform: 'none' }}
+                  >
+                    {uploading && fileType === 'screenshotProof' ? 'Uploading...' : 'Upload Screenshot Proof'}
+                    <Input
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={(e) => handleFileUpload(e, 'screenshotProof')}
+                      sx={{ display: 'none' }}
+                      disabled={uploading}
+                    />
+                  </Button>
                 </Paper>
               )}
             </Box>
           )}
 
           {/* Notes Tab */}
-          {activeTab === 3 && (
+          {activeTab === 4 && (
             <Box>
               <TextField
                 fullWidth

@@ -40,6 +40,7 @@ export default function ProfilePage() {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [loadingAtsResume, setLoadingAtsResume] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -172,7 +173,7 @@ export default function ProfilePage() {
     let value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     
     // Prevent negative values for salary fields
-    if (['minAcceptableSalary', 'preferredSalaryMin', 'preferredSalaryMax'].includes(field)) {
+    if (['preferredSalaryMin', 'preferredSalaryMax'].includes(field)) {
       const numValue = parseFloat(value);
       if (!isNaN(numValue) && numValue < 0) {
         value = 0;
@@ -184,6 +185,32 @@ export default function ProfilePage() {
 
   const handleArrayChange = (field) => (event, newValue) => {
     setFormData(prev => ({ ...prev, [field]: newValue }));
+  };
+
+  const handleViewAtsResume = async () => {
+    if (!formData.optimizedResumeDetails) return;
+    try {
+      setLoadingAtsResume(true);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication required');
+        return;
+      }
+      const response = await fetch(`${getApiUrl()}/api/resume/optimized/download`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (data.success && data.downloadUrl) {
+        window.open(data.downloadUrl, '_blank');
+      } else {
+        setError(data.error || 'Failed to load resume preview');
+      }
+    } catch (err) {
+      console.error('Error fetching ATS resume:', err);
+      setError('Failed to load resume preview');
+    } finally {
+      setLoadingAtsResume(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -550,16 +577,6 @@ export default function ProfilePage() {
                 
                 <TextField
                   fullWidth
-                  label="Min Acceptable Salary"
-                  type="number"
-                  value={formData.minAcceptableSalary}
-                  onChange={handleChange('minAcceptableSalary')}
-                  inputProps={{ min: 0 }}
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
-                />
-                
-                <TextField
-                  fullWidth
                   label="Preferred Salary Min"
                   type="number"
                   value={formData.preferredSalaryMin}
@@ -639,19 +656,16 @@ export default function ProfilePage() {
                       p: 2, 
                       border: '1px solid #e2e8f0', 
                       borderRadius: '8px',
-                      cursor: 'pointer',
+                      cursor: loadingAtsResume ? 'wait' : 'pointer',
                       bgcolor: '#f0fdf4',
                       borderColor: '#16a34a',
-                      '&:hover': {
+                      opacity: loadingAtsResume ? 0.8 : 1,
+                      '&:hover': loadingAtsResume ? {} : {
                         borderColor: '#16a34a',
                         bgcolor: '#dcfce7',
                       }
                     }}
-                    onClick={() => {
-                      if (formData.optimizedResumeDetails?.url) {
-                        window.open(formData.optimizedResumeDetails.url, '_blank');
-                      }
-                    }}
+                    onClick={loadingAtsResume ? undefined : handleViewAtsResume}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <DescriptionIcon sx={{ color: '#16a34a', fontSize: 32 }} />
@@ -676,9 +690,13 @@ export default function ProfilePage() {
                           {formatFileSize(formData.optimizedResumeDetails.fileSize)}
                         </Typography>
                       </Box>
-                      <Typography sx={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: 500 }}>
-                        Click to view
-                      </Typography>
+                      {loadingAtsResume ? (
+                        <CircularProgress size={20} sx={{ color: '#16a34a' }} />
+                      ) : (
+                        <Typography sx={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: 500 }}>
+                          Click to view
+                        </Typography>
+                      )}
                     </Box>
                   </Paper>
                 )}

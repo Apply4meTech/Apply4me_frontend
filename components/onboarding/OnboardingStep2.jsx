@@ -105,7 +105,7 @@ export default function OnboardingStep2() {
     let value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     
     // Prevent negative values for salary fields
-    if (['minAcceptableSalary', 'preferredSalaryMin', 'preferredSalaryMax'].includes(field)) {
+    if (['preferredSalaryMin', 'preferredSalaryMax'].includes(field)) {
       const numValue = parseFloat(value);
       if (!isNaN(numValue) && numValue < 0) {
         value = 0;
@@ -373,25 +373,6 @@ export default function OnboardingStep2() {
             '& .MuiFormControlLabel-label': {
               color: '#0f172a',
               fontWeight: 500,
-            },
-          }}
-        />
-
-        {/* Compensation - Min Acceptable Salary */}
-        <TextField
-          fullWidth
-          label="Compensation - Min acceptable salary"
-          type="number"
-          value={formData.minAcceptableSalary}
-          onChange={handleChange('minAcceptableSalary')}
-          placeholder="e.g., 80000"
-          inputProps={{ min: 0 }}
-          InputProps={{
-            startAdornment: <Typography sx={{ mr: 1, color: '#64748b' }}>$</Typography>,
-          }}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
             },
           }}
         />

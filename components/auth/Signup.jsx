@@ -100,7 +100,7 @@ export default function Signup() {
         if (typeof window !== 'undefined') {
           localStorage.removeItem('onboardingData');
         }
-        router.push('/onboarding');
+        router.push('/pricing');
       } else {
         throw new Error(data.message || 'Signup failed. Please try again.');
       }

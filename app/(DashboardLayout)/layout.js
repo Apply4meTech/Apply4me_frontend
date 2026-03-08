@@ -32,7 +32,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import { logout, initializeAuth } from '../../store/authSlice';
+import { logout, initializeAuth, updateUser } from '../../store/authSlice';
 
 const drawerWidth = 260;
 
@@ -54,6 +54,7 @@ const getMenuItems = (userRole) => {
   // Add admin menu items for super_admin
   if (userRole === 'super_admin') {
     baseItems.push(
+      { text: 'Job Titles', icon: <WorkIcon />, path: '/dashboard/admin/job-titles' },
       { text: 'Plan Management', icon: <AdminPanelSettingsIcon />, path: '/dashboard/admin/plans' }
     );
   }
@@ -94,9 +95,11 @@ export default function DashboardLayout({ children }) {
   useEffect(() => {
     // Redirect employees to their dashboard - they use Employee auth, not User auth
     if (isInitialized && isAuthenticated && user?.isEmployee) {
-      // Preserve Plan Management destination if they came from /dashboard/admin/plans
+      // Preserve admin destination if they came from dashboard admin pages
       const isPlansPage = pathname?.startsWith('/dashboard/admin/plans');
-      router.push(isPlansPage ? '/employee/admin/plans' : '/employee/dashboard');
+      const isJobTitlesPage = pathname?.startsWith('/dashboard/admin/job-titles');
+      const redirect = isPlansPage ? '/employee/admin/plans' : isJobTitlesPage ? '/employee/admin/job-titles' : '/employee/dashboard';
+      router.push(redirect);
       return;
     }
 
@@ -119,23 +122,43 @@ export default function DashboardLayout({ children }) {
     }
   }, [isInitialized, isAuthenticated, user, pathname, router, dispatch]);
 
-  // Check onboarding completion status
+  // Check payment (subscription) first, then onboarding - for regular users only
   useEffect(() => {
-    if (isInitialized && isAuthenticated && user) {
-      // Skip onboarding check for super_admin and admin users
-      if (user.role === 'super_admin' || user.role === 'admin') {
-        return;
+    if (!isInitialized || !isAuthenticated || !user) return;
+    if (user.role === 'super_admin' || user.role === 'admin') return;
+
+    const hasActiveSubscription = user.hasActiveSubscription === true;
+    const isOnboardingComplete = user.isOnboardingComplete ?? false;
+
+    const verifyAndRedirect = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+        const base = API_URL.endsWith('/api') ? API_URL.slice(0, -4) : API_URL;
+        const res = await fetch(`${base}/api/users/my-plan`, { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        const sub = data.data?.subscription;
+        const hasActive = sub?.planName && sub?.status === 'active' && (!sub?.endDate || new Date(sub.endDate) >= new Date());
+        if (!hasActive) {
+          router.push('/pricing');
+          return;
+        }
+        dispatch(updateUser({ hasActiveSubscription: true, subscription: sub }));
+        if (!isOnboardingComplete) router.push('/onboarding');
+      } catch {
+        router.push('/pricing');
       }
-      
-      const isOnboardingComplete = user.isOnboardingComplete ?? false;
-      const currentPath = pathname;
-      
-      // Don't redirect if already on onboarding page
-      if (!isOnboardingComplete && currentPath !== '/onboarding') {
-        router.push('/onboarding');
-      }
+    };
+
+    if (!hasActiveSubscription) {
+      verifyAndRedirect();
+      return;
     }
-  }, [isInitialized, isAuthenticated, user, pathname, router]);
+    if (!isOnboardingComplete && pathname !== '/onboarding') {
+      router.push('/onboarding');
+    }
+  }, [isInitialized, isAuthenticated, user, pathname, router, dispatch]);
 
   // Get profile picture from Redux state or fetch it
   useEffect(() => {

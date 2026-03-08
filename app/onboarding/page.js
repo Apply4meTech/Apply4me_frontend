@@ -329,7 +329,7 @@ function OnboardingContent() {
 }
 
 export default function OnboardingPage() {
-  const { isAuthenticated, isInitialized } = useSelector((state) => state.auth);
+  const { isAuthenticated, isInitialized, user } = useSelector((state) => state.auth);
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -337,15 +337,46 @@ export default function OnboardingPage() {
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
-      const user = localStorage.getItem('user');
+      const storedUser = localStorage.getItem('user');
       
-      if (token && user && !isAuthenticated) {
+      if (token && storedUser && !isAuthenticated) {
         dispatch(initializeAuth());
       } else if (isInitialized && !isAuthenticated) {
         router.push('/login');
       }
     }
   }, [isAuthenticated, isInitialized, router, dispatch]);
+
+  // Payment gate: redirect to pricing if no active subscription (regular users only)
+  React.useEffect(() => {
+    if (!isInitialized || !isAuthenticated || !user || user.isEmployee) return;
+    if (user.role === 'super_admin' || user.role === 'admin') return;
+
+    const checkSubscription = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+        const base = API_URL.endsWith('/api') ? API_URL.slice(0, -4) : API_URL;
+        const res = await fetch(`${base}/api/users/my-plan`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        const sub = data.data?.subscription;
+        const hasActive = sub?.planName && sub?.status === 'active' && (!sub?.endDate || new Date(sub.endDate) >= new Date());
+        if (!hasActive) {
+          router.push('/pricing');
+          return;
+        }
+        dispatch(updateUser({ hasActiveSubscription: true, subscription: sub }));
+      } catch {
+        router.push('/pricing');
+      }
+    };
+
+    if (user.hasActiveSubscription === true) return;
+    checkSubscription();
+  }, [isInitialized, isAuthenticated, user, router, dispatch]);
 
   if (!isAuthenticated) {
     return (

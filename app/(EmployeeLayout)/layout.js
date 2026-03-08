@@ -41,6 +41,7 @@ const LogoIcon = ({ color = '#2463eb', size = 32 }) => (
 
 import ArticleIcon from '@mui/icons-material/Article';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import WorkIcon from '@mui/icons-material/Work';
 
 const getMenuItems = (userRole) => {
   const items = [
@@ -52,6 +53,7 @@ const getMenuItems = (userRole) => {
   if (userRole === 'super_admin') {
     items.push(
       { text: 'Blogs', icon: <ArticleIcon />, path: '/employee/blogs' },
+      { text: 'Job Titles', icon: <WorkIcon />, path: '/employee/admin/job-titles' },
       { text: 'Plan Management', icon: <AdminPanelSettingsIcon />, path: '/employee/admin/plans' }
     );
   }
@@ -88,10 +90,20 @@ export default function EmployeeLayout({ children }) {
   }, [dispatch, isAuthenticated]);
 
   useEffect(() => {
-    if (isInitialized) {
-      if (!isAuthenticated || !user?.isEmployee) {
-        router.push('/employee/login');
+    if (!isInitialized) return;
+    // Check localStorage - if valid employee session exists, auth may still be initializing
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      if (token && storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          if (userData.isEmployee) return; // Valid employee session, auth will sync
+        } catch (_) {}
       }
+    }
+    if (!isAuthenticated || !user?.isEmployee) {
+      router.push('/login');
     }
   }, [isInitialized, isAuthenticated, user, router]);
 
@@ -157,7 +169,7 @@ export default function EmployeeLayout({ children }) {
   const handleLogout = () => {
     handleProfileMenuClose();
     dispatch(logout());
-    router.push('/employee/login');
+    router.push('/login');
   };
 
   if (!isInitialized || !isAuthenticated || !user?.isEmployee) {
