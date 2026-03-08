@@ -225,7 +225,6 @@ export default function Pricing() {
     }
   };
 
-  // Plans are now fetched from API - see useEffect above
 
   return (
     <MainLayout>
