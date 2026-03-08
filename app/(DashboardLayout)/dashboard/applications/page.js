@@ -310,7 +310,7 @@ export default function ApplicationsPage() {
         ) : (
           <>
             <TableContainer sx={{ overflowX: 'auto' }}>
-                <Table>
+                <Table sx={{ '& .MuiTableCell-root': { whiteSpace: 'nowrap' } }}>
                   <TableHead>
                     <TableRow sx={{ bgcolor: '#f8fafc' }}>
                       <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Job Name</TableCell>

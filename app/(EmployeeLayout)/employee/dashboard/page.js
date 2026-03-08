@@ -613,12 +613,19 @@ export default function EmployeeDashboard() {
 
   return (
     <Box>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a', mb: 1 }}>
+      <Box sx={{ 
+        mb: 4, 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' }, 
+        justifyContent: { sm: 'space-between' }, 
+        alignItems: { xs: 'stretch', sm: 'center' },
+        gap: { xs: 2, sm: 0 }
+      }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a', mb: { xs: 0, sm: 1 } }}>
           Dashboard
         </Typography>
         {isSuperAdmin && (
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, flexWrap: 'nowrap', minWidth: 0 }}>
             <Button
               variant="outlined"
               startIcon={<PeopleIcon />}
@@ -629,8 +636,10 @@ export default function EmployeeDashboard() {
                 textTransform: 'none',
                 fontWeight: 600,
                 borderRadius: '8px',
-                px: 3,
+                px: { xs: 2, sm: 3 },
                 py: 1,
+                flex: { xs: 1, sm: 'none' },
+                minWidth: 0,
                 '&:hover': {
                   borderColor: '#1d4ed8',
                   bgcolor: '#e0e7ff',
@@ -649,8 +658,10 @@ export default function EmployeeDashboard() {
                 textTransform: 'none',
                 fontWeight: 600,
                 borderRadius: '8px',
-                px: 3,
+                px: { xs: 2, sm: 3 },
                 py: 1,
+                flex: { xs: 1, sm: 'none' },
+                minWidth: 0,
                 '&:hover': {
                   bgcolor: '#1d4ed8',
                 },
@@ -682,8 +693,8 @@ export default function EmployeeDashboard() {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <SettingsIcon sx={{ color: '#2463eb', fontSize: '1.5rem' }} />
-              <Typography sx={{ fontSize: '1.125rem', fontWeight: 600, color: '#0f172a' }}>
+              <SettingsIcon sx={{ color: '#2463eb', fontSize: { xs: '1.25rem', sm: '1.5rem' } }} />
+              <Typography sx={{ fontSize: { xs: '0.875rem', sm: '1.125rem' }, fontWeight: 600, color: '#0f172a' }}>
                 Auto-Assign Settings
               </Typography>
             </Box>
@@ -693,6 +704,7 @@ export default function EmployeeDashboard() {
                   checked={autoAssignEnabled}
                   onChange={handleToggleAutoAssign}
                   disabled={loadingSettings}
+                  size="small"
                   sx={{
                     '& .MuiSwitch-switchBase.Mui-checked': {
                       color: '#2463eb',
@@ -704,7 +716,7 @@ export default function EmployeeDashboard() {
                 />
               }
               label={
-                <Typography sx={{ fontSize: '0.875rem', color: '#64748b' }}>
+                <Typography sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, color: '#64748b' }}>
                   {autoAssignEnabled ? 'Enabled' : 'Disabled'}
                 </Typography>
               }
@@ -863,7 +875,7 @@ export default function EmployeeDashboard() {
       {/* Jobs Table */}
       <Paper elevation={0} sx={{ borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
         <TableContainer sx={{ overflowX: 'auto' }}>
-          <Table>
+          <Table sx={{ '& .MuiTableCell-root': { whiteSpace: 'nowrap' } }}>
             <TableHead>
               <TableRow sx={{ bgcolor: '#f8fafc' }}>
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', width: '60px', whiteSpace: 'nowrap' }}>SR No</TableCell>

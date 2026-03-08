@@ -356,9 +356,16 @@ export default function ProfilePage() {
               <Tabs 
                 value={tabValue} 
                 onChange={(e, newValue) => setTabValue(newValue)}
+                variant="scrollable"
+                scrollButtons="auto"
+                allowScrollButtonsMobile
                 sx={{
+                  minHeight: 48,
                   '& .MuiTabs-flexContainer': {
-                    flexWrap: { xs: 'wrap', md: 'nowrap' }
+                    flexWrap: 'nowrap'
+                  },
+                  '& .MuiTabs-scroller': {
+                    overflow: 'auto !important'
                   }
                 }}
               >
@@ -656,6 +663,7 @@ export default function ProfilePage() {
                       p: 2, 
                       border: '1px solid #e2e8f0', 
                       borderRadius: '8px',
+                      overflow: 'hidden',
                       cursor: loadingAtsResume ? 'wait' : 'pointer',
                       bgcolor: '#f0fdf4',
                       borderColor: '#16a34a',
@@ -667,11 +675,11 @@ export default function ProfilePage() {
                     }}
                     onClick={loadingAtsResume ? undefined : handleViewAtsResume}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <DescriptionIcon sx={{ color: '#16a34a', fontSize: 32 }} />
-                      <Box sx={{ flex: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
+                      <DescriptionIcon sx={{ color: '#16a34a', fontSize: 32, flexShrink: 0 }} />
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, minWidth: 0 }}>
+                          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>
                             {formData.optimizedResumeDetails.fileName}
                           </Typography>
                           <Chip 
@@ -682,7 +690,8 @@ export default function ProfilePage() {
                               fontSize: '0.65rem',
                               bgcolor: '#16a34a',
                               color: 'white',
-                              fontWeight: 600
+                              fontWeight: 600,
+                              flexShrink: 0
                             }} 
                           />
                         </Box>
@@ -691,9 +700,9 @@ export default function ProfilePage() {
                         </Typography>
                       </Box>
                       {loadingAtsResume ? (
-                        <CircularProgress size={20} sx={{ color: '#16a34a' }} />
+                        <CircularProgress size={20} sx={{ color: '#16a34a', flexShrink: 0 }} />
                       ) : (
-                        <Typography sx={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: 500 }}>
+                        <Typography sx={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: 500, flexShrink: 0, whiteSpace: 'nowrap' }}>
                           Click to view
                         </Typography>
                       )}
@@ -707,6 +716,7 @@ export default function ProfilePage() {
                       p: 2, 
                       border: '1px solid #e2e8f0', 
                       borderRadius: '8px',
+                      overflow: 'hidden',
                       cursor: 'pointer',
                       '&:hover': {
                         borderColor: '#2463eb',
@@ -719,11 +729,11 @@ export default function ProfilePage() {
                       }
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <DescriptionIcon sx={{ color: '#2463eb', fontSize: 32 }} />
-                      <Box sx={{ flex: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
+                      <DescriptionIcon sx={{ color: '#2463eb', fontSize: 32, flexShrink: 0 }} />
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, minWidth: 0 }}>
+                          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>
                             {formData.resume_details.fileName}
                           </Typography>
                           <Chip 
@@ -734,7 +744,8 @@ export default function ProfilePage() {
                               fontSize: '0.65rem',
                               bgcolor: '#64748b',
                               color: 'white',
-                              fontWeight: 600
+                              fontWeight: 600,
+                              flexShrink: 0
                             }} 
                           />
                         </Box>
@@ -742,7 +753,7 @@ export default function ProfilePage() {
                           {formatFileSize(formData.resume_details.fileSize)}
                         </Typography>
                       </Box>
-                      <Typography sx={{ fontSize: '0.75rem', color: '#2463eb' }}>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#2463eb', flexShrink: 0, whiteSpace: 'nowrap' }}>
                         Click to view
                       </Typography>
                     </Box>
@@ -755,6 +766,7 @@ export default function ProfilePage() {
                       p: 2, 
                       border: '1px solid #e2e8f0', 
                       borderRadius: '8px',
+                      overflow: 'hidden',
                       cursor: 'pointer',
                       '&:hover': {
                         borderColor: '#2463eb',
@@ -767,17 +779,17 @@ export default function ProfilePage() {
                       }
                     }}
                   >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <DescriptionIcon sx={{ color: '#2463eb', fontSize: 32 }} />
-                      <Box sx={{ flex: 1 }}>
-                        <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
+                      <DescriptionIcon sx={{ color: '#2463eb', fontSize: 32, flexShrink: 0 }} />
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {formData.cv_details.fileName}
                         </Typography>
                         <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
                           {formatFileSize(formData.cv_details.fileSize)}
                         </Typography>
                       </Box>
-                      <Typography sx={{ fontSize: '0.75rem', color: '#2463eb' }}>
+                      <Typography sx={{ fontSize: '0.75rem', color: '#2463eb', flexShrink: 0, whiteSpace: 'nowrap' }}>
                         Click to view
                       </Typography>
                     </Box>

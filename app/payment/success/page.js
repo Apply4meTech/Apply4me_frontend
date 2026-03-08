@@ -13,7 +13,6 @@ import { updateUser } from '../../../store/authSlice';
 function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const returnTo = searchParams?.get('return_to');
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
   const [verifying, setVerifying] = useState(true);
@@ -69,12 +68,10 @@ function PaymentSuccessContent() {
 
   useEffect(() => {
     if (!verifying && verified) {
-      const returnTo = searchParams?.get('return_to');
-      const redirectPath = returnTo === 'onboarding' ? '/onboarding' : '/dashboard';
-      const timer = setTimeout(() => router.push(redirectPath), 3000);
+      const timer = setTimeout(() => router.push('/onboarding'), 3000);
       return () => clearTimeout(timer);
     }
-  }, [verifying, verified, router, searchParams]);
+  }, [verifying, verified, router]);
 
   return (
     <MainLayout>
@@ -146,14 +143,12 @@ function PaymentSuccessContent() {
             <Box
               sx={{
                 display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' },
-                gap: '1rem',
                 justifyContent: 'center',
               }}
             >
               <Button
                 component={Link}
-                href={returnTo === 'onboarding' ? '/onboarding' : '/dashboard'}
+                href="/onboarding"
                 variant="contained"
                 sx={{
                   backgroundColor: '#2563EB',
@@ -168,27 +163,7 @@ function PaymentSuccessContent() {
                   },
                 }}
               >
-                {returnTo === 'onboarding' ? 'Continue to Onboarding' : 'Go to Dashboard'}
-              </Button>
-              <Button
-                component={Link}
-                href="/pricing"
-                variant="outlined"
-                sx={{
-                  borderColor: '#2563EB',
-                  color: '#2563EB',
-                  padding: '0.75rem 2rem',
-                  borderRadius: '0.5rem',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  '&:hover': {
-                    borderColor: '#1E3A8A',
-                    backgroundColor: 'rgba(37, 99, 235, 0.04)',
-                  },
-                }}
-              >
-                View Plans
+                Start Your Onboarding
               </Button>
             </Box>
             {!verifying && verified && (

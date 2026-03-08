@@ -263,8 +263,8 @@ export default function AllEmployeesModal({ open, onClose }) {
             </Typography>
           </Box>
         ) : (
-          <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-            <Table>
+          <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflowX: 'auto' }}>
+            <Table sx={{ '& .MuiTableCell-root': { whiteSpace: 'nowrap' } }}>
               <TableHead>
                 <TableRow sx={{ bgcolor: '#f8fafc' }}>
                   <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Name</TableCell>

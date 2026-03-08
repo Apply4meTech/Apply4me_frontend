@@ -810,7 +810,7 @@ export default function Pricing() {
                 transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
               }}
             >
-            <TableContainer>
+            <TableContainer sx={{ overflowX: 'auto' }}>
               <Table
                 sx={{
                   minWidth: 560,
@@ -819,6 +819,7 @@ export default function Pricing() {
                     padding: { xs: '0.875rem 0.625rem', md: '1rem 0.875rem' },
                     fontFamily: 'inherit',
                     verticalAlign: 'middle',
+                    whiteSpace: 'nowrap',
                   },
                 }}
               >

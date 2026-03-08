@@ -251,12 +251,19 @@ export default function AdminPlansContent() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' }, 
+        justifyContent: { sm: 'space-between' }, 
+        alignItems: { xs: 'stretch', sm: 'center' },
+        gap: { xs: 2, sm: 0 },
+        mb: 4 
+      }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a', mb: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a', mb: 1, fontSize: { xs: '1.25rem', sm: 'inherit' } }}>
             Plan Management
           </Typography>
-          <Typography sx={{ color: '#64748b', fontSize: '1rem' }}>
+          <Typography sx={{ color: '#64748b', fontSize: { xs: '0.875rem', sm: '1rem' } }}>
             Manage subscription plans for your platform.
           </Typography>
         </Box>
@@ -268,6 +275,9 @@ export default function AdminPlansContent() {
             bgcolor: '#2463eb',
             color: 'white',
             textTransform: 'none',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+            alignSelf: { xs: 'stretch', sm: 'flex-start' },
             '&:hover': { bgcolor: '#1e40af' },
           }}
         >
@@ -281,16 +291,23 @@ export default function AdminPlansContent() {
         </Alert>
       )}
 
-      <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e2e8f0' }}>
-        <Table>
+      <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e2e8f0', overflowX: 'auto', borderRadius: '8px' }}>
+        <Table sx={{ 
+          '& .MuiTableCell-root': { 
+            whiteSpace: 'nowrap',
+            fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+            py: { xs: 1.25, sm: 2 },
+            px: { xs: 1.5, sm: 2 },
+          } 
+        }}>
           <TableHead>
             <TableRow sx={{ bgcolor: '#f8fafc' }}>
-              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Name</TableCell>
-              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Description</TableCell>
-              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }} align="right">Price</TableCell>
-              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Status</TableCell>
-              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Order</TableCell>
-              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }} align="center">Actions</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Name</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Description</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap', fontSize: { xs: '0.75rem', sm: '0.875rem' } }} align="right">Price</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Status</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Order</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap', fontSize: { xs: '0.75rem', sm: '0.875rem' } }} align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -304,24 +321,24 @@ export default function AdminPlansContent() {
               plans.map((plan) => (
                 <TableRow key={plan._id} hover>
                   <TableCell>
-                    <Box>
-                      <Typography sx={{ fontWeight: 600 }}>{plan.name}</Typography>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography sx={{ fontWeight: 600, fontSize: 'inherit' }}>{plan.name}</Typography>
                       {plan.badge && (
-                        <Chip label={plan.badge} size="small" sx={{ mt: 0.5, height: 20, fontSize: '0.7rem' }} />
+                        <Chip label={plan.badge} size="small" sx={{ mt: 0.5, height: { xs: 18, sm: 20 }, fontSize: { xs: '0.625rem', sm: '0.7rem' } }} />
                       )}
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Typography sx={{ color: '#64748b', fontSize: '0.875rem' }}>
+                    <Typography sx={{ color: '#64748b', fontSize: 'inherit' }}>
                       {plan.description}
                     </Typography>
                   </TableCell>
                   <TableCell align="right">
-                    <Typography sx={{ fontWeight: 600 }}>
+                    <Typography sx={{ fontWeight: 600, fontSize: 'inherit' }}>
                       ${plan.price} {plan.currency}
                     </Typography>
                     {plan.actualPrice && plan.actualPrice > plan.price && (
-                      <Typography sx={{ color: '#64748b', fontSize: '0.75rem', textDecoration: 'line-through' }}>
+                      <Typography sx={{ color: '#64748b', fontSize: { xs: '0.6875rem', sm: '0.75rem' }, textDecoration: 'line-through' }}>
                         ${plan.actualPrice}
                       </Typography>
                     )}
@@ -331,6 +348,7 @@ export default function AdminPlansContent() {
                       label={plan.isActive ? 'Active' : 'Inactive'}
                       color={plan.isActive ? 'success' : 'default'}
                       size="small"
+                      sx={{ fontSize: { xs: '0.6875rem', sm: 'inherit' }, height: { xs: 20, sm: 24 } }}
                     />
                   </TableCell>
                   <TableCell>{plan.displayOrder}</TableCell>

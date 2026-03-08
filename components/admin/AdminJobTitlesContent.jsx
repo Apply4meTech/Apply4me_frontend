@@ -178,12 +178,19 @@ export default function AdminJobTitlesContent() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' }, 
+        justifyContent: { sm: 'space-between' }, 
+        alignItems: { xs: 'stretch', sm: 'center' },
+        gap: { xs: 2, sm: 0 },
+        mb: 4 
+      }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a', mb: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a', mb: 1, fontSize: { xs: '1.25rem', sm: 'inherit' } }}>
             Job Titles (Master Data)
           </Typography>
-          <Typography sx={{ color: '#64748b', fontSize: '1rem' }}>
+          <Typography sx={{ color: '#64748b', fontSize: { xs: '0.875rem', sm: '1rem' } }}>
             Manage job titles used in signup and onboarding.
           </Typography>
         </Box>
@@ -195,6 +202,9 @@ export default function AdminJobTitlesContent() {
             bgcolor: '#2463eb',
             color: 'white',
             textTransform: 'none',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+            alignSelf: { xs: 'stretch', sm: 'flex-start' },
             '&:hover': { bgcolor: '#1e40af' },
           }}
         >
@@ -208,14 +218,21 @@ export default function AdminJobTitlesContent() {
         </Alert>
       )}
 
-      <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e2e8f0' }}>
-        <Table>
+      <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid #e2e8f0', overflowX: 'auto', borderRadius: { xs: '8px', sm: '8px' } }}>
+        <Table sx={{ 
+          '& .MuiTableCell-root': { 
+            whiteSpace: 'nowrap',
+            fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+            py: { xs: 1.25, sm: 2 },
+            px: { xs: 1.5, sm: 2 },
+          } 
+        }}>
           <TableHead>
             <TableRow sx={{ bgcolor: '#f8fafc' }}>
-              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Job Title</TableCell>
-              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Default</TableCell>
-              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }} align="right">Usage Count</TableCell>
-              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }} align="center">Actions</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Job Title</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Default</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap', fontSize: { xs: '0.75rem', sm: '0.875rem' } }} align="right">Usage Count</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap', fontSize: { xs: '0.75rem', sm: '0.875rem' } }} align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -229,9 +246,9 @@ export default function AdminJobTitlesContent() {
               jobTitles.map((item) => (
                 <TableRow key={item._id} hover>
                   <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <WorkIcon sx={{ color: '#64748b', fontSize: 20 }} />
-                      <Typography sx={{ fontWeight: 500 }}>{item.displayTitle || item.title}</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+                      <WorkIcon sx={{ color: '#64748b', fontSize: { xs: 18, sm: 20 }, flexShrink: 0 }} />
+                      <Typography sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.displayTitle || item.title}</Typography>
                     </Box>
                   </TableCell>
                   <TableCell>
@@ -239,6 +256,7 @@ export default function AdminJobTitlesContent() {
                       label={item.isDefault ? 'Yes' : 'No'}
                       color={item.isDefault ? 'primary' : 'default'}
                       size="small"
+                      sx={{ fontSize: { xs: '0.6875rem', sm: 'inherit' }, height: { xs: 20, sm: 24 } }}
                     />
                   </TableCell>
                   <TableCell align="right">{item.usageCount ?? 0}</TableCell>

@@ -420,7 +420,7 @@ export default function DashboardContent() {
         }}
       >
         <TableContainer sx={{ overflowX: 'auto' }}>
-          <Table>
+          <Table sx={{ '& .MuiTableCell-root': { whiteSpace: 'nowrap' } }}>
             <TableHead>
               <TableRow sx={{ bgcolor: '#f8fafc' }}>
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap', width: '60px' }}>
