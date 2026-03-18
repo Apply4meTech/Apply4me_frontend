@@ -41,8 +41,11 @@ import ClearIcon from '@mui/icons-material/Clear';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useSelector } from 'react-redux';
 import MuiLink from '@mui/material/Link';
+import Link from 'next/link';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import EmailIcon from '@mui/icons-material/Email';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -98,11 +101,12 @@ export default function EmployeeDashboard() {
     totalJobs: 0,
     totalCompleted: 0,
     totalPending: 0,
+    totalInProgress: 0,
     jobs: []
   });
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
   const [searchInput, setSearchInput] = useState('');
-  const [filters, setFilters] = useState({ status: 'all', search: '' });
+  const [filters, setFilters] = useState({ status: 'all', search: '', sortBy: 'title', sortOrder: 'asc' });
   const isSuperAdmin = user?.role === 'super_admin';
 
   useEffect(() => {
@@ -130,7 +134,9 @@ export default function EmployeeDashboard() {
         page: pagination.page.toString(),
         limit: pagination.limit.toString(),
         ...(filters.status !== 'all' && { status: filters.status }),
-        ...(filters.search && { search: filters.search })
+        ...(filters.search && { search: filters.search }),
+        sortBy: filters.sortBy || 'title',
+        sortOrder: filters.sortOrder || 'asc'
       });
 
       const response = await fetch(`${getApiUrl()}/api/employee/dashboard?${params}`, {
@@ -174,6 +180,15 @@ export default function EmployeeDashboard() {
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
+    setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
+  const handleSortByTitle = () => {
+    setFilters(prev => ({
+      ...prev,
+      sortBy: 'title',
+      sortOrder: prev.sortOrder === 'asc' ? 'desc' : 'asc'
+    }));
     setPagination(prev => ({ ...prev, page: 1 }));
   };
 
@@ -591,6 +606,7 @@ export default function EmployeeDashboard() {
     const statusMap = {
       'pending': { bg: '#fef3c7', color: '#d97706' },
       'assigned': { bg: '#f3e8ff', color: '#9333ea' },
+      'in_progress': { bg: '#dbeafe', color: '#1d4ed8' },
       'applied': { bg: '#eff6ff', color: '#2463eb' },
       'response': { bg: '#dcfce7', color: '#16a34a' },
       'rejected': { bg: '#fee2e2', color: '#dc2626' },
@@ -600,6 +616,7 @@ export default function EmployeeDashboard() {
   };
 
   const formatStatus = (status) => {
+    if (status === 'in_progress') return 'In Progress';
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
@@ -775,7 +792,7 @@ export default function EmployeeDashboard() {
 
       {/* Summary Boxes */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <Paper elevation={0} sx={{ p: 3, borderRadius: '12px', border: '1px solid #e2e8f0', bgcolor: 'white' }}>
             <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
               {isSuperAdmin ? 'Total Jobs' : 'Total Jobs Assigned'}
@@ -785,7 +802,7 @@ export default function EmployeeDashboard() {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={12} sm={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <Paper elevation={0} sx={{ p: 3, borderRadius: '12px', border: '1px solid #e2e8f0', bgcolor: 'white' }}>
             <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
               {isSuperAdmin ? 'Total Completed' : 'My Completed'}
@@ -795,13 +812,23 @@ export default function EmployeeDashboard() {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={12} sm={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <Paper elevation={0} sx={{ p: 3, borderRadius: '12px', border: '1px solid #e2e8f0', bgcolor: 'white' }}>
             <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
               {isSuperAdmin ? 'Total Pending' : 'My Pending'}
             </Typography>
             <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#f59e0b' }}>
               {dashboardData.totalPending}
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper elevation={0} sx={{ p: 3, borderRadius: '12px', border: '1px solid #e2e8f0', bgcolor: 'white' }}>
+            <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
+              {isSuperAdmin ? 'Total In Progress' : 'My In Progress'}
+            </Typography>
+            <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#1d4ed8' }}>
+              {dashboardData.totalInProgress ?? 0}
             </Typography>
           </Paper>
         </Grid>
@@ -865,6 +892,7 @@ export default function EmployeeDashboard() {
                 <MenuItem value="all">All</MenuItem>
                 <MenuItem value="pending">Pending</MenuItem>
                 <MenuItem value="assigned">Assigned</MenuItem>
+                <MenuItem value="in_progress">In Progress</MenuItem>
                 <MenuItem value="completed">Completed</MenuItem>
               </Select>
             </FormControl>
@@ -879,6 +907,30 @@ export default function EmployeeDashboard() {
             <TableHead>
               <TableRow sx={{ bgcolor: '#f8fafc' }}>
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', width: '60px', whiteSpace: 'nowrap' }}>SR No</TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 600,
+                    color: '#0f172a',
+                    fontSize: '0.875rem',
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    minWidth: 140,
+                    '&:hover': { bgcolor: '#f1f5f9' }
+                  }}
+                  onClick={handleSortByTitle}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    Job Title
+                    {filters.sortBy === 'title' && (
+                      filters.sortOrder === 'asc' ? (
+                        <ArrowUpwardIcon sx={{ fontSize: '1rem', color: '#2463eb' }} />
+                      ) : (
+                        <ArrowDownwardIcon sx={{ fontSize: '1rem', color: '#2463eb' }} />
+                      )
+                    )}
+                  </Box>
+                </TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>User Name</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Company Name</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Link</TableCell>
@@ -896,7 +948,7 @@ export default function EmployeeDashboard() {
             <TableBody>
               {                dashboardData.jobs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={isSuperAdmin ? 11 : 10} sx={{ textAlign: 'center', py: 6 }}>
+                  <TableCell colSpan={isSuperAdmin ? 12 : 11} sx={{ textAlign: 'center', py: 6 }}>
                     <Typography sx={{ color: '#64748b' }}>No jobs found</Typography>
                   </TableCell>
                 </TableRow>
@@ -915,6 +967,9 @@ export default function EmployeeDashboard() {
                       <TableCell sx={{ color: '#64748b', fontSize: '0.875rem', fontWeight: 500 }}>
                         {(pagination.page - 1) * pagination.limit + index + 1}
                       </TableCell>
+                      <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem', fontWeight: 600 }}>
+                        {job.jobTitle || '—'}
+                      </TableCell>
                       <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem', fontWeight: 500 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           {job.canCustomizeResume && (
@@ -922,7 +977,28 @@ export default function EmployeeDashboard() {
                               <AutoAwesomeIcon sx={{ color: '#16a34a', fontSize: '1.1rem' }} />
                             </Tooltip>
                           )}
-                          {job.userName || job.applicant || 'N/A'}
+                          {job.userId ? (
+                            <Link
+                              href={`/employee/customers/${job.userId}`}
+                              style={{
+                                color: '#2463eb',
+                                textDecoration: 'none',
+                                fontWeight: 500,
+                                fontSize: '0.875rem',
+                              }}
+                            >
+                              <Box
+                                component="span"
+                                sx={{
+                                  '&:hover': { textDecoration: 'underline' },
+                                }}
+                              >
+                                {job.userName || job.applicant || 'N/A'}
+                              </Box>
+                            </Link>
+                          ) : (
+                            job.userName || job.applicant || 'N/A'
+                          )}
                         </Box>
                       </TableCell>
                       <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem', fontWeight: 600 }}>
@@ -978,6 +1054,8 @@ export default function EmployeeDashboard() {
                             }}
                           >
                             <MenuItem value="pending">Pending</MenuItem>
+                            <MenuItem value="assigned">Assigned</MenuItem>
+                            <MenuItem value="in_progress">In Progress</MenuItem>
                             <MenuItem value="completed">Completed</MenuItem>
                           </Select>
                         </FormControl>

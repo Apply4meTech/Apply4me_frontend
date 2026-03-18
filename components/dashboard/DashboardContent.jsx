@@ -68,6 +68,7 @@ export default function DashboardContent() {
   const [userPlan, setUserPlan] = useState(null);
   const [dashboardData, setDashboardData] = useState({
     totalJobsApplied: 0,
+    totalJobsOpted: 0,
     accountManagerName: 'Not Assigned',
     applications: [],
     platforms: []
@@ -232,7 +233,7 @@ export default function DashboardContent() {
     );
   }
 
-  const { totalJobsApplied, accountManagerName, applications } = dashboardData;
+  const { totalJobsApplied, totalJobsOpted, accountManagerName, applications } = dashboardData;
 
   return (
     <Box>
@@ -274,10 +275,13 @@ export default function DashboardContent() {
                 }}
               >
                 <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1.5 }}>
-                  Total Jobs Applied
+                  Jobs Applied
                 </Typography>
                 <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#0f172a' }}>
-                  {totalJobsApplied}
+                  {totalJobsApplied} out of {totalJobsOpted}
+                </Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: '#64748b', mt: 0.5 }}>
+                  {totalJobsOpted > 0 ? `${Math.round((totalJobsApplied / totalJobsOpted) * 100)}% of your jobs have been applied` : 'Add jobs to get started'}
                 </Typography>
               </Paper>
             </Grid>

@@ -1,39 +1,32 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { Box, Container, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Box, Container, Typography, Dialog, DialogContent, Button as MuiButton } from '@mui/material';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Button from '../components/Button';
 import JobSearchingCard from '../components/landingPageComponents/jobSearchingcCard/JobSearchingCard';
-import StatisticsSection from '../components/landingPageComponents/StatisticsSection/StatisticsSection';
 import SixStepCards from '../components/landingPageComponents/6stepCards/6stepCards';
 import ROICalculator from '../components/landingPageComponents/ROICalculator/ROICalculator';
 import SuccessStories from '../components/landingPageComponents/SuccessStories/SuccessStories';
 import CTASection from '../components/landingPageComponents/CTASection/CTASection';
 import MainLayout from '../components/layouts/MainLayout';
 
-// comment
-
 export default function Home() {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const router = useRouter();
   const [heroVisible, setHeroVisible] = useState(false);
+  const [comingSoonOpen, setComingSoonOpen] = useState(true);
 
   useEffect(() => {
-    // Handle smooth scroll to success stories section
     const hash = window.location.hash;
     if (hash === '#success-stories') {
       setTimeout(() => {
         const element = document.getElementById('success-stories');
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
     }
-
-    // Trigger hero animation on mount
     setHeroVisible(true);
   }, []);
 
@@ -90,13 +83,8 @@ export default function Home() {
                 transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
               }}
             >
-              Stop spending hours {""}
-              <Box
-                component="span"
-                sx={{
-                  color: '#60A5FA',
-                }}
-              >
+              Stop spending hours {''}
+              <Box component="span" sx={{ color: '#60A5FA' }}>
                 applying to jobs.
               </Box>
             </Typography>
@@ -241,6 +229,95 @@ export default function Home() {
         <CTASection />
 
       </Box>
+
+      {/* Coming Soon Popup Overlay */}
+      <Dialog
+        open={comingSoonOpen}
+        onClose={() => setComingSoonOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '24px',
+            p: 0,
+            maxWidth: 460,
+            mx: 2,
+            overflow: 'hidden',
+            boxShadow: '0 32px 64px -12px rgba(37, 99, 235, 0.25), 0 0 0 1px rgba(255,255,255,0.05)',
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
+            border: '1px solid rgba(96, 165, 250, 0.2)',
+          }
+        }}
+        BackdropProps={{
+          sx: { bgcolor: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(8px)' }
+        }}
+      >
+        <DialogContent sx={{ p: 4, pt: 5 }}>
+          <Box
+            sx={{
+              width: 64,
+              height: 64,
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mx: 'auto',
+              mb: 2,
+              boxShadow: '0 0 40px rgba(59, 130, 246, 0.4)',
+              animation: 'pulse 2s ease-in-out infinite',
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+                '50%': { opacity: 0.9, transform: 'scale(1.05)' },
+              }
+            }}
+          >
+            <Box sx={{ fontSize: '2rem' }}>🚀</Box>
+          </Box>
+          <Typography
+            sx={{
+              fontSize: '2.25rem',
+              fontWeight: 800,
+              background: 'linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              mb: 1.5,
+              letterSpacing: '-0.02em',
+            }}
+          >
+            Something Big Is Coming
+          </Typography>
+          <Typography sx={{ color: '#94a3b8', fontSize: '1.05rem', lineHeight: 1.7, mb: 3 }}>
+            We're building something that will transform how you land your dream job.
+            <br />
+            <Box component="span" sx={{ color: '#60a5fa', fontWeight: 600 }}>
+              Get ready to stop applying—and start getting hired.
+            </Box>
+          </Typography>
+          <Typography sx={{ color: '#64748b', fontSize: '0.95rem', mb: 3 }}>
+            We'll notify you the moment we're live. You won't want to miss it.
+          </Typography>
+          <MuiButton
+            variant="contained"
+            onClick={() => setComingSoonOpen(false)}
+            fullWidth
+            sx={{
+              py: 1.75,
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+              textTransform: 'none',
+              fontWeight: 700,
+              fontSize: '1rem',
+              boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                boxShadow: '0 6px 20px rgba(37, 99, 235, 0.5)',
+              }
+            }}
+          >
+            I'm Excited — Let's Go!
+          </MuiButton>
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 }

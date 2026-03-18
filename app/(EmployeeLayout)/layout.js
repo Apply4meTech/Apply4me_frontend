@@ -42,6 +42,7 @@ const LogoIcon = ({ color = '#2463eb', size = 32 }) => (
 import ArticleIcon from '@mui/icons-material/Article';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import WorkIcon from '@mui/icons-material/Work';
+import PeopleIcon from '@mui/icons-material/People';
 
 const getMenuItems = (userRole) => {
   const items = [
@@ -54,7 +55,8 @@ const getMenuItems = (userRole) => {
     items.push(
       { text: 'Blogs', icon: <ArticleIcon />, path: '/employee/blogs' },
       { text: 'Job Titles', icon: <WorkIcon />, path: '/employee/admin/job-titles' },
-      { text: 'Plan Management', icon: <AdminPanelSettingsIcon />, path: '/employee/admin/plans' }
+      { text: 'Plan Management', icon: <AdminPanelSettingsIcon />, path: '/employee/admin/plans' },
+      { text: 'Affiliates', icon: <PeopleIcon />, path: '/employee/admin/affiliates' }
     );
   }
 

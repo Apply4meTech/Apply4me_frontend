@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { Box, Typography, TextField, Button, Checkbox, FormHelperText, useMediaQuery, CircularProgress, Alert } from '@mui/material';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik, Form } from 'formik';
 import * as yup from 'yup';
@@ -58,11 +58,29 @@ const getTextFieldStyles = (hasError, size = 'default') => ({
   '& .MuiFormHelperText-root': { color: '#ef4444', marginLeft: 0, marginTop: '4px', fontSize: '0.75rem' },
 });
 
+const getApiBase = () => {
+  const url = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+  return url.endsWith('/api') ? url.slice(0, -4) : url;
+};
+
 export default function Signup() {
   const isMobileOrTablet = useMediaQuery('(max-width:900px)');
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
   const { loading, error: authError } = useSelector((state) => state.auth);
+  const referralCode = searchParams?.get('ref') || '';
+
+  // Log affiliate click when landing with ref
+  useEffect(() => {
+    if (referralCode && typeof window !== 'undefined') {
+      fetch(`${getApiBase()}/api/affiliate/click`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ referralCode })
+      }).catch(() => {});
+    }
+  }, [referralCode]);
 
   // Prevent body scroll on real mobile so the form stays fixed like in inspector
   useEffect(() => {
@@ -77,7 +95,7 @@ export default function Signup() {
     dispatch(setLoading(true));
     
     try {
-      const response = await fetch(`${API_URL}/auth/signup`, {
+      const response = await fetch(`${getApiBase()}/api/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,13 +104,14 @@ export default function Signup() {
           name: values.name,
           email: values.email,
           password: values.password,
+          ...(referralCode && { referralCode }),
         }),
       });
       
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.message || 'Signup failed. Please try again.');
+        throw new Error(data.error || data.message || 'Signup failed. Please try again.');
       }
       
       if (data.success && data.token) {

@@ -3,12 +3,12 @@
 import Header from '../Header';
 import Footer from '../Footer/Footer';
 
-export default function MainLayout({ children }) {
+export default function MainLayout({ children, hideNavbarAndFooter = false }) {
   return (
     <>
-      <Header />
+      {!hideNavbarAndFooter && <Header />}
       {children}
-      <Footer />
+      {!hideNavbarAndFooter && <Footer />}
     </>
   );
 }
