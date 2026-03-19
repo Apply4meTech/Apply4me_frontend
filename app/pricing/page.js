@@ -214,7 +214,6 @@ export default function Pricing() {
         return;
       }
 
-      // Redirect to payment page with payment intent details
       router.push(`/payment/checkout?payment_intent=${paymentIntentId}&client_secret=${encodeURIComponent(clientSecret)}`);
 
     } catch (error) {
