@@ -30,14 +30,6 @@ const signupSchema = yup.object().shape({
     .oneOf([true], 'You must agree to the Terms of Service and Privacy Policy'),
 });
 
-// Logo SVG Component
-const LogoIcon = ({ color = '#2463eb', size = 32 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M20 6H16V4C16 2.89 15.11 2 14 2H10C8.89 2 8 2.89 8 4V6H4C2.89 6 2 6.89 2 8V19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V8C22 6.89 21.11 6 20 6ZM10 4H14V6H10V4ZM20 19H4V8H20V19Z" fill={color}/>
-    <path d="M12 10C10.34 10 9 11.34 9 13C9 14.66 10.34 16 12 16C13.66 16 15 14.66 15 13C15 11.34 13.66 10 12 10ZM12 14.5C11.17 14.5 10.5 13.83 10.5 13C10.5 12.17 11.17 11.5 12 11.5C12.83 11.5 13.5 12.17 13.5 13C13.5 13.83 12.83 14.5 12 14.5Z" fill={color}/>
-  </svg>
-);
-
 // Reusable TextField styles
 const getTextFieldStyles = (hasError, size = 'default') => ({
   '& .MuiOutlinedInput-root': {
@@ -211,17 +203,33 @@ export default function Signup() {
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
             <Link href="/" style={{ textDecoration: 'none' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <LogoIcon color="#2463eb" size={36} />
+                <Box
+                  component="img"
+                  src="/afm_logo_black.png"
+                  alt="Apply For Me"
+                  sx={{ width: 44, height: 44, objectFit: 'contain', display: 'block' }}
+                />
                 <Typography
                   sx={{
                     color: '#0f172a',
                     fontSize: '1.25rem',
-                    fontWeight: 700,
+                    fontWeight: 500,
                     letterSpacing: '0.02em',
                     fontFamily: '"Manrope", sans-serif',
+                    display: 'inline-flex',
+                    alignItems: 'baseline',
+                    gap: '0.25rem',
                   }}
                 >
-                  APPLY FOR ME
+                  <Box component="span" sx={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', fontWeight: 500 }}>
+                    Apply
+                  </Box>
+                  <Box component="span" sx={{ fontFamily: '"PP Editorial New", "Times New Roman", serif', fontStyle: 'italic', fontWeight: 400 }}>
+                    for
+                  </Box>
+                  <Box component="span" sx={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', fontWeight: 500 }}>
+                    Me
+                  </Box>
                 </Typography>
               </Box>
             </Link>
@@ -481,9 +489,32 @@ export default function Signup() {
               textDecoration: 'none',
             }}
           >
-            <LogoIcon color="white" size={32} />
-            <Typography sx={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.025em', color: 'white' }}>
-              APPLY FOR ME
+            <Box
+              component="img"
+              src="/afm_logo_white.png"
+              alt="Apply For Me"
+              sx={{ width: 44, height: 44, objectFit: 'contain', display: 'block' }}
+            />
+            <Typography
+              sx={{
+                fontSize: '1.25rem',
+                fontWeight: 500,
+                letterSpacing: '-0.01em',
+                color: 'white',
+                display: 'inline-flex',
+                alignItems: 'baseline',
+                gap: '0.25rem',
+              }}
+            >
+              <Box component="span" sx={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', fontWeight: 500 }}>
+                Apply
+              </Box>
+              <Box component="span" sx={{ fontFamily: '"PP Editorial New", "Times New Roman", serif', fontStyle: 'italic', fontWeight: 400 }}>
+                for
+              </Box>
+              <Box component="span" sx={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', fontWeight: 500 }}>
+                Me
+              </Box>
             </Typography>
           </Link>
 

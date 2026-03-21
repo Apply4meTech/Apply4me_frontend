@@ -52,6 +52,101 @@ export default function Home() {
           }}
         >
           <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                flexWrap: 'wrap',
+                gap: { xs: '0.75rem', md: '1rem' },
+                mb: '1.25rem',
+                opacity: heroVisible ? 1 : 0,
+                transform: heroVisible ? 'translateY(0)' : 'translateY(20px)',
+                transition: 'opacity 0.8s ease-out 0.1s, transform 0.8s ease-out 0.1s',
+              }}
+            >
+              <Box
+                sx={{
+                  background: 'rgba(255,255,255,0.12)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  borderRadius: '9999px',
+                  px: 2,
+                  py: 0.75,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  color: '#FFFFFF',
+                  fontSize: { xs: '0.75rem', md: '0.8125rem' },
+                  fontWeight: 500,
+                }}
+              >
+                <Box
+                  component="svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  sx={{ width: 18, height: 18, color: '#F5C518', flexShrink: 0 }}
+                >
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="10" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </Box>
+                1000+ Job Seekers Helped
+              </Box>
+
+              <Box
+                sx={{
+                  background: 'rgba(255,255,255,0.12)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  borderRadius: '9999px',
+                  px: 2,
+                  py: 0.75,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  color: '#FFFFFF',
+                  fontSize: { xs: '0.75rem', md: '0.8125rem' },
+                  fontWeight: 500,
+                }}
+              >
+                Built for <Box component="span" sx={{ color: '#F5C518', fontWeight: 700 }}>Australia</Box>
+              </Box>
+
+              <Box
+                sx={{
+                  background: 'rgba(255,255,255,0.12)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  borderRadius: '9999px',
+                  px: 2,
+                  py: 0.75,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  color: '#FFFFFF',
+                  fontSize: { xs: '0.75rem', md: '0.8125rem' },
+                  fontWeight: 500,
+                }}
+              >
+                <Box
+                  component="svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  sx={{ width: 18, height: 18, color: '#F5C518', flexShrink: 0 }}
+                >
+                  <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
+                  <path d="M3 21v-2a6 6 0 0 1 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <rect x="13" y="13" width="8" height="8" rx="2" stroke="currentColor" strokeWidth="2" />
+                  <path d="m15.5 17 1.5 1.5 2.5-2.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </Box>
+                9/10 Land Job in 90 days
+              </Box>
+            </Box>
+
             <Typography
               component="h1"
               sx={{
@@ -62,7 +157,7 @@ export default function Home() {
                 letterSpacing: '-0.02em',
                 marginBottom: '1.25rem',
                 fontFamily: 'inherit',
-                maxWidth: '800px',
+                maxWidth: '980px',
                 mx: 'auto',
                 opacity: heroVisible ? 1 : 0,
                 transform: heroVisible ? 'translateY(0)' : 'translateY(30px)',
@@ -81,7 +176,7 @@ export default function Home() {
               sx={{
                 fontSize: { xs: '1rem', md: '1.125rem' },
                 color: 'rgba(255,255,255,0.85)',
-                maxWidth: '600px',
+                maxWidth: '760px',
                 margin: '0 auto 2.5rem',
                 lineHeight: 1.65,
                 fontFamily: 'inherit',
@@ -99,6 +194,8 @@ export default function Home() {
                 display: 'flex',
                 justifyContent: 'center',
                 flexWrap: 'wrap',
+                maxWidth: '760px',
+                mx: 'auto',
                 opacity: heroVisible ? 1 : 0,
                 transform: heroVisible ? 'translateY(0)' : 'translateY(20px)',
                 transition: 'opacity 0.8s ease-out 0.4s, transform 0.8s ease-out 0.4s',

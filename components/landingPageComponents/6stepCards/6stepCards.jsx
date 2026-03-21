@@ -11,15 +11,7 @@ const steps = [
     gradient: 'linear-gradient(180deg, #4b6be0 0%, #6b5bdb 50%, #5a4dbf 100%)',
     titleColor: '#F5C518',
     textColor: 'rgba(255,255,255,0.9)',
-    mock: (
-      <Box sx={{ mt: 'auto', pt: 2 }}>
-        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1 }}>
-          <Box sx={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '9999px', px: 2, py: 0.75, fontSize: '0.8125rem', color: '#fff' }}>👤 Jessica F.</Box>
-          <Box sx={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '9999px', px: 2, py: 0.75, fontSize: '0.8125rem', color: '#fff' }}>💰 $160K Annually</Box>
-        </Box>
-        <Box sx={{ background: 'rgba(255,255,255,0.15)', borderRadius: '12px', p: 1.5, color: 'rgba(255,255,255,0.9)', fontSize: '0.8125rem' }}>I want a role in graphic design...</Box>
-      </Box>
-    ),
+    image: '/hw_1.png',
   },
   {
     number: 2,
@@ -28,16 +20,7 @@ const steps = [
     gradient: 'linear-gradient(180deg, #f5c518 0%, #e8a80a 50%, #d4940a 100%)',
     titleColor: '#1e3a8a',
     textColor: 'rgba(30,58,138,0.9)',
-    mock: (
-      <Box sx={{ mt: 'auto', pt: 2, display: 'flex', gap: 1 }}>
-        <Box sx={{ background: 'rgba(255,255,255,0.5)', borderRadius: '12px', p: 1.5, flex: 1, color: '#1e3a8a', fontSize: '0.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-          <strong>Product Designer</strong><br />Adobe · Full-Time
-        </Box>
-        <Box sx={{ background: 'rgba(255,255,255,0.5)', borderRadius: '12px', p: 1.5, flex: 1, color: '#1e3a8a', fontSize: '0.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-          <strong>Software Engineer</strong><br />Google · Full-Time
-        </Box>
-      </Box>
-    ),
+    image: '/hw_2.png',
   },
   {
     number: 3,
@@ -46,23 +29,7 @@ const steps = [
     gradient: 'linear-gradient(180deg, #4b6be0 0%, #6b5bdb 50%, #5a4dbf 100%)',
     titleColor: '#F5C518',
     textColor: 'rgba(255,255,255,0.9)',
-    mock: (
-      <Box sx={{ mt: 'auto', pt: 2 }}>
-        <Box sx={{ display: 'flex', gap: 0.5, mb: 1 }}>
-          <Box sx={{ background: 'rgba(255,255,255,0.2)', borderRadius: '9999px', px: 1.5, py: 0.5, fontSize: '0.75rem', color: '#fff' }}>Saved (9)</Box>
-          <Box sx={{ background: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.45)', borderRadius: '9999px', px: 1.5, py: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#fff' }}>Applied (22)</Box>
-          <Box sx={{ background: 'rgba(255,255,255,0.2)', borderRadius: '9999px', px: 1.5, py: 0.5, fontSize: '0.75rem', color: '#fff' }}>Interviews (6)</Box>
-        </Box>
-        <Box sx={{ background: 'rgba(255,255,255,0.15)', borderRadius: '12px', p: 1.25, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-          <span style={{ fontSize: '0.8125rem', color: '#fff' }}>🔍 Software Engineer — Google</span>
-          <Box sx={{ background: 'rgba(255,255,255,0.2)', borderRadius: '9999px', px: 1, py: 0.25, fontSize: '0.6875rem', color: '#fff' }}>$200K+</Box>
-        </Box>
-        <Box sx={{ background: 'rgba(255,255,255,0.15)', borderRadius: '12px', p: 1.25, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: '0.8125rem', color: '#fff' }}>🎨 Product Designer — Adobe</span>
-          <Box sx={{ background: 'rgba(255,255,255,0.2)', borderRadius: '9999px', px: 1, py: 0.25, fontSize: '0.6875rem', color: '#fff' }}>$160K+</Box>
-        </Box>
-      </Box>
-    ),
+    image: '/hw_3.png',
   },
 ];
 
@@ -215,7 +182,69 @@ export default function SixStepCards() {
               >
                 {step.description}
               </Typography>
-              {step.mock}
+              <Box
+                sx={{
+                  mt: 'auto',
+                  pt: 2,
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  position: 'relative',
+                }}
+              >
+                {step.number === 1 && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 12,
+                      left: 0,
+                      right: 0,
+                      zIndex: 2,
+                      height: '100%',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    {[
+                      { text: 'Jessica F.', left: '28%', top: 8 },
+                      { text: '$160k Annual', left: '35%', top: 44 },
+                      { text: 'I want a role in graphics', left: '14%', top: 80 },
+                    ].map((item) => (
+                      <Box
+                        key={item.text}
+                        sx={{
+                          position: 'absolute',
+                          left: item.left,
+                          top: item.top,
+                          background: 'rgba(255,255,255,0.18)',
+                          border: '1px solid rgba(255,255,255,0.35)',
+                          backdropFilter: 'blur(8px)',
+                          WebkitBackdropFilter: 'blur(8px)',
+                          borderRadius: '9999px',
+                          px: 1.25,
+                          py: 0.55,
+                          color: '#FFFFFF',
+                          fontSize: '0.75rem',
+                          fontWeight: 500,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {item.text}
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+                <Box
+                  component="img"
+                  src={step.image}
+                  alt={`${step.title} illustration`}
+                  sx={{
+                    width: '100%',
+                    height: { xs: 170, md: 185 },
+                    objectFit: 'contain',
+                    objectPosition: step.number === 1 ? 'right center' : 'center',
+                    display: 'block',
+                  }}
+                />
+              </Box>
             </Box>
           ))}
         </Box>

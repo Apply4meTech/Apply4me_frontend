@@ -53,7 +53,12 @@ export default function Footer() {
           {/* Brand */}
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <Link href="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Box component="span" sx={{ fontSize: '1.25rem' }}>🚀</Box>
+              <Box
+                component="img"
+                src="/afm_logo_black.png"
+                alt="Apply For Me"
+                sx={{ width: { xs: 48, sm: 56 }, height: { xs: 48, sm: 56 }, objectFit: 'contain', display: 'block' }}
+              />
               <Typography
                 component="span"
                 sx={{
@@ -61,9 +66,20 @@ export default function Footer() {
                   fontSize: { xs: '1.125rem', sm: '1.25rem' },
                   fontWeight: 500,
                   fontFamily: 'inherit',
+                  display: 'inline-flex',
+                  alignItems: 'baseline',
+                  gap: '0.25rem',
                 }}
               >
-                Apply <em style={{ fontStyle: 'italic', fontWeight: 400 }}>For</em> Me
+                <Box component="span" sx={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', fontWeight: 500 }}>
+                  Apply
+                </Box>
+                <Box component="span" sx={{ fontFamily: '"PP Editorial New", "Times New Roman", serif', fontStyle: 'italic', fontWeight: 400 }}>
+                  for
+                </Box>
+                <Box component="span" sx={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', fontWeight: 500 }}>
+                  Me
+                </Box>
               </Typography>
             </Link>
             <Typography sx={{ fontSize: '0.9375rem', color: '#6b7280', lineHeight: 1.5, fontFamily: 'inherit' }}>

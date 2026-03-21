@@ -76,7 +76,7 @@ const Header = () => {
         backdropFilter: showHeaderBg ? 'blur(16px)' : 'none',
         WebkitBackdropFilter: showHeaderBg ? 'blur(16px)' : 'none',
         borderBottom: 'none',
-        padding: '10px',
+        padding: '5px',
         transition: 'background 0.25s ease, border-color 0.25s ease',
       }}
     >
@@ -105,9 +105,12 @@ const Header = () => {
             flexShrink: 0,
           }}
         >
-          <Box sx={{ color: '#fff', display: 'flex', alignItems: 'center', fontSize: '1.25rem' }}>
-            🚀
-          </Box>
+          <Box
+            component="img"
+            src="/afm_logo_white.png"
+            alt="Apply For Me"
+            sx={{ width: { xs: 48, sm: 56 }, height: { xs: 48, sm: 56 }, objectFit: 'contain', display: 'block' }}
+          />
           <Box
             component="span"
             sx={{
@@ -115,9 +118,20 @@ const Header = () => {
               fontSize: isMobile ? '1rem' : '1.125rem',
               fontWeight: 500,
               fontFamily: 'inherit',
+              display: 'inline-flex',
+              alignItems: 'baseline',
+              gap: '0.25rem',
             }}
           >
-            Apply <em style={{ fontStyle: 'italic', fontWeight: 400 }}>for</em> Me
+            <Box component="span" sx={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', fontWeight: 500 }}>
+              Apply
+            </Box>
+            <Box component="span" sx={{ fontFamily: '"PP Editorial New", "Times New Roman", serif', fontStyle: 'italic', fontWeight: 400 }}>
+              for
+            </Box>
+            <Box component="span" sx={{ fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', fontWeight: 500 }}>
+              Me
+            </Box>
           </Box>
         </Link>
 

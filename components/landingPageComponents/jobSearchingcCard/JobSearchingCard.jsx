@@ -12,7 +12,7 @@ export default function JobSearchingCard() {
         backgroundColor: '#000',
       }}
     >
-      <Container maxWidth="md">
+      <Container maxWidth="lg">
         <Typography
           component="h2"
           sx={{
@@ -35,7 +35,7 @@ export default function JobSearchingCard() {
             marginBottom: '2.5rem',
             fontFamily: 'inherit',
             lineHeight: 1.7,
-            maxWidth: 640,
+            maxWidth: 860,
             mx: 'auto',
           }}
         >
