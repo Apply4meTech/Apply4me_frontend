@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Container, Typography, Button } from '@mui/material';
+import { Box, Container, Typography } from '@mui/material';
 import Link from 'next/link';
 
 export default function CTASection() {
@@ -16,26 +16,18 @@ export default function CTASection() {
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+      { threshold: 0.1 }
     );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
-      }
-    };
+    if (ref.current) observer.observe(ref.current);
+    return () => ref.current && observer.unobserve(ref.current);
   }, []);
 
   return (
     <Box
       ref={ref}
       sx={{
-        backgroundColor: '#0F172A',
-        padding: { xs: '4rem 1.5rem', md: '6rem 2rem' },
+        background: 'linear-gradient(135deg, #1e3a8a, #2563eb)',
+        padding: { xs: '4rem 1.5rem', md: '5rem 2rem' },
         textAlign: 'center',
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
@@ -43,79 +35,62 @@ export default function CTASection() {
       }}
     >
       <Container maxWidth="lg">
-        {/* Headline */}
         <Typography
           component="h2"
           sx={{
-            fontSize: { xs: '2.25rem', md: '2.5rem' },
-            fontWeight: 900,
+            fontSize: { xs: '2rem', md: '3rem' },
+            fontWeight: 700,
             color: '#FFFFFF',
-            marginBottom: '1.5rem',
+            marginBottom: 1,
             fontFamily: 'inherit',
             lineHeight: 1.2,
-            letterSpacing: '-0.02em',
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 0.8s ease-out 0.2s, transform 0.8s ease-out 0.2s',
           }}
         >
           Stop Applying. Start Delegating.
         </Typography>
 
-        {/* Description */}
         <Typography
           component="p"
           sx={{
             fontSize: '1.125rem',
-            color: '#FFFFFF',
-            marginBottom: '2.5rem',
+            color: 'rgba(255,255,255,0.9)',
+            marginBottom: 2.25,
             fontFamily: 'inherit',
             lineHeight: 1.75,
-            maxWidth: '42rem',
-            margin: '0 auto 2.5rem',
-            opacity: isVisible ? 0.9 : 0,
-            transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 0.8s ease-out 0.4s, transform 0.8s ease-out 0.4s',
+            maxWidth: 560,
+            mx: 'auto',
           }}
         >
-          Let us handle the applications so you can focus on interviews.
+          Let our team handle your applications with accuracy and purpose so you can focus on preparing for interviews and securing your next role.
         </Typography>
 
-        {/* CTA Button */}
-        <Box
-          sx={{
-            marginBottom: '1rem',
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.95)',
-            transition: 'opacity 0.8s ease-out 0.6s, transform 0.8s ease-out 0.6s',
-          }}
-        >
-          <Button
-            component={Link}
-            href="/signup"
+        <Link href="/signup" style={{ textDecoration: 'none' }}>
+          <Box
+            component="span"
             sx={{
-              backgroundColor: '#2563EB',
-              color: '#FFFFFF',
-              fontSize: '1.125rem',
-              fontWeight: 700,
-              py: 2,
-              px: 5,
-              borderRadius: '12px',
-              boxShadow: '0 20px 40px -10px rgba(37, 99, 235, 0.5)',
-              textTransform: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 0.75,
+              border: '2px solid rgba(255,255,255,0.8)',
+              background: 'transparent',
+              color: '#fff',
+              borderRadius: '9999px',
+              padding: '1rem 2.5rem',
+              fontSize: '1rem',
+              fontWeight: 600,
+              fontFamily: 'inherit',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
               '&:hover': {
-                backgroundColor: '#1E3A8A',
-                transform: 'scale(1.08)',
-                boxShadow: '0 25px 50px -10px rgba(37, 99, 235, 0.6)',
+                background: 'rgba(255,255,255,0.15)',
+                borderColor: '#fff',
               },
-              transition: 'all 0.3s ease',
             }}
           >
-            Start Application
-          </Button>
-        </Box>
+            Start Your Application
+          </Box>
+        </Link>
       </Container>
     </Box>
   );
 }
-

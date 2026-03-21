@@ -7,7 +7,7 @@ import { Box, Typography } from '@mui/material';
 // Using Simple Icons CDN for consistent SVG logos
 const australianCompanies = [
   { name: 'Atlassian', logoUrl: 'https://cdn.simpleicons.org/atlassian/0052CC' },
-  { name: 'Canva', logoUrl: 'https://cdn.simpleicons.org/canva/00C4CC' },
+  { name: 'Canva', logoUrl: 'https://logo.clearbit.com/canva.com' },
   { name: 'Afterpay', logoUrl: 'https://cdn.simpleicons.org/afterpay/00A9E0' },
   { name: 'Xero', logoUrl: 'https://cdn.simpleicons.org/xero/13B5EA' },
 ];

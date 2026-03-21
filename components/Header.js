@@ -3,32 +3,41 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Box, Container, useMediaQuery, useTheme, Drawer } from '@mui/material';
+import { Box, useMediaQuery, useTheme, Drawer } from '@mui/material';
 import { useSelector } from 'react-redux';
-import Button from './Button';
 
 const Header = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down(650));
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { isAuthenticated, user } = useSelector((state) => state.auth);
 
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
+  const isHome = pathname === '/';
+
+  useEffect(() => {
+    if (!isHome) {
+      setScrolled(true);
+      return;
+    }
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isHome]);
+
+  const showHeaderBg = !isHome || scrolled;
 
   const navLinks = [
     { href: '/about-us', label: 'About Us' },
-    { href: '/blogs', label: 'Blogs' },
     { href: '/pricing', label: 'Pricing' },
-    ...(isAuthenticated ? [] : [{ href: '/login', label: 'Login' }]),
+    { href: '/#how-works', label: 'How It Works' },
+    { href: '#', label: 'Connect' },
   ];
 
   const isActiveLink = (href) => {
-    if (href === '/') {
-      return pathname === '/';
-    }
+    if (href === '/') return pathname === '/';
     return pathname?.startsWith(href);
   };
 
@@ -39,11 +48,12 @@ const Header = () => {
         position: 'sticky',
         top: 0,
         zIndex: 1000,
-        backgroundColor: 'rgba(30, 41, 59, 0.9)',
-        backdropFilter: 'blur(30px)',
-        WebkitBackdropFilter: 'blur(30px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+        background: showHeaderBg ? '#0A2540' : 'transparent',
+        backdropFilter: showHeaderBg ? 'blur(12px)' : 'none',
+        WebkitBackdropFilter: showHeaderBg ? 'blur(12px)' : 'none',
+        borderBottom: showHeaderBg ? '1px solid rgba(255,255,255,0.08)' : '1px solid transparent',
+        padding: { xs: '1rem', md: '1.125rem 2.5rem' },
+        transition: 'background 0.25s ease, border-color 0.25s ease',
       }}
     >
       <Box
@@ -51,291 +61,183 @@ const Header = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: { xs: '0.75rem 1rem', md: '0.75rem 2.5rem' },
           width: '100%',
+          [theme.breakpoints.up('lg')]: {
+            display: 'grid',
+            gridTemplateColumns: '1fr auto 1fr',
+            alignItems: 'center',
+            gap: '1rem',
+          },
         }}
       >
-        {/* Logo - Left Side */}
+        {/* Box 1 - Left: Logo */}
         <Link
           href="/"
           style={{
             textDecoration: 'none',
             display: 'flex',
             alignItems: 'center',
-            gap: '1rem',
+            gap: '0.5rem',
             flexShrink: 0,
           }}
         >
-          <Box
-            sx={{
-              width: '32px',
-              height: '32px',
-              color: '#2563EB',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <svg
-              className="w-full h-full"
-              fill="none"
-              viewBox="0 0 48 48"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                clipRule="evenodd"
-                d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z"
-                fill="currentColor"
-                fillRule="evenodd"
-              />
-              <path
-                clipRule="evenodd"
-                d="M24 8.18819L33.4123 11.574L24 15.2071L14.5877 11.574L24 8.18819ZM9 15.8487L21 20.4805V37.6263L9 32.9945V15.8487ZM27 37.6263V20.4805L39 15.8487V32.9945L27 37.6263ZM25.354 2.29885C24.4788 1.98402 23.5212 1.98402 22.646 2.29885L4.98454 8.65208C3.7939 9.08038 3 10.2097 3 11.475V34.3663C3 36.0196 4.01719 37.5026 5.55962 38.098L22.9197 44.7987C23.6149 45.0671 24.3851 45.0671 25.0803 44.7987L42.4404 38.098C43.9828 37.5026 45 36.0196 45 34.3663V11.475C45 10.2097 44.2061 9.08038 43.0155 8.65208L25.354 2.29885Z"
-                fill="currentColor"
-                fillRule="evenodd"
-              />
-            </svg>
+          <Box sx={{ color: '#fff', display: 'flex', alignItems: 'center', fontSize: '1.25rem' }}>
+            🚀
           </Box>
           <Box
-            component="h2"
+            component="span"
             sx={{
               color: '#FFFFFF',
-              fontSize: isMobile ? '1rem' : '1.25rem',
-              fontWeight: 700,
-              lineHeight: 1.2,
-              letterSpacing: '0.025em',
+              fontSize: isMobile ? '1rem' : '1.125rem',
+              fontWeight: 500,
+              fontFamily: 'inherit',
             }}
           >
-            APPLY FOR ME
+            Apply <em style={{ fontStyle: 'italic', fontWeight: 400 }}>for</em> Me
           </Box>
         </Link>
 
-        {/* Right Side - Navigation + Button (Desktop) / Hamburger (Mobile) */}
+        {/* Box 2 - Center: Nav buttons (desktop only) */}
         <Box
           sx={{
             display: { xs: 'none', lg: 'flex' },
+            justifyContent: 'center',
             alignItems: 'center',
-            flex: 1,
-            justifyContent: 'flex-end',
-            gap: '2rem',
           }}
         >
-          {/* Navigation Links */}
           <Box
             sx={{
+              background: 'rgba(255,255,255,0.15)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.25)',
+              borderRadius: '9999px',
+              padding: '0.25rem',
               display: 'flex',
-              alignItems: 'center',
-              gap: '2.25rem',
+              gap: '0.25rem',
             }}
           >
             {navLinks.map((link) => {
-              const isActive = isActiveLink(link.href);
+              const isActive = isActiveLink(link.href) || (link.href === '/#how-works' && pathname === '/');
+              const isConnect = link.label === 'Connect';
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  style={{
-                    color: isActive ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)',
-                    textDecoration: 'none',
-                    fontSize: isActive ? '1.125rem' : '1.0625rem',
-                    fontWeight: isActive ? 700 : 500,
-                    transition: 'color 0.3s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) e.target.style.color = '#FFFFFF';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.target.style.color = 'rgba(255, 255, 255, 0.7)';
-                  }}
+                  style={{ textDecoration: 'none' }}
                 >
-                  {link.label}
+                  <Box
+                    component="span"
+                    sx={{
+                      display: 'inline-block',
+                      padding: '0.5rem 1.125rem',
+                      borderRadius: '9999px',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      color: isConnect ? 'rgba(255,255,255,0.9)' : (isActive ? '#1e3a8a' : 'rgba(255,255,255,0.85)'),
+                      background: isConnect ? 'transparent' : (isActive ? '#fff' : 'transparent'),
+                      transition: 'all 0.15s ease',
+                      '&:hover': {
+                        background: isConnect ? 'transparent' : (isActive ? '#fff' : 'rgba(255,255,255,0.2)'),
+                      },
+                    }}
+                  >
+                    {link.label}
+                  </Box>
                 </Link>
               );
             })}
           </Box>
-
-          {/* CTA Button */}
-          {isAuthenticated ? (
-            <Link href={user?.isEmployee ? '/employee/dashboard' : '/dashboard'} style={{ textDecoration: 'none' }}>
-              <Button variant="primary">Dashboard</Button>
-            </Link>
-          ) : (
-            <Link href="/signup" style={{ textDecoration: 'none' }}>
-              <Button variant="primary">Signup</Button>
-            </Link>
-          )}
         </Box>
 
-        {/* Mobile Menu Button */}
-        <Box
-          onClick={toggleMobileMenu}
-          sx={{
-            display: { xs: 'block', lg: 'none' },
-            color: '#FFFFFF',
-            cursor: 'pointer',
-          }}
-        >
-          <svg
-            width="1.5rem"
-            height="1.5rem"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            {mobileMenuOpen ? (
-              <path d="M18 6L6 18M6 6l12 12" />
-            ) : (
-              <path d="M3 12h18M3 6h18M3 18h18" />
-            )}
-          </svg>
-        </Box>
-      </Box>
-
-      {/* Mobile Menu Drawer */}
-      <Drawer
-        anchor="left"
-        open={mobileMenuOpen}
-        onClose={toggleMobileMenu}
-        sx={{
-          display: { xs: 'block', lg: 'none' },
-          '& .MuiDrawer-paper': {
-            width: { xs: '280px', sm: '320px' },
-            backgroundColor: 'rgba(15, 23, 42, 0.98)',
-            backdropFilter: 'blur(30px)',
-            WebkitBackdropFilter: 'blur(30px)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-          },
-        }}
-      >
-        <Box
-          sx={{
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            paddingTop: 0,
-            paddingX: '1.5rem',
-            paddingBottom: '1.5rem',
-          }}
-        >
-          {/* Logo and Text at Top - Aligned with Header */}
+        {/* Box 3 - Right: Login/Dashboard (desktop) or Mobile menu button */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0 }}>
           <Box
             sx={{
-              paddingTop: { xs: '1rem', md: '1rem' },
-              paddingBottom: { xs: '1rem', md: '1rem' },
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              display: { xs: 'none', lg: 'block' },
             }}
           >
             <Link
-              href="/"
-              onClick={() => setMobileMenuOpen(false)}
-              style={{
-                textDecoration: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-              }}
+              href={isAuthenticated ? (user?.isEmployee ? '/employee/dashboard' : '/dashboard') : '/login'}
+              style={{ textDecoration: 'none' }}
             >
-            <Box
-              sx={{
-                width: '32px',
-                height: '32px',
-                color: '#2563EB',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <svg
-                className="w-full h-full"
-                fill="none"
-                viewBox="0 0 48 48"
-                xmlns="http://www.w3.org/2000/svg"
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  color: '#fff',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  padding: '0.5rem 1.25rem',
+                  borderRadius: '9999px',
+                  border: '1px solid rgba(255,255,255,0.6)',
+                  background: 'transparent',
+                  transition: 'background 0.15s',
+                  '&:hover': { background: 'rgba(255,255,255,0.12)' },
+                }}
               >
-                <path
-                  clipRule="evenodd"
-                  d="M24 18.4228L42 11.475V34.3663C42 34.7796 41.7457 35.1504 41.3601 35.2992L24 42V18.4228Z"
-                  fill="currentColor"
-                  fillRule="evenodd"
-                />
-                <path
-                  clipRule="evenodd"
-                  d="M24 8.18819L33.4123 11.574L24 15.2071L14.5877 11.574L24 8.18819ZM9 15.8487L21 20.4805V37.6263L9 32.9945V15.8487ZM27 37.6263V20.4805L39 15.8487V32.9945L27 37.6263ZM25.354 2.29885C24.4788 1.98402 23.5212 1.98402 22.646 2.29885L4.98454 8.65208C3.7939 9.08038 3 10.2097 3 11.475V34.3663C3 36.0196 4.01719 37.5026 5.55962 38.098L22.9197 44.7987C23.6149 45.0671 24.3851 45.0671 25.0803 44.7987L42.4404 38.098C43.9828 37.5026 45 36.0196 45 34.3663V11.475C45 10.2097 44.2061 9.08038 43.0155 8.65208L25.354 2.29885Z"
-                  fill="currentColor"
-                  fillRule="evenodd"
-                />
-              </svg>
-            </Box>
-            <Box
-              component="h2"
-              sx={{
-                color: '#FFFFFF',
-                fontSize: isMobile ? '1rem' : '1.25rem',
-                fontWeight: 700,
-                lineHeight: 1.2,
-                letterSpacing: '0.025em',
-                margin: 0,
-              }}
-            >
-              APPLY FOR ME
-            </Box>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                {isAuthenticated ? 'Dashboard' : 'Login'}
+              </Box>
             </Link>
           </Box>
 
-          {/* Menu Items */}
+          {/* Mobile Menu Button */}
           <Box
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1.5rem',
-              flex: 1,
-              paddingTop: '1.5rem',
+              display: { xs: 'block', lg: 'none' },
+              color: '#FFFFFF',
+              cursor: 'pointer',
             }}
           >
-            {navLinks.map((link) => {
-              const isActive = isActiveLink(link.href);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  style={{
-                    color: isActive ? '#2563EB' : '#FFFFFF',
-                    textDecoration: 'none',
-                    fontSize: isMobile ? '1.0625rem' : '1.125rem',
-                    fontWeight: isActive ? 700 : 400,
-                    transition: 'opacity 0.3s ease',
-                    padding: '0.5rem 0',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) e.target.style.opacity = '0.7';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.target.style.opacity = '1';
-                  }}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
+            <svg width="1.5rem" height="1.5rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {mobileMenuOpen ? (
+                <path d="M18 6L6 18M6 6l12 12" />
+              ) : (
+                <path d="M3 12h18M3 6h18M3 18h18" />
+              )}
+            </svg>
           </Box>
+        </Box>
+      </Box>
 
-          {/* CTA Button at Bottom */}
-          <Box sx={{ marginTop: 'auto', paddingTop: '1.5rem' }}>
-            {isAuthenticated ? (
-              <Link href={user?.isEmployee ? '/employee/dashboard' : '/dashboard'} style={{ textDecoration: 'none', width: '100%', display: 'block' }} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="primary" fullWidth>
-                  Dashboard
-                </Button>
-              </Link>
-            ) : (
-              <Link href="/signup" style={{ textDecoration: 'none', width: '100%', display: 'block' }} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="primary" fullWidth>
-                  Signup
-                </Button>
-              </Link>
-            )}
-          </Box>
+      {/* Mobile Drawer */}
+      <Drawer
+        anchor="right"
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        sx={{
+          display: { xs: 'block', lg: 'none' },
+          '& .MuiDrawer-paper': {
+            width: 280,
+            background: '#0A2540',
+            backdropFilter: 'blur(20px)',
+          },
+        }}
+      >
+        <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ color: '#fff', textDecoration: 'none', padding: '0.75rem' }}
+            >
+              {link.label}
+            </Link>
+          ))}
+          <Link
+            href={isAuthenticated ? '/dashboard' : '/login'}
+            onClick={() => setMobileMenuOpen(false)}
+            style={{ color: '#fff', textDecoration: 'none', padding: '0.75rem', marginTop: '1rem' }}
+          >
+            {isAuthenticated ? 'Dashboard' : 'Login'}
+          </Link>
         </Box>
       </Drawer>
     </Box>
@@ -343,4 +245,3 @@ const Header = () => {
 };
 
 export default Header;
-

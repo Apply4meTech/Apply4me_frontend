@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Container, Typography, TextField } from '@mui/material';
-import Button from '../../Button';
+import { Box, Container, Typography } from '@mui/material';
 
 const DEFAULT_APPLICATIONS = 1000;
 
@@ -32,23 +31,11 @@ export default function ROICalculator() {
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+      { threshold: 0.1 }
     );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
-      }
-    };
+    if (ref.current) observer.observe(ref.current);
+    return () => ref.current && observer.unobserve(ref.current);
   }, []);
-
-  const handleCalculate = () => {
-    recalc(hourlyIncome, minutesPerJob);
-  };
 
   const handleHourlyChange = (e) => {
     const raw = e.target.value;
@@ -65,341 +52,190 @@ export default function ROICalculator() {
   return (
     <Box
       sx={{
-        padding: { xs: '3rem 1.5rem', md: '5rem 2rem' },
-        backgroundColor: '#EDF2F7',
+        padding: { xs: '4rem 1.5rem', md: '5rem 2rem' },
+        backgroundColor: '#000',
       }}
     >
       <Container maxWidth="lg">
         <Box
           ref={ref}
           sx={{
-            display: 'flex',
-            backgroundColor: '#FFFFFF',
-            borderRadius: '1rem',
-            padding: { xs: '1.5rem', md: '2.5rem' },
-            boxShadow: '0 0.125rem 0.5rem rgba(0, 0, 0, 0.1)',
-            flexDirection: { xs: 'column', lg: 'row' },
-            gap: { xs: '1.5rem', md: '2rem' },
-            alignItems: 'stretch',
+            background: '#054ada',
+            borderRadius: '48px',
+            padding: { xs: 2, md: 5 },
+            maxWidth: 900,
+            mx: 'auto',
             opacity: isVisible ? 1 : 0,
-            transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(40px) scale(0.95)',
+            transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
             transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
           }}
         >
-          {/* Left Card - ROI Calculator */}
-          <Box
-            sx={{
-              flex:0.6,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1.5rem',
-            
-            }}
-          >
-            {/* ROI Calculator Label */}
+          <Box sx={{ textAlign: 'center', mb: 2 }}>
             <Box
               sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                backgroundColor: '#EFF6FF',
-                color: '#3B82F6',
-                padding: { xs: '0.5rem 1rem', md: '0.625rem 1.25rem' },
-                borderRadius: '1.5rem',
-                fontSize: { xs: '0.75rem', md: '0.875rem' },
-                fontWeight: 600,
-                fontFamily: 'inherit',
+                display: 'inline-block',
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.3)',
+                borderRadius: '9999px',
+                color: 'rgba(255,255,255,0.9)',
+                fontSize: '0.6875rem',
+                letterSpacing: '0.12em',
+                padding: '0.375rem 1.125rem',
               }}
             >
-              <svg
-                width="1rem"
-                height="1rem"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M3 3V21H21M7 16L12 11L16 15L21 10M21 10V14M21 10H17"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
               ROI CALCULATOR
-            </Box>
-
-            {/* Headline */}
-            <Typography
-              component="h2"
-              sx={{
-                fontSize: { xs: '1.875rem', md: '2.25rem' },
-                fontWeight: 700,
-                color: '#1F2937',
-                fontFamily: 'inherit',
-                lineHeight: 1.2,
-              }}
-            >
-              How much is your time really worth?
-            </Typography>
-
-            {/* Description */}
-            <Typography
-              component="p"
-              sx={{
-                fontSize: '1.125rem',
-                color: '#6B7280',
-                lineHeight: 1.75,
-                fontFamily: 'inherit',
-              }}
-            >
-              Don't let job hunting become a second unpaid job. Calculate your potential ROI by delegating the grunt work to us.
-            </Typography>
-
-            {/* Input: Hourly income */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <Typography
-                component="label"
-                sx={{
-                  fontSize: { xs: '0.875rem', md: '1rem' },
-                  fontWeight: 500,
-                  color: '#374151',
-                  fontFamily: 'inherit',
-                }}
-              >
-                Your hourly income ($)
-              </Typography>
-              <TextField
-                type="number"
-                value={hourlyIncome}
-                onChange={handleHourlyChange}
-                placeholder="20"
-                inputProps={{ min: 0, step: 1 }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor: '#FFFFFF',
-                    borderRadius: '0.5rem',
-                    '& fieldset': { borderColor: '#E5E7EB' },
-                    '&:hover fieldset': { borderColor: '#D1D5DB' },
-                    '&.Mui-focused fieldset': { borderColor: '#3B82F6' },
-                  },
-                  '& .MuiInputBase-input': {
-                    fontSize: { xs: '1rem', md: '1.125rem' },
-                    padding: { xs: '0.75rem', md: '0.875rem' },
-                    fontFamily: 'inherit',
-                  },
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <Box component="span" sx={{ color: '#6B7280', marginRight: '0.5rem', fontSize: { xs: '1rem', md: '1.125rem' } }}>
-                      $
-                    </Box>
-                  ),
-                }}
-              />
-            </Box>
-
-            {/* Input: Minutes per job */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <Typography
-                component="label"
-                sx={{
-                  fontSize: { xs: '0.875rem', md: '1rem' },
-                  fontWeight: 500,
-                  color: '#374151',
-                  fontFamily: 'inherit',
-                }}
-              >
-                Minutes per job application
-              </Typography>
-              <TextField
-                type="number"
-                value={minutesPerJob}
-                onChange={handleMinutesChange}
-                placeholder="10"
-                inputProps={{ min: 0, step: 1 }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor: '#FFFFFF',
-                    borderRadius: '0.5rem',
-                    '& fieldset': { borderColor: '#E5E7EB' },
-                    '&:hover fieldset': { borderColor: '#D1D5DB' },
-                    '&.Mui-focused fieldset': { borderColor: '#3B82F6' },
-                  },
-                  '& .MuiInputBase-input': {
-                    fontSize: { xs: '1rem', md: '1.125rem' },
-                    padding: { xs: '0.75rem', md: '0.875rem' },
-                    fontFamily: 'inherit',
-                  },
-                }}
-                InputProps={{
-                  endAdornment: (
-                    <Box component="span" sx={{ color: '#6B7280', marginLeft: '0.5rem', fontSize: { xs: '1rem', md: '1.125rem' } }}>
-                      min
-                    </Box>
-                  ),
-                }}
-              />
-            </Box>
-
-            {/* Calculate Button */}
-            <Box sx={{ marginTop: '0.5rem' }}>
-              <Button
-                variant="primary"
-                onClick={handleCalculate}
-                fullWidth
-              >
-                <Box
-                  component="span"
-                  sx={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                  }}
-                >
-                  <svg
-                    width="1.25rem"
-                    height="1.25rem"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M9 7H6C4.89543 7 4 7.89543 4 9V18C4 19.1046 4.89543 20 6 20H15C16.1046 20 17 19.1046 17 18V15M9 7C9 8.10457 9.89543 9 11 9H13C14.1046 9 15 8.10457 15 7M9 7C9 5.89543 9.89543 5 11 5H13C14.1046 5 15 5.89543 15 7M15 7H18M18 7L21 10M21 10L18 13M21 10H12"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  Calculate Savings
-                </Box>
-              </Button>
             </Box>
           </Box>
 
-          {/* Right Card - Estimated Savings */}
           <Box
             sx={{
-              flex: { xs: 1, md: 0.4 },
-              backgroundColor: '#1E293B',
-              borderRadius: '1rem',
-              padding: { xs: '2rem', md: '2.5rem' },
-              paddingBottom: { xs: '2.375rem', md: '2.875rem' },
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              minHeight: { xs: 'auto', md: '60%' },
-              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1)',
-              position: 'relative',
-              overflow: 'hidden',
-              maxHeight:'350px',
-              margin:'auto'
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' },
+              gap: { xs: 2, lg: 4 },
+              alignItems: 'center',
+              mt: 2,
             }}
           >
-            {/* Blue gradient in bottom right corner */}
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: '0.375rem',
-                right: 0,
-                width: '100%',
-                height: '100%',
-                background: 'linear-gradient(to top left, rgba(37, 99, 235, 0.3) 0%, rgba(37, 99, 235, 0.15) 30%, transparent 60%)',
-                clipPath: 'polygon(100% 100%, 100% 70%, 0% 100%)',
-                pointerEvents: 'none',
-                zIndex: 0,
-              }}
-            />
-
-           
-            <Box sx={{ position: 'relative', zIndex: 2 }}>
-              {/* Header */}
+            {/* Left: Header, description, inputs */}
+            <Box>
               <Typography
-                component="h3"
                 sx={{
-                  fontSize: '0.875rem',
+                  color: '#fff',
+                  fontSize: { xs: '1.5rem', md: '2rem' },
                   fontWeight: 700,
-                  color: '#94A3B8',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
+                  maxWidth: 440,
+                  lineHeight: 1.3,
+                  mb: 1,
                   fontFamily: 'inherit',
-                  marginBottom: '1.5rem',
                 }}
               >
-                ESTIMATED SAVINGS
+                How much is your time really worth?
+              </Typography>
+              <Typography
+                sx={{
+                  color: 'rgba(255,255,255,0.85)',
+                  fontSize: '0.9375rem',
+                  maxWidth: 440,
+                  lineHeight: 1.65,
+                  mb: 2.5,
+                  fontFamily: 'inherit',
+                }}
+              >
+                Don't let job hunting become a second unpaid job. Calculate your potential ROI by delegating the grunt work to us.
               </Typography>
 
-              {/* Savings Amount */}
-              <Box sx={{ marginBottom: '1.5rem' }}>
-                <Typography
-                  component="div"
+              <Typography sx={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.8125rem', fontWeight: 500, mb: 0.5, fontFamily: 'inherit' }}>
+                Your hourly income ($)
+              </Typography>
+              <Box sx={{ position: 'relative', mb: 1.5 }}>
+                <Box component="span" sx={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.6)', fontSize: '0.9375rem' }}>$</Box>
+                <Box
+                  component="input"
+                  type="number"
+                  value={hourlyIncome}
+                  onChange={handleHourlyChange}
+                  placeholder="20"
                   sx={{
-                    fontSize: { xs: '3rem', sm: '4rem', md: '4.5rem' },
-                    fontWeight: 700,
-                    color: '#FFFFFF',
+                    width: '100%',
+                    background: 'rgba(0,0,0,0.3)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '9999px',
+                    padding: '0.875rem 1.25rem 0.875rem 2rem',
+                    fontSize: '0.9375rem',
+                    color: '#fff',
                     fontFamily: 'inherit',
-                    lineHeight: 1,
+                    outline: 'none',
+                    '&::placeholder': { color: 'rgba(255,255,255,0.4)' },
                   }}
-                >
-                  ${calculatedSavings.toLocaleString()}+
-                </Typography>
+                />
               </Box>
+              <Typography sx={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.8125rem', fontWeight: 500, mb: 0.5, fontFamily: 'inherit' }}>
+                Minutes per job application
+              </Typography>
+              <Box sx={{ position: 'relative', mb: 1.5 }}>
+                <Box component="span" sx={{ position: 'absolute', right: 18, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.6)', fontSize: '0.8125rem' }}>Min</Box>
+                <Box
+                  component="input"
+                  type="number"
+                  value={minutesPerJob}
+                  onChange={handleMinutesChange}
+                  placeholder="10"
+                  sx={{
+                    width: '100%',
+                    background: 'rgba(0,0,0,0.3)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '9999px',
+                    padding: '0.875rem 3rem 0.875rem 1.25rem',
+                    fontSize: '0.9375rem',
+                    color: '#fff',
+                    fontFamily: 'inherit',
+                    outline: 'none',
+                    '&::placeholder': { color: 'rgba(255,255,255,0.4)' },
+                  }}
+                />
+              </Box>
+              <Box
+                component="button"
+                sx={{
+                  width: '100%',
+                  background: '#000',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '9999px',
+                  padding: '0.875rem 1.5rem',
+                  fontSize: '0.8125rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.08em',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  mt: 0.5,
+                  textTransform: 'uppercase',
+                  '&:hover': { background: '#1a1a1a' },
+                }}
+              >
+                Calculate Savings
+              </Box>
+            </Box>
 
-              {/* Hours Saved - Green Pill */}
+            {/* Right: Results card */}
+            <Box
+              sx={{
+                background: 'rgba(0,0,0,0.5)',
+                borderRadius: '24px',
+                padding: 2.5,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                minHeight: 220,
+                textAlign: 'center',
+              }}
+            >
+              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.6875rem', letterSpacing: '0.12em', mb: 1, fontFamily: 'inherit' }}>
+                ESTIMATED SAVINGS
+              </Typography>
+              <Typography sx={{ color: '#fff', fontSize: { xs: '2.5rem', md: '3rem' }, fontWeight: 700, fontFamily: 'inherit', mb: 1 }}>
+                ${calculatedSavings.toLocaleString()}+
+              </Typography>
               <Box
                 sx={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.5rem',
-                  backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                  color: '#10B981',
-                  padding: '0.5rem 1rem',
+                  gap: 0.5,
+                  background: 'rgba(34,197,94,0.2)',
+                  border: '1px solid rgba(34,197,94,0.4)',
+                  color: '#4ade80',
                   borderRadius: '9999px',
-                  border: '1px solid rgba(16, 185, 129, 0.2)',
-                  marginBottom: '1.5rem',
+                  padding: '0.375rem 1rem',
+                  fontSize: '0.8125rem',
                   width: 'fit-content',
+                  mx: 'auto',
+                  mb: 1,
                 }}
               >
-                <svg
-                  width="1rem"
-                  height="1rem"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M7 17L17 7M17 7H7M17 7V17"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <Typography
-                  component="span"
-                  sx={{
-                    fontSize: '0.875rem',
-                    fontWeight: 700,
-                    color: '#10B981',
-                    fontFamily: 'inherit',
-                  }}
-                >
-                  {hoursSaved.toLocaleString()}+ Hours Saved
-                </Typography>
+                ↑ {hoursSaved.toLocaleString()}+ Hours Saved
               </Box>
-
-              {/* Disclaimer */}
-              <Typography
-                component="p"
-                sx={{
-                  fontSize: '0.75rem',
-                  color: '#94A3B8',
-                  fontFamily: 'inherit',
-                  lineHeight: 1.5,
-                }}
-              >
-                Based on {DEFAULT_APPLICATIONS.toLocaleString()} applications at {minutesPerJob || '0'} min per job and ${hourlyIncome || '0'}/hr.
+              <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', fontFamily: 'inherit', mt: 'auto' }}>
+                Based on 1,000 applications at {minutesPerJob || '0'} min per job and ${hourlyIncome || '0'}/hr.
               </Typography>
             </Box>
           </Box>
@@ -408,4 +244,3 @@ export default function ROICalculator() {
     </Box>
   );
 }
-

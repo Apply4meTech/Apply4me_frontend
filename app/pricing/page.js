@@ -236,10 +236,10 @@ export default function Pricing() {
           overflowX: 'hidden',
         }}
       >
-        {/* Hero Section with Dark Blue Background */}
+        {/* Hero Section - Royal Blue */}
         <Box
           sx={{
-            backgroundColor: '#1E293B',
+            backgroundColor: '#1056ce',
             paddingTop: { xs: '5rem', md: '5rem' },
             paddingBottom: { xs: '10rem', md: '10rem' },
             paddingX: { xs: '1rem', sm: '2.5rem' },
@@ -247,18 +247,6 @@ export default function Pricing() {
             overflow: 'hidden',
           }}
         >
-          {/* Gradient overlay matching About Us */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              width: '100%',
-              height: '100%',
-              background:
-                'radial-gradient(circle at top right, rgba(37,99,235,0.25), transparent 60%)',
-            }}
-          />
           <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10 }}>
             <Box
               ref={heroRef}
@@ -268,7 +256,6 @@ export default function Pricing() {
                 transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
               }}
             >
-              {/* Headline */}
               <Typography
                 component="h1"
                 sx={{
@@ -280,55 +267,51 @@ export default function Pricing() {
                   fontFamily: 'inherit',
                   lineHeight: 1.2,
                   letterSpacing: '-0.02em',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.2)',
                 }}
               >
-                Invest in Your{' '}
-                <Box component="span" sx={{ color: '#60A5FA' }}>
-                  Career Acceleration.
-                </Box>
+                Simple. Transparent. Built for Results.
               </Typography>
 
-              
               <Typography
                 component="p"
                 sx={{
-                  fontSize: { xs: '0.875rem', md: '1rem' },
-                  color: '#CBD5E1',
+                  fontSize: { xs: '0.9375rem', md: '1.0625rem' },
+                  color: 'rgba(255,255,255,0.9)',
                   textAlign: 'center',
-                  marginBottom: '3rem',
-                  opacity: 0.9,
+                  marginBottom: '0.5rem',
                   fontFamily: 'inherit',
                   maxWidth: '48rem',
                   marginX: 'auto',
                   lineHeight: 1.75,
-                  fontWeight: 300,
                 }}
               >
-                One-time payment (AUD). Choose the plan that fits your goals. Start landing interviews sooner.
+                Choose a plan based on the number of professionally submitted applications you would like managed on your behalf.
+              </Typography>
+              <Typography
+                component="p"
+                sx={{
+                  fontSize: { xs: '0.875rem', md: '1rem' },
+                  color: 'rgba(255,255,255,0.8)',
+                  textAlign: 'center',
+                  marginBottom: '3rem',
+                  fontFamily: 'inherit',
+                  maxWidth: '48rem',
+                  marginX: 'auto',
+                  lineHeight: 1.75,
+                }}
+              >
+                No automation. No bulk spam. Just manual, structured submission handled by real people.
               </Typography>
             </Box>
-
-            <Typography
-              sx={{
-                fontSize: { xs: '0.875rem', md: '1rem' },
-                color: '#94A3B8',
-                textAlign: 'center',
-                marginBottom: '2rem',
-                fontFamily: 'inherit',
-              }}
-            >
-              AUD · One-time payment
-            </Typography>
           </Container>
         </Box>
 
-      {/* Pricing Plans Section - Cards overlapping the hero section */}
+      {/* Pricing Plans Section - Dark navy with glassmorphism cards */}
       <Box
         sx={{
-          background: '#EDF2F7',
+          background: '#0A2540',
           paddingTop: 0,
-          paddingBottom: { xs: '1rem', md: '2rem' },
+          paddingBottom: { xs: '4rem', md: '5rem' },
           paddingX: { xs: '1.5rem', md: '2rem' },
           flex: 1,
           position: 'relative',
@@ -400,19 +383,16 @@ export default function Pricing() {
                   key={plan.name}
                   sx={{
                     position: 'relative',
-                    background: 'rgba(255, 255, 255, 0.7)',
-                    border: '1px solid rgba(255, 255, 255, 0.9)',
-                    backdropFilter: 'blur(30px)',
-                    WebkitBackdropFilter: 'blur(30px)',
-                    borderRadius: '1rem',
+                    background: 'rgba(191, 219, 254, 0.08)',
+                    border: '1px solid rgba(191, 219, 254, 0.3)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                    borderRadius: '1.25rem',
                     padding: '2rem',
                     display: 'flex',
                     flexDirection: 'column',
                     overflow: 'visible',
-                    boxShadow: '0 20px 40px -10px rgba(30, 41, 59, 0.08)',
-                    borderWidth: '1px',
-                    borderStyle: 'solid',
-                    borderColor: 'rgba(255, 255, 255, 0.5)',
+                    boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
                     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                     opacity: plansVisible ? 1 : 0,
                     // transform: plansVisible ? 'translateY(0)' : 'translateY(40px)',
@@ -477,8 +457,8 @@ export default function Pricing() {
                         top: '-0.75rem',
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        backgroundColor: '#2563EB',
-                        color: '#FFFFFF',
+                        backgroundColor: '#BFDBFE',
+                        color: '#1e3a8a',
                         padding: '0.25rem 0.75rem',
                         borderRadius: '9999px',
                         fontSize: '0.75rem',
@@ -514,7 +494,7 @@ export default function Pricing() {
                     sx={{
                       fontSize: '1.5rem',
                       fontWeight: 700,
-                      color: plan.isPopular ? '#2563EB' : '#1E293B',
+                      color: '#FFFFFF',
                       marginBottom: '0.5rem',
                       fontFamily: 'inherit',
                     }}
@@ -522,7 +502,7 @@ export default function Pricing() {
                     {plan.name}
                   </Typography>
 
-                  {/* Price: actual (strikethrough) + discounted — eye-catching */}
+                  {/* Price: actual (strikethrough) + discounted */}
                   <Box
                     sx={{
                       display: 'flex',
@@ -536,9 +516,9 @@ export default function Pricing() {
                       <Typography
                         component="span"
                         sx={{
-                          fontSize: '1.375rem',
+                          fontSize: '1.25rem',
                           fontWeight: 600,
-                          color: '#94A3B8',
+                          color: 'rgba(255,255,255,0.5)',
                           textDecoration: 'line-through',
                           fontFamily: 'inherit',
                         }}
@@ -550,7 +530,7 @@ export default function Pricing() {
                       sx={{
                         fontSize: '2.5rem',
                         fontWeight: 800,
-                        color: '#1E293B',
+                        color: '#FFFFFF',
                         fontFamily: 'inherit',
                         letterSpacing: '-0.02em',
                         lineHeight: 1.1,
@@ -565,9 +545,9 @@ export default function Pricing() {
                           fontSize: '0.75rem',
                           fontWeight: 700,
                           color: '#FFFFFF',
-                          backgroundColor: '#10B981',
-                          padding: '0.2rem 0.5rem',
-                          borderRadius: '0.375rem',
+                          backgroundColor: '#4ADE80',
+                          padding: '0.25rem 0.625rem',
+                          borderRadius: '9999px',
                           fontFamily: 'inherit',
                         }}
                       >
@@ -577,26 +557,26 @@ export default function Pricing() {
                   </Box>
                   <Typography
                     sx={{
-                      fontSize: '0.8125rem',
-                      color: '#64748B',
+                      fontSize: '0.75rem',
+                      color: 'rgba(255,255,255,0.5)',
                       marginBottom: '0.5rem',
                       fontFamily: 'inherit',
                     }}
                   >
-                    {plan.billingPeriod === 'onetime' ? 'One-time' : plan.billingPeriod.charAt(0).toUpperCase() + plan.billingPeriod.slice(1)} · {plan.currency || 'AUD'}
+                    One-time · AUD
                   </Typography>
-
-                  {/* Description */}
-                  <Typography
-                    sx={{
-                      fontSize: '0.875rem',
-                      color: '#64748B',
-                      marginBottom: '1.5rem',
-                      fontFamily: 'inherit',
-                    }}
-                  >
-                    {plan.description}
-                  </Typography>
+                  {plan.description && (
+                    <Typography
+                      sx={{
+                        fontSize: '0.8125rem',
+                        color: 'rgba(255,255,255,0.7)',
+                        marginBottom: '1.5rem',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      {plan.description}
+                    </Typography>
+                  )}
 
                   {/* Features List */}
                   <Box
@@ -617,7 +597,7 @@ export default function Pricing() {
                         {feature.included ? (
                           <CheckCircleIcon
                             sx={{
-                              color: '#2563EB',
+                              color: '#60A5FA',
                               fontSize: '1.25rem',
                               marginRight: '0.75rem',
                             }}
@@ -625,7 +605,7 @@ export default function Pricing() {
                         ) : (
                           <RadioButtonUncheckedIcon
                             sx={{
-                              color: '#94A3B8',
+                              color: 'rgba(255,255,255,0.4)',
                               fontSize: '1.25rem',
                               marginRight: '0.75rem',
                             }}
@@ -634,7 +614,7 @@ export default function Pricing() {
                         <Typography
                           sx={{
                             fontSize: '0.875rem',
-                            color: feature.included ? '#1E293B' : '#94A3B8',
+                            color: feature.included ? '#FFFFFF' : 'rgba(255,255,255,0.6)',
                             fontFamily: 'inherit',
                           }}
                         >
@@ -661,21 +641,12 @@ export default function Pricing() {
                           hoverColor: '#FFFFFF'
                         };
                       }
-                      if (plan.isPopular) {
-                        return {
-                          bg: '#2563EB',
-                          color: '#FFFFFF',
-                          border: 'none',
-                          hoverBg: '#1E3A8A',
-                          hoverColor: '#FFFFFF'
-                        };
-                      }
-                      // Non-popular plan (white background)
+                      // Glassmorphism style for all plans
                       return {
-                        bg: '#FFFFFF',
-                        color: '#2563EB',
-                        border: '1px solid #2563EB',
-                        hoverBg: '#2563EB',
+                        bg: 'rgba(255,255,255,0.15)',
+                        color: '#FFFFFF',
+                        border: '1px solid rgba(255,255,255,0.4)',
+                        hoverBg: 'rgba(255,255,255,0.25)',
                         hoverColor: '#FFFFFF'
                       };
                     };
@@ -720,7 +691,7 @@ export default function Pricing() {
                         ) : hasActivePlan ? (
                           'Already Have Plan'
                         ) : (
-                          'Get Started'
+                          'GET STARTED →'
                         )}
                       </Box>
                     );
@@ -752,24 +723,49 @@ export default function Pricing() {
         </Container>
       </Box>
 
+      {/* ROI Section with intro */}
       <Box 
         ref={roiRef}
         sx={{
-          padding: { sm: '0rem', md: '0rem 3rem' },
-          backgroundColor: '#EDF2F7',
+          padding: { xs: '4rem 1.5rem', md: '5rem 2rem' },
+          backgroundColor: '#000',
           opacity: roiVisible ? 1 : 0,
           transform: roiVisible ? 'translateY(0)' : 'translateY(40px)',
           transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
         }}
       >
-        <ROICalculator/>
+        <Container maxWidth="lg">
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
+            <Typography
+              sx={{
+                fontSize: { xs: '1.25rem', md: '1.5rem' },
+                fontWeight: 700,
+                color: '#FFFFFF',
+                fontFamily: 'inherit',
+                mb: 1,
+              }}
+            >
+              Job searching should not feel like a second unpaid job.
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '1rem',
+                color: 'rgba(255,255,255,0.8)',
+                fontFamily: 'inherit',
+              }}
+            >
+              Estimate the time and financial value of delegating your applications to our team
+            </Typography>
+          </Box>
+          <ROICalculator/>
+        </Container>
       </Box>
 
       {/* Compare Plans Table Section */}
       <Box
         sx={{
-          backgroundColor: '#EDF2F7',
-          paddingY: { xs: '0rem', md: '0rem' },
+          backgroundColor: '#FFFFFF',
+          paddingY: { xs: '4rem', md: '5rem' },
           paddingX: { xs: '1.5rem', md: '2rem' },
         }}
       >
@@ -778,24 +774,24 @@ export default function Pricing() {
           <Typography
             component="h2"
             sx={{
-              fontSize: { xs: '2rem', md: '2.5rem' },
+              fontSize: { xs: '1.75rem', md: '2.25rem' },
               fontWeight: 700,
-              color: '#1E293B',
+              color: '#111',
               textAlign: 'center',
-              marginBottom: '3rem',
+              marginBottom: '2rem',
               fontFamily: 'inherit',
             }}
           >
             Package Features Comparison
           </Typography>
 
-          {/* Comparison Table Card */}
+          {/* Comparison Table Card - Dark navy gradient */}
           <Box
             sx={{
-              backgroundColor: '#FFFFFF',
-              borderRadius: '1rem',
+              background: 'linear-gradient(180deg, #1e3a8a 0%, #2563eb 100%)',
+              borderRadius: '1.5rem',
               padding: { xs: '1.5rem', md: '2rem' },
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+              boxShadow: '0 4px 24px rgba(30,58,138,0.3)',
               overflowX: 'auto',
             }}
           >
@@ -812,102 +808,90 @@ export default function Pricing() {
                 sx={{
                   minWidth: 560,
                   '& .MuiTableCell-root': {
-                    borderBottom: '1px solid #E2E8F0',
+                    borderBottom: '1px solid rgba(255,255,255,0.15)',
                     padding: { xs: '0.875rem 0.625rem', md: '1rem 0.875rem' },
                     fontFamily: 'inherit',
                     verticalAlign: 'middle',
                     whiteSpace: 'nowrap',
+                    color: '#FFFFFF',
                   },
                 }}
               >
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', paddingLeft: 0, borderBottom: '1px solid #E2E8F0', width: '22%', whiteSpace: 'nowrap' }}>
+                    <TableCell sx={{ fontSize: '0.8125rem', fontWeight: 600, color: 'rgba(255,255,255,0.8)', textTransform: 'uppercase', letterSpacing: '0.05em', paddingLeft: 0, borderBottom: '1px solid rgba(255,255,255,0.2)', width: '22%', whiteSpace: 'nowrap' }}>
                       Feature
                     </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#1E293B', width: '19%', whiteSpace: 'nowrap' }}>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#FFFFFF', width: '19%', whiteSpace: 'nowrap' }}>
                       Starter
                     </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#1E293B', width: '19%', whiteSpace: 'nowrap' }}>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#FFFFFF', width: '19%', whiteSpace: 'nowrap' }}>
                       Standard
                     </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#2563EB', width: '19%', whiteSpace: 'nowrap' }}>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#FFFFFF', width: '19%', whiteSpace: 'nowrap' }}>
                       Pro
                     </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#1E293B', width: '19%', whiteSpace: 'nowrap' }}>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.875rem', md: '1rem' }, fontWeight: 600, color: '#FFFFFF', width: '19%', whiteSpace: 'nowrap' }}>
                       Premium
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   <TableRow>
-                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0, maxWidth: 160 }}>
-                      Job search (who applies)
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#1E293B', lineHeight: 1.4 }}>
-                      You (100)
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#1E293B', lineHeight: 1.4 }}>
-                      50% us / 50% you
-                      <Box component="span" sx={{ display: 'block', fontSize: '0.75rem', color: '#64748B', marginTop: '0.25rem' }}>(175)</Box>
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#2563EB', lineHeight: 1.4 }}>
-                      75% us / 25% you
-                      <Box component="span" sx={{ display: 'block', fontSize: '0.75rem', color: '#64748B', marginTop: '0.25rem' }}>(250)</Box>
-                    </TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#1E293B', lineHeight: 1.4 }}>
-                      100% us
-                      <Box component="span" sx={{ display: 'block', fontSize: '0.75rem', color: '#64748B', marginTop: '0.25rem' }}>(350)</Box>
-                    </TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0, maxWidth: 160 }}>Job Search (Who Applies)</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>You (100)</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>50% us / 50% you (175)</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>75% us / 25% you (250)</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>100% us (350)</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0 }}>Human Assistant</TableCell>
-                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
-                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
-                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Dedicated</TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0 }}>Human Assistant</TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#4ADE80', fontSize: '1.25rem' }} /></TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#4ADE80', fontSize: '1.25rem' }} /></TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#4ADE80', fontSize: '1.25rem' }} /></TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Dedicated</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0 }}>Cover Letters</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Standard</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Custom</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Custom</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Custom</TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0 }}>Cover Letters</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Standard</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Custom</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Custom</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Custom</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0 }}>Resume (ATS-aligned)</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Review only (add-on)</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>We create</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>We create</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>We create</TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0 }}>Resume (ATS-Aligned)</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Review Only (Add-on)</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>We Create</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>We Create</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>We Create</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0 }}>LinkedIn optimisation</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Add-on</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Add-on</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Add-on</TableCell>
-                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0 }}>LinkedIn Optimisation</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Add-on</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Add-on</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Add-on</TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#4ADE80', fontSize: '1.25rem' }} /></TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0 }}>Priority processing</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>—</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>—</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Add-on</TableCell>
-                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0 }}>Priority Processing</TableCell>
+                    <TableCell align="center"><Box component="span" sx={{ color: '#EF4444', fontSize: '1.25rem', fontWeight: 700 }}>✕</Box></TableCell>
+                    <TableCell align="center"><Box component="span" sx={{ color: '#EF4444', fontSize: '1.25rem', fontWeight: 700 }}>✕</Box></TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Add-on</TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#4ADE80', fontSize: '1.25rem' }} /></TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0 }}>Real-time updates</TableCell>
-                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
-                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
-                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
-                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#2563EB', fontSize: '1.25rem' }} /></TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0 }}>Real-Time Updates</TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#4ADE80', fontSize: '1.25rem' }} /></TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#4ADE80', fontSize: '1.25rem' }} /></TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#4ADE80', fontSize: '1.25rem' }} /></TableCell>
+                    <TableCell align="center"><CheckCircleIcon sx={{ color: '#4ADE80', fontSize: '1.25rem' }} /></TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#1E293B', paddingLeft: 0 }}>Interview prep</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Add-on</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>Add-on</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>1 + add-on</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' } }}>3 + add-on</TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0 }}>Interview prep</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Add-on</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Add-on</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>1+ Add-on</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>3+ Add-on</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -915,16 +899,27 @@ export default function Pricing() {
             </Box>
           </Box>
 
-          {/* Optional Add-Ons Section */}
+          {/* Optional Add-Ons Section - moved to dark navy box below */}
+        </Container>
+      </Box>
+
+      {/* Optional Add-Ons - Dark Navy Section */}
+      <Box
+        sx={{
+          backgroundColor: '#0A2540',
+          paddingY: { xs: '4rem', md: '5rem' },
+          paddingX: { xs: '1.5rem', md: '2rem' },
+        }}
+      >
+        <Container maxWidth="lg">
           <Typography
             component="h2"
             sx={{
               fontSize: { xs: '1.75rem', md: '2.25rem' },
               fontWeight: 700,
-              color: '#1E293B',
+              color: '#FFFFFF',
               textAlign: 'center',
-              marginTop: '4rem',
-              marginBottom: '1.5rem',
+              marginBottom: '0.75rem',
               fontFamily: 'inherit',
             }}
           >
@@ -932,10 +927,10 @@ export default function Pricing() {
           </Typography>
           <Typography
             sx={{
-              fontSize: { xs: '0.9375rem', md: '1rem' },
-              color: '#64748B',
+              fontSize: '1rem',
+              color: 'rgba(255,255,255,0.8)',
               textAlign: 'center',
-              marginBottom: '2rem',
+              marginBottom: '2.5rem',
               fontFamily: 'inherit',
             }}
           >
@@ -946,42 +941,63 @@ export default function Pricing() {
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
               gap: '1.25rem',
-              marginBottom: '3rem',
+              '& > *:nth-of-type(4), & > *:nth-of-type(5)': { gridColumn: { md: 'span 1' } },
             }}
           >
             {[
-              { name: 'Job Search by Our Team', desc: 'We search and shortlist relevant jobs based on role & location', price: 59 },
-              { name: 'Custom Resume Rewrite (ATS-Optimised)', desc: 'Complete resume rewrite with keyword optimisation', price: 39 },
-              { name: 'LinkedIn Profile Optimisation', desc: 'Headline, summary & recruiter keyword optimisation', price: 49 },
-              { name: 'Interview Prep', desc: 'Preparation session for your interviews', price: 20 },
-              { name: 'Priority Processing Upgrade', desc: 'Faster handling vs standard queue', price: 49 },
+              { name: 'Job Search by Our Team', desc: 'We search and shortlist relevant jobs based on role & location.', price: 69 },
+              { name: 'Custom Resume Rewrite (ATS-Optimised)', desc: 'Complete resume rewrite with keyword optimisation.', price: 39 },
+              { name: 'LinkedIn Profile Optimisation', desc: 'Headline, summary & recruiter keyword optimisation.', price: 49 },
+              { name: 'Interview Prep', desc: 'Preparation session for your interviews.', price: 20 },
+              { name: 'Priority Processing Upgrade', desc: 'Faster handling vs standard queue.', price: 19 },
             ].map((addon) => (
               <Box
                 key={addon.name}
                 sx={{
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: '0.75rem',
-                  padding: '1.25rem',
-                  border: '1px solid #E2E8F0',
-                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.06)',
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: '1rem',
+                  padding: '1.5rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  minHeight: 140,
                 }}
               >
-                <Typography sx={{ fontSize: '1rem', fontWeight: 600, color: '#1E293B', fontFamily: 'inherit', marginBottom: '0.5rem' }}>
+                <Typography sx={{ fontSize: '1rem', fontWeight: 600, color: '#FFFFFF', fontFamily: 'inherit', marginBottom: '0.5rem' }}>
                   {addon.name}
                 </Typography>
-                <Typography sx={{ fontSize: '0.875rem', color: '#64748B', fontFamily: 'inherit', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                <Typography sx={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.75)', fontFamily: 'inherit', marginBottom: '1rem', lineHeight: 1.5, flex: 1 }}>
                   {addon.desc}
                 </Typography>
-                <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#2563EB', fontFamily: 'inherit' }}>
-                  ${addon.price} AUD
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+                  <Typography sx={{ fontSize: '1.125rem', fontWeight: 700, color: '#FFFFFF', fontFamily: 'inherit' }}>
+                    ${addon.price} AUD
+                  </Typography>
+                  <Box
+                    component="button"
+                    sx={{
+                      background: 'rgba(255,255,255,0.2)',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      borderRadius: '9999px',
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.8125rem',
+                      fontWeight: 600,
+                      color: '#FFFFFF',
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                      '&:hover': { background: 'rgba(255,255,255,0.3)' },
+                    }}
+                  >
+                    ADD +
+                  </Box>
+                </Box>
               </Box>
             ))}
           </Box>
         </Container>
       </Box>
 
-      <Box sx={{padding:{sm:'0rem', md:'3rem'}, backgroundColor:'#EDF2F7'}}>
+      <Box sx={{ padding: { xs: '4rem 1.5rem', md: '4rem 2rem' }, backgroundColor: '#FFFFFF' }}>
         <Container maxWidth="lg">
           <Box
             ref={logosRef}
@@ -1004,9 +1020,9 @@ export default function Pricing() {
                 letterSpacing: '0.05em',
               }}
             >
-              OUR CLIENTS GET HIRED AT
+              ROLES OUR CLIENTS HAVE APPLIED TO AT
             </Typography>
-            <CompanyLogos title="Our Clients Get Hired At" />
+            <CompanyLogos title="Roles Our Clients Have Applied To At" />
           </Box>
         </Container>
       </Box>
@@ -1051,39 +1067,39 @@ export default function Pricing() {
           >
             {[
   {
-    question: 'What exactly do you do?',
+    question: 'What do we do?',
     answer:
-      'We apply to jobs on your behalf using your resume and preferences. You give us the details, and our human team submits each application (cover letters included). It’s 100% manual – we’re here to handle the busywork of your job search.',
+      'We professionally manage and submit job applications on your behalf, aligned with your resume and role preferences. Once you provide your details, our dedicated human team prepares and submits each application manually, including customised cover letters.',
   },
   {
-    question: 'Do you guarantee I’ll get a job?',
+    question: 'Do we guarantee jobs?',
     answer:
-      'No. We can’t promise interviews or job offers – no honest service can. What we guarantee is a structured, transparent application process. We focus on making high-quality submissions, but ultimately hiring decisions are out of our control.',
+      'We do not guarantee interviews or job offers, as hiring decisions are made solely by employers. What we do guarantee is a structured, transparent, and professionally managed application process.',
   },
   {
-    question: 'Where do you apply?',
+    question: 'Where do we apply?',
     answer:
-      'We use your chosen methods: company websites, major job boards (like Seek, LinkedIn, etc.), and any direct links you provide. Our service is tailored to the Australian market, so we know where Australian employers post roles.',
+      'Applications are submitted via your selected channels, including company career pages, leading job platforms such as Seek and LinkedIn, and any direct application links you provide.',
   },
   {
     question: 'How is this different from a recruitment agency?',
     answer:
-      'We work for you, not for employers. Agencies often match candidates to employers (and they typically represent companies, not you). Our sole focus is on getting you in front of as many relevant doors as possible. Think of us as your personal application team, not a headhunter.',
+      'We work for you, not for employers. Agencies often match candidates to employers (and they typically represent companies, not you). Our sole focus is on getting you in front of as many relevant doors as possible. Think of us as your personal application team, not a head-hunter.',
   },
   {
-    question: 'Can I see proof of applications?',
+    question: 'Can you see progress?',
     answer:
-      'Yes! You get access to a live dashboard where every submitted application is logged. You’ll know exactly where and when we applied on your behalf. No mysteries, no “hidden” applications – complete transparency.',
+      'You will have access to a live tracking dashboard that logs every application submitted on your behalf. This allows you to monitor where and when each submission has been made.',
   },
   {
     question: 'How does pricing and cancellation work?',
     answer:
-      'Each package is a one-time payment. We have no recurring fees. Once you purchase, we start the process (after you submit your info). Because our team immediately begins handling your applications, we do not offer refunds after we’ve started the service. If you change your mind before we begin, we can cancel and refund you. But once applications are in progress, it’s non-refundable.',
+      'After purchase and submission of your details, our team promptly begins preparing and submitting applications on your behalf. As the service involves immediate time and resource allocation, refunds cannot be provided once work has commenced. Cancellations requested prior to service initiation are eligible for a full refund. Once applications are being processed or submitted, the service is non-refundable.',
   },
   {
     question: 'Is my data secure?',
     answer:
-      'Absolutely. We take your privacy seriously. We collect only the information needed to apply for jobs (your resume, contact info, preferences). This data is stored securely and used only for the purpose of job applications. We do not sell or share your personal info with anyone outside our team. You have full rights under the Australian Privacy Act – you can access, correct, or delete your data at any time (just let us know).',
+      'We collect only the information necessary to manage and submit job applications on your behalf, including your resume, contact details, and role preferences. Your information is stored securely and used solely for the purpose of facilitating job applications through the channels you authorise. We do not sell, rent, or share your personal information with any third parties outside our internal team, except where required to submit applications as directed by you. In accordance with the Australian Privacy Act, you have the right to access, update, or request deletion of your personal information at any time. Requests can be made by contacting our team directly.',
   },
 ]
 .map((faq, index) => (
@@ -1218,7 +1234,7 @@ export default function Pricing() {
                 mx: 'auto',
               }}
             >
-              Let us handle the applications so you can focus on interviews.
+              Let us handle applications so you can focus on interviews.
             </Typography>
             <Button
               sx={{

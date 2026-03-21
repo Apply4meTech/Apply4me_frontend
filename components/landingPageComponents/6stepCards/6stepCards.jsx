@@ -6,174 +6,216 @@ import { Box, Container, Typography } from '@mui/material';
 const steps = [
   {
     number: 1,
-    title: 'Share your details',
-    description:
-      'Tell us about your experience, the roles you are targeting, and where you want to work. Upload your resume and preferences through our onboarding form.',
-    bgColor: '#EFF6FF', // pastel blue
+    title: 'Tell Us About You',
+    description: 'Share your experience, target roles, preferences and resume through our onboarding form.',
+    gradient: 'linear-gradient(180deg, #4b6be0 0%, #6b5bdb 50%, #5a4dbf 100%)',
+    titleColor: '#F5C518',
+    textColor: 'rgba(255,255,255,0.9)',
+    mock: (
+      <Box sx={{ mt: 'auto', pt: 2 }}>
+        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1 }}>
+          <Box sx={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '9999px', px: 2, py: 0.75, fontSize: '0.8125rem', color: '#fff' }}>👤 Jessica F.</Box>
+          <Box sx={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '9999px', px: 2, py: 0.75, fontSize: '0.8125rem', color: '#fff' }}>💰 $160K Annually</Box>
+        </Box>
+        <Box sx={{ background: 'rgba(255,255,255,0.15)', borderRadius: '12px', p: 1.5, color: 'rgba(255,255,255,0.9)', fontSize: '0.8125rem' }}>I want a role in graphic design...</Box>
+      </Box>
+    ),
   },
   {
     number: 2,
-    title: 'Choose jobs to apply for',
-    description:
-      'Share job links you like or let us help shortlist suitable roles based on your criteria. You stay in control of what we apply to.',
-    bgColor: '#ECFDF3', // pastel green
+    title: 'Select Roles to Apply For',
+    description: "Provide job links you're interested in or let us shortlist opportunities that fit your criteria — you stay in control.",
+    gradient: 'linear-gradient(180deg, #f5c518 0%, #e8a80a 50%, #d4940a 100%)',
+    titleColor: '#1e3a8a',
+    textColor: 'rgba(30,58,138,0.9)',
+    mock: (
+      <Box sx={{ mt: 'auto', pt: 2, display: 'flex', gap: 1 }}>
+        <Box sx={{ background: 'rgba(255,255,255,0.5)', borderRadius: '12px', p: 1.5, flex: 1, color: '#1e3a8a', fontSize: '0.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          <strong>Product Designer</strong><br />Adobe · Full-Time
+        </Box>
+        <Box sx={{ background: 'rgba(255,255,255,0.5)', borderRadius: '12px', p: 1.5, flex: 1, color: '#1e3a8a', fontSize: '0.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          <strong>Software Engineer</strong><br />Google · Full-Time
+        </Box>
+      </Box>
+    ),
   },
   {
     number: 3,
-    title: 'We submit applications for you',
-    description:
-      'Our team manually applies to each role using your information. You can track progress and see what has been applied to.',
-    bgColor: '#FFF7ED', // pastel orange
+    title: 'We Apply for You',
+    description: 'Our team manually submits each application using your details. You can track progress and stay updated.',
+    gradient: 'linear-gradient(180deg, #4b6be0 0%, #6b5bdb 50%, #5a4dbf 100%)',
+    titleColor: '#F5C518',
+    textColor: 'rgba(255,255,255,0.9)',
+    mock: (
+      <Box sx={{ mt: 'auto', pt: 2 }}>
+        <Box sx={{ display: 'flex', gap: 0.5, mb: 1 }}>
+          <Box sx={{ background: 'rgba(255,255,255,0.2)', borderRadius: '9999px', px: 1.5, py: 0.5, fontSize: '0.75rem', color: '#fff' }}>Saved (9)</Box>
+          <Box sx={{ background: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.45)', borderRadius: '9999px', px: 1.5, py: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#fff' }}>Applied (22)</Box>
+          <Box sx={{ background: 'rgba(255,255,255,0.2)', borderRadius: '9999px', px: 1.5, py: 0.5, fontSize: '0.75rem', color: '#fff' }}>Interviews (6)</Box>
+        </Box>
+        <Box sx={{ background: 'rgba(255,255,255,0.15)', borderRadius: '12px', p: 1.25, display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+          <span style={{ fontSize: '0.8125rem', color: '#fff' }}>🔍 Software Engineer — Google</span>
+          <Box sx={{ background: 'rgba(255,255,255,0.2)', borderRadius: '9999px', px: 1, py: 0.25, fontSize: '0.6875rem', color: '#fff' }}>$200K+</Box>
+        </Box>
+        <Box sx={{ background: 'rgba(255,255,255,0.15)', borderRadius: '12px', p: 1.25, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.8125rem', color: '#fff' }}>🎨 Product Designer — Adobe</span>
+          <Box sx={{ background: 'rgba(255,255,255,0.2)', borderRadius: '9999px', px: 1, py: 0.25, fontSize: '0.6875rem', color: '#fff' }}>$160K+</Box>
+        </Box>
+      </Box>
+    ),
   },
 ];
 
+const logos = [
+  { src: 'https://cdn.simpleicons.org/google/4285F4', top: '15%', left: '8%' },
+  { src: 'https://cdn.simpleicons.org/apple/000000', top: '25%', right: '12%' },
+  { src: 'https://cdn.simpleicons.org/behance/1769FF', top: '60%', left: '5%' },
+  { src: 'https://cdn.simpleicons.org/github/181717', top: '70%', right: '8%' },
+  { src: 'https://cdn.simpleicons.org/mcdonalds/FBC817', top: '40%', left: '15%' },
+  { src: 'https://cdn.simpleicons.org/atlassian/0052CC', top: '50%', right: '18%' },
+];
 
 export default function SixStepCards() {
-  const [headingVisible, setHeadingVisible] = useState(false);
-  const [cardsVisible, setCardsVisible] = useState(false);
-  const headingRef = useRef(null);
-  const cardsRef = useRef(null);
+  const [visible, setVisible] = useState(false);
+  const ref = useRef(null);
 
   useEffect(() => {
-    const headingObserver = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setHeadingVisible(true);
-          headingObserver.unobserve(entry.target);
+          setVisible(true);
+          observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+      { threshold: 0.1 }
     );
-
-    const cardsObserver = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setCardsVisible(true);
-          cardsObserver.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
-    );
-
-    if (headingRef.current) headingObserver.observe(headingRef.current);
-    if (cardsRef.current) cardsObserver.observe(cardsRef.current);
-
-    return () => {
-      if (headingRef.current) headingObserver.unobserve(headingRef.current);
-      if (cardsRef.current) cardsObserver.unobserve(cardsRef.current);
-    };
+    if (ref.current) observer.observe(ref.current);
+    return () => ref.current && observer.unobserve(ref.current);
   }, []);
 
   return (
     <Box
+      ref={ref}
       sx={{
-        padding: { xs: '2rem 1.5rem', md: '3rem 2rem' },
-        paddingTop: { xs: '1rem', md: '2rem' },
-        marginTop:'50px'
+        padding: { xs: '4rem 1.5rem', md: '5rem 2rem' },
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
-      <Container maxWidth="lg">
-        {/* Heading */}
-        <Box ref={headingRef}>
+      {/* Floating logos */}
+      <Box
+        sx={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          zIndex: 0,
+          opacity: 0.08,
+        }}
+      >
+        {logos.map((logo, i) => (
+          <Box
+            key={i}
+            component="img"
+            src={logo.src}
+            alt=""
+            sx={{
+              position: 'absolute',
+              width: 48,
+              height: 48,
+              borderRadius: '50%',
+              objectFit: 'contain',
+              background: '#fff',
+              p: 0.75,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+              top: logo.top,
+              ...(logo.left && { left: logo.left }),
+              ...(logo.right && { right: logo.right }),
+            }}
+          />
+        ))}
+      </Box>
+
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
           <Typography
             component="h2"
             sx={{
-              fontSize: { xs: '1.875rem', md: '2.25rem' },
+              fontSize: { xs: '1.875rem', md: '2.5rem' },
               fontWeight: 700,
-              color: '#1F2937',
-              textAlign: 'center',
-              marginBottom: '1rem',
+              color: '#111',
+              marginBottom: 1,
               fontFamily: 'inherit',
-              opacity: headingVisible ? 1 : 0,
-              transform: headingVisible ? 'translateY(0)' : 'translateY(20px)',
+              opacity: visible ? 1 : 0,
+              transform: visible ? 'translateY(0)' : 'translateY(20px)',
               transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
             }}
           >
-            How ApplyForMe Works
+            How Our Service Works
           </Typography>
-
-          {/* Subtitle */}
           <Typography
             component="p"
             sx={{
-              fontSize: '1.125rem',
-              color: '#6B7280',
-              textAlign: 'center',
-              maxWidth: '42rem',
-              margin: '0 auto 3rem',
-              lineHeight: 1.75,
+              fontSize: '1.0625rem',
+              color: '#6b7280',
+              maxWidth: 560,
+              mx: 'auto',
+              lineHeight: 1.7,
               fontFamily: 'inherit',
-              opacity: headingVisible ? 1 : 0,
-              transform: headingVisible ? 'translateY(0)' : 'translateY(20px)',
-              transition: 'opacity 0.6s ease-out 0.2s, transform 0.6s ease-out 0.2s',
+              opacity: visible ? 1 : 0,
+              transform: visible ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'opacity 0.6s ease-out 0.1s, transform 0.6s ease-out 0.1s',
             }}
           >
-Most job applications fail because they are rushed or generic.
- We use real people to submit applications carefully and accurately on your behalf.
+            We don't use bots or shortcuts — we manually submit tailored applications on your behalf. Most job seekers fail to get responses because applications are rushed and generic. Our approach is strategic, accurate, and professional.
           </Typography>
         </Box>
 
-        {/* Cards Grid */}
         <Box
-          ref={cardsRef}
           sx={{
             display: 'grid',
-            gridTemplateColumns: {
-              xs: '1fr',
-              sm: 'repeat(2, 1fr)',
-              md: 'repeat(3, 1fr)',
-            },
-            gap: { xs: '1.5rem', md: '2rem' },
+            gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+            gap: 2,
           }}
         >
           {steps.map((step, index) => (
             <Box
               key={step.number}
               sx={{
-                backgroundColor: step.bgColor,
-                borderRadius: '1rem',
-                padding: { xs: '1.5rem', md: '2rem' },
-                boxShadow: '0 0.125rem 0.5rem rgba(0, 0, 0, 0.1)',
+                background: step.gradient,
+                borderRadius: '2rem',
+                padding: 2,
+                minHeight: 380,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1rem',
-                transition: 'transform 0.4s ease, box-shadow 0.4s ease, opacity 0.4s ease',
-                opacity: cardsVisible ? 1 : 0,
-                transform: cardsVisible ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.95)',
-                transitionDelay: `${index * 0.1}s`,
-                '&:hover': {
-                  transform: 'translateY(-0.5rem) scale(1.02)',
-                  boxShadow: '0 0.5rem 1.5rem rgba(0, 0, 0, 0.15)',
-                },
+                boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+                opacity: visible ? 1 : 0,
+                transform: visible ? 'translateY(0)' : 'translateY(30px)',
+                transition: `opacity 0.6s ease-out ${0.1 + index * 0.1}s, transform 0.6s ease-out ${0.1 + index * 0.1}s`,
               }}
             >
-
-              {/* Title */}
               <Typography
                 component="h3"
                 sx={{
-                  fontSize: '1.25rem',
+                  fontSize: '1.375rem',
                   fontWeight: 700,
-                  color: '#1F2937',
+                  color: step.titleColor,
                   fontFamily: 'inherit',
-                  marginTop: '0.5rem',
+                  mb: 1,
                 }}
               >
                 {step.number}. {step.title}
               </Typography>
-
-              {/* Description */}
               <Typography
-                component="p"
                 sx={{
-                  fontSize: '1.125rem',
-                  color: '#6B7280',
+                  fontSize: '0.875rem',
+                  color: step.textColor,
                   lineHeight: 1.75,
                   fontFamily: 'inherit',
                 }}
               >
                 {step.description}
               </Typography>
+              {step.mock}
             </Box>
           ))}
         </Box>
