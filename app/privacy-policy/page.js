@@ -13,13 +13,15 @@ export default function PrivacyPolicy() {
           display: 'flex',
           flexDirection: 'column',
           fontFamily: 'inherit',
+          marginTop: { xs: '-64px', md: '-72px' },
+          paddingTop: { xs: '64px', md: '72px' },
+          background: 'linear-gradient(to right, #001f4d 0%, #0056b3 100%)',
         }}
       >
-        {/* Hero Section - Gradient with top border (matches image) */}
+        {/* Hero — transparent so page gradient blends with header */}
         <Box
           sx={{
-            background: 'linear-gradient(to right, #001f4d 0%, #0056b3 100%)',
-            borderTop: '2px solid #00d4ff',
+            background: 'transparent',
             py: { xs: 5, md: 7 },
             textAlign: 'center',
             display: 'flex',

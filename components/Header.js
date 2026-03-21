@@ -15,9 +15,28 @@ const Header = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
 
   const isHome = pathname === '/';
+  const isPricing = pathname === '/pricing';
+  const isAbout = pathname === '/about-us';
+  const isPrivacyPolicy = pathname === '/privacy-policy';
+  const isTermsOfService = pathname === '/terms-of-service';
+  const isPaymentPolicy = pathname === '/payment-policy';
+  const isBlogsList = pathname === '/blogs';
+  const isBlogPost =
+    typeof pathname === 'string' &&
+    pathname.startsWith('/blogs/') &&
+    pathname !== '/blogs';
+  const shouldBlendLikeHero =
+    isHome ||
+    isPricing ||
+    isAbout ||
+    isPrivacyPolicy ||
+    isTermsOfService ||
+    isPaymentPolicy ||
+    isBlogsList ||
+    isBlogPost;
 
   useEffect(() => {
-    if (!isHome) {
+    if (!shouldBlendLikeHero) {
       setScrolled(true);
       return;
     }
@@ -25,9 +44,9 @@ const Header = () => {
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isHome]);
+  }, [shouldBlendLikeHero]);
 
-  const showHeaderBg = !isHome || scrolled;
+  const showHeaderBg = shouldBlendLikeHero ? scrolled : true;
 
   const navLinks = [
     { href: '/about-us', label: 'About Us' },
@@ -48,11 +67,16 @@ const Header = () => {
         position: 'sticky',
         top: 0,
         zIndex: 1000,
-        background: showHeaderBg ? '#0A2540' : 'transparent',
-        backdropFilter: showHeaderBg ? 'blur(12px)' : 'none',
-        WebkitBackdropFilter: showHeaderBg ? 'blur(12px)' : 'none',
-        borderBottom: showHeaderBg ? '1px solid rgba(255,255,255,0.08)' : '1px solid transparent',
-        padding: { xs: '1rem', md: '1.125rem 2.5rem' },
+        // Keep header visually blended with hero:
+        // - no background tint at top
+        // - only blur behind the header after scroll
+        background: showHeaderBg
+          ? 'linear-gradient(180deg, rgba(9,49,111,0.28) 0%, rgba(17,90,206,0.28) 100%)'
+          : 'transparent',
+        backdropFilter: showHeaderBg ? 'blur(16px)' : 'none',
+        WebkitBackdropFilter: showHeaderBg ? 'blur(16px)' : 'none',
+        borderBottom: 'none',
+        padding: '10px',
         transition: 'background 0.25s ease, border-color 0.25s ease',
       }}
     >
@@ -118,7 +142,8 @@ const Header = () => {
             }}
           >
             {navLinks.map((link) => {
-              const isActive = isActiveLink(link.href) || (link.href === '/#how-works' && pathname === '/');
+              const isHowItWorks = link.label === 'How It Works';
+              const isActive = !isHowItWorks && (isActiveLink(link.href) || (link.href === '/#how-works' && pathname === '/'));
               const isConnect = link.label === 'Connect';
               return (
                 <Link
@@ -134,11 +159,12 @@ const Header = () => {
                       borderRadius: '9999px',
                       fontSize: '0.875rem',
                       fontWeight: 500,
-                      color: isConnect ? 'rgba(255,255,255,0.9)' : (isActive ? '#1e3a8a' : 'rgba(255,255,255,0.85)'),
-                      background: isConnect ? 'transparent' : (isActive ? '#fff' : 'transparent'),
+                      color: isConnect ? 'rgba(255,255,255,0.9)' : (isActive ? '#FFFFFF' : 'rgba(255,255,255,0.85)'),
+                      background: isConnect ? 'transparent' : (isActive ? 'rgba(255,255,255,0.12)' : 'transparent'),
+                      border: isConnect ? '1px solid transparent' : (isActive ? '1px solid rgba(255,255,255,0.25)' : '1px solid transparent'),
                       transition: 'all 0.15s ease',
                       '&:hover': {
-                        background: isConnect ? 'transparent' : (isActive ? '#fff' : 'rgba(255,255,255,0.2)'),
+                        background: isConnect ? 'transparent' : (isActive ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.18)'),
                       },
                     }}
                   >

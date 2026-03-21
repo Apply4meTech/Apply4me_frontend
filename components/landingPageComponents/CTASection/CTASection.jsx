@@ -26,7 +26,7 @@ export default function CTASection() {
     <Box
       ref={ref}
       sx={{
-        background: 'linear-gradient(135deg, #1e3a8a, #2563eb)',
+        background: 'linear-gradient(90deg, #09316f 0%, #115ace 100%)',
         padding: { xs: '4rem 1.5rem', md: '5rem 2rem' },
         textAlign: 'center',
         opacity: isVisible ? 1 : 0,
@@ -71,9 +71,11 @@ export default function CTASection() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: 0.75,
-              border: '2px solid rgba(255,255,255,0.8)',
-              background: 'transparent',
-              color: '#fff',
+              border: '1px solid rgba(255,255,255,0.25)',
+              background: 'rgba(255,255,255,0.10)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              color: 'rgba(255,255,255,0.95)',
               borderRadius: '9999px',
               padding: '1rem 2.5rem',
               fontSize: '1rem',
@@ -82,8 +84,8 @@ export default function CTASection() {
               cursor: 'pointer',
               transition: 'all 0.15s',
               '&:hover': {
-                background: 'rgba(255,255,255,0.15)',
-                borderColor: '#fff',
+                background: 'rgba(255,255,255,0.16)',
+                borderColor: 'rgba(255,255,255,0.35)',
               },
             }}
           >

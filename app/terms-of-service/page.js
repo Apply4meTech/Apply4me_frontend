@@ -13,12 +13,14 @@ export default function TermsOfService() {
           display: 'flex',
           flexDirection: 'column',
           fontFamily: 'inherit',
+          marginTop: { xs: '-64px', md: '-72px' },
+          paddingTop: { xs: '64px', md: '72px' },
+          background: 'linear-gradient(to right, #0D3370 0%, #1E62D0 100%)',
         }}
       >
-        {/* Hero Section - Blue gradient (dark navy left to royal blue right) */}
         <Box
           sx={{
-            background: 'linear-gradient(to right, #0D3370 0%, #1E62D0 100%)',
+            background: 'transparent',
             py: { xs: 5, md: 7 },
             textAlign: 'center',
             display: 'flex',

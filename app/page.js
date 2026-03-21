@@ -11,7 +11,6 @@ import SixStepCards from '../components/landingPageComponents/6stepCards/6stepCa
 import ROICalculator from '../components/landingPageComponents/ROICalculator/ROICalculator';
 import CTASection from '../components/landingPageComponents/CTASection/CTASection';
 import HowWeAreDifferent from '../components/landingPageComponents/HowWeAreDifferent/HowWeAreDifferent';
-import TrustedBy from '../components/landingPageComponents/TrustedBy/TrustedBy';
 import MainLayout from '../components/layouts/MainLayout';
 
 export default function Home() {
@@ -34,7 +33,7 @@ export default function Home() {
           minHeight: '100vh',
           marginTop: { xs: '-64px', md: '-72px' },
           paddingTop: { xs: '64px', md: '72px' },
-          background: 'radial-gradient(ellipse 80% 80% at 50% 0%, #2c5fdb 0%, #1e3a8a 50%, #0f172a 100%)',
+            background: 'linear-gradient(180deg, #09316f 0%, #115ace 100%)',
           display: 'flex',
           flexDirection: 'column',
         }}
@@ -139,14 +138,17 @@ export default function Home() {
                     <Link href="/signup" style={{ textDecoration: 'none' }}>
                       <Button
                         sx={{
-                          background: '#fff !important',
-                          color: '#2563EB !important',
+                          background: 'rgba(255,255,255,0.12) !important',
+                          backdropFilter: 'blur(12px)',
+                          WebkitBackdropFilter: 'blur(12px)',
+                          border: '1px solid rgba(255,255,255,0.25)',
+                          color: 'rgba(255,255,255,0.95) !important',
                           py: 1.25,
                           px: 3,
                           borderRadius: '9999px',
                           fontWeight: 600,
                           fontSize: '1rem',
-                          '&:hover': { background: '#f0f4ff !important' },
+                          '&:hover': { background: 'rgba(255,255,255,0.18) !important' },
                         }}
                       >
                         Start Application
@@ -155,14 +157,17 @@ export default function Home() {
                     <Link href="/pricing" style={{ textDecoration: 'none' }}>
                       <Button
                         sx={{
-                          background: '#fff !important',
-                          color: '#2563EB !important',
+                          background: 'rgba(255,255,255,0.12) !important',
+                          backdropFilter: 'blur(12px)',
+                          WebkitBackdropFilter: 'blur(12px)',
+                          border: '1px solid rgba(255,255,255,0.25)',
+                          color: 'rgba(255,255,255,0.95) !important',
                           py: 1.25,
                           px: 3,
                           borderRadius: '9999px',
                           fontWeight: 600,
                           fontSize: '1rem',
-                          '&:hover': { background: '#f0f4ff !important' },
+                          '&:hover': { background: 'rgba(255,255,255,0.18) !important' },
                         }}
                       >
                         View Pricing →
@@ -189,10 +194,6 @@ export default function Home() {
 
         <Box sx={{ background: '#fff' }}>
           <HowWeAreDifferent />
-        </Box>
-
-        <Box sx={{ background: '#fff' }}>
-          <TrustedBy />
         </Box>
 
         <CTASection />

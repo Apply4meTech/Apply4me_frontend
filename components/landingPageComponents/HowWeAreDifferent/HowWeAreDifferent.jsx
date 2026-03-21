@@ -71,10 +71,14 @@ export default function HowWeAreDifferent() {
             <Box
               key={card.title}
               sx={{
-                background: 'linear-gradient(180deg, #2d52b0 0%, #1e3a8a 100%)',
+                // Match the landing page gradient colors (vertical shade)
+                background: 'linear-gradient(180deg, #09316f 0%, #115ace 100%)',
                 borderRadius: '32px',
                 padding: 2.5,
-                boxShadow: '0 8px 32px rgba(30,58,138,0.25)',
+                boxShadow: '0 14px 44px rgba(37,99,235,0.18)',
+                border: '1px solid rgba(255,255,255,0.18)',
+                backdropFilter: 'blur(14px)',
+                WebkitBackdropFilter: 'blur(14px)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -87,29 +91,20 @@ export default function HowWeAreDifferent() {
                 sx={{
                   width: '100%',
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
+                  justifyContent: 'center',
+                  alignItems: 'center',
                   mb: 2,
                 }}
               >
-                <Box
-                  sx={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: '50%',
-                    background: '#93C5FD',
-                    flexShrink: 0,
-                  }}
-                />
                 <Typography
                   sx={{
                     color: 'rgba(255,255,255,0.9)',
                     fontSize: '1.125rem',
                     fontWeight: 600,
-                    textAlign: 'right',
+                    textAlign: 'center',
                     fontFamily: 'inherit',
                     lineHeight: 1.3,
-                    maxWidth: '80%',
+                    maxWidth: '100%',
                   }}
                 >
                   {card.title}
@@ -128,15 +123,18 @@ export default function HowWeAreDifferent() {
                   <Box
                     key={tag}
                     sx={{
-                      background: 'rgba(15,23,42,0.5)',
-                      border: '1px solid rgba(147,197,253,0.4)',
+                      // Glassy + lighter pill backgrounds
+                      background: 'rgba(255,255,255,0.10)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(147,197,253,0.32)',
                       borderRadius: '50px',
                       padding: '0.5rem 1.25rem',
-                      color: '#fff',
+                      color: 'rgba(255,255,255,0.95)',
                       fontSize: '0.875rem',
                       width: 'fit-content',
                       fontFamily: 'inherit',
-                      boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)',
+                      boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.06)',
                     }}
                   >
                     {tag}

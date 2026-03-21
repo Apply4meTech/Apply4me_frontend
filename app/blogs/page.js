@@ -176,29 +176,32 @@ export default function BlogsPage() {
       <Box
         sx={{
           minHeight: '100vh',
-          bgcolor: 'background.default',
-          py: { xs: 4, md: 6 }
+          display: 'flex',
+          flexDirection: 'column',
+          marginTop: { xs: '-64px', md: '-72px' },
+          paddingTop: { xs: '64px', md: '72px' },
+          background: 'linear-gradient(180deg, #09316f 0%, #115ace 100%)',
         }}
       >
-        <Container 
-          maxWidth="xl" 
-          sx={{ 
+        <Container
+          maxWidth="xl"
+          sx={{
             px: { xs: 2, sm: 3, md: 4 },
             width: '100%',
             '& .MuiContainer-root': {
-              maxWidth: '100%'
-            }
+              maxWidth: '100%',
+            },
           }}
         >
-          <Box sx={{ mb: 4, textAlign: 'center' }}>
+          <Box sx={{ py: { xs: 4, md: 5 }, textAlign: 'center' }}>
             <Typography
               variant="h2"
               component="h1"
               sx={{
                 fontWeight: 700,
                 mb: 2,
-                color: 'text.primary',
-                fontSize: { xs: '2rem', md: '3rem' }
+                color: '#FFFFFF',
+                fontSize: { xs: '2rem', md: '3rem' },
               }}
             >
               Our Blog
@@ -206,77 +209,92 @@ export default function BlogsPage() {
             <Typography
               variant="body1"
               sx={{
-                color: 'text.secondary',
+                color: 'rgba(255,255,255,0.9)',
                 maxWidth: '600px',
                 mx: 'auto',
                 fontSize: { xs: '0.9rem', md: '1rem' },
-                mb: 3
+                mb: 3,
               }}
             >
               Stay updated with the latest insights, tips, and stories from our team
             </Typography>
 
-            {/* Filter Buttons */}
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: 2,
-                flexWrap: 'wrap',
-                mb: 2
-              }}
-            >
-              
-              {isAuthenticated && (
-                <>
-                  <Button
-                    variant={filter === 'liked' ? 'contained' : 'outlined'}
-                    onClick={() => handleFilterChange('liked')}
-                    startIcon={<FavoriteIcon />}
-                    sx={{
-                      textTransform: 'none',
-                      borderRadius: '8px',
-                      px: 3,
-                      py: 1,
-                      fontWeight: 500,
-                      bgcolor: filter === 'liked' ? '#f44336' : 'transparent',
-                      color: filter === 'liked' ? '#fff' : '#f44336',
-                      borderColor: '#f44336',
-                      '&:hover': {
-                        bgcolor: filter === 'liked' ? '#d32f2f' : 'rgba(244, 67, 54, 0.08)',
-                        borderColor: '#f44336'
-                      }
-                    }}
-                  >
-                    Liked
-                  </Button>
-                  
-                  <Button
-                    variant={filter === 'bookmarked' ? 'contained' : 'outlined'}
-                    onClick={() => handleFilterChange('bookmarked')}
-                    startIcon={<BookmarkIcon />}
-                    sx={{
-                      textTransform: 'none',
-                      borderRadius: '8px',
-                      px: 3,
-                      py: 1,
-                      fontWeight: 500,
-                      bgcolor: filter === 'bookmarked' ? '#1976D2' : 'transparent',
-                      color: filter === 'bookmarked' ? '#fff' : '#1976D2',
-                      borderColor: '#1976D2',
-                      '&:hover': {
-                        bgcolor: filter === 'bookmarked' ? '#1565C0' : 'rgba(25, 118, 210, 0.08)',
-                        borderColor: '#1976D2'
-                      }
-                    }}
-                  >
-                    Bookmarked
-                  </Button>
-                </>
-              )}
-            </Box>
-          </Box>
+            {isAuthenticated && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: 2,
+                  flexWrap: 'wrap',
+                  mb: 2,
+                }}
+              >
+                <Button
+                  variant={filter === 'liked' ? 'contained' : 'outlined'}
+                  onClick={() => handleFilterChange('liked')}
+                  startIcon={<FavoriteIcon />}
+                  sx={{
+                    textTransform: 'none',
+                    borderRadius: '8px',
+                    px: 3,
+                    py: 1,
+                    fontWeight: 500,
+                    bgcolor: filter === 'liked' ? '#f44336' : 'transparent',
+                    color: filter === 'liked' ? '#fff' : '#fff',
+                    borderColor: 'rgba(255,255,255,0.6)',
+                    '&:hover': {
+                      bgcolor: filter === 'liked' ? '#d32f2f' : 'rgba(255,255,255,0.12)',
+                      borderColor: '#fff',
+                    },
+                  }}
+                >
+                  Liked
+                </Button>
 
+                <Button
+                  variant={filter === 'bookmarked' ? 'contained' : 'outlined'}
+                  onClick={() => handleFilterChange('bookmarked')}
+                  startIcon={<BookmarkIcon />}
+                  sx={{
+                    textTransform: 'none',
+                    borderRadius: '8px',
+                    px: 3,
+                    py: 1,
+                    fontWeight: 500,
+                    bgcolor: filter === 'bookmarked' ? '#1976D2' : 'transparent',
+                    color: filter === 'bookmarked' ? '#fff' : '#fff',
+                    borderColor: 'rgba(255,255,255,0.6)',
+                    '&:hover': {
+                      bgcolor: filter === 'bookmarked' ? '#1565C0' : 'rgba(255,255,255,0.12)',
+                      borderColor: '#fff',
+                    },
+                  }}
+                >
+                  Bookmarked
+                </Button>
+              </Box>
+            )}
+          </Box>
+        </Container>
+
+        <Box
+          sx={{
+            flex: 1,
+            backgroundColor: '#FFFFFF',
+            py: { xs: 4, md: 6 },
+            px: { xs: 1.5, md: 2 },
+          }}
+        >
+          <Container
+            maxWidth="xl"
+            sx={{
+              px: { xs: 2, sm: 3, md: 4 },
+              width: '100%',
+              '& .MuiContainer-root': {
+                maxWidth: '100%',
+              },
+            }}
+          >
           {loading && (
   <Box
     sx={{
@@ -515,7 +533,8 @@ export default function BlogsPage() {
               )}
             </>
           )}
-        </Container>
+          </Container>
+        </Box>
       </Box>
     </MainLayout>
   );

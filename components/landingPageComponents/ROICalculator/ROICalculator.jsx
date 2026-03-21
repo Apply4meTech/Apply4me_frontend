@@ -60,7 +60,7 @@ export default function ROICalculator() {
         <Box
           ref={ref}
           sx={{
-            background: '#054ada',
+            background: 'linear-gradient(180deg, #09316f 0%, #115ace 100%)',
             borderRadius: '48px',
             padding: { xs: 2, md: 5 },
             maxWidth: 900,
@@ -76,6 +76,9 @@ export default function ROICalculator() {
                 display: 'inline-block',
                 background: 'rgba(255,255,255,0.1)',
                 border: '1px solid rgba(255,255,255,0.3)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
                 borderRadius: '9999px',
                 color: 'rgba(255,255,255,0.9)',
                 fontSize: '0.6875rem',
@@ -92,18 +95,23 @@ export default function ROICalculator() {
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' },
               gap: { xs: 2, lg: 4 },
-              alignItems: 'center',
+              alignItems: 'stretch',
               mt: 2,
             }}
           >
-            {/* Left: Header, description, inputs */}
-            <Box>
+            {/* Full-width header */}
+            <Box
+              sx={{
+                gridColumn: { xs: 'auto', lg: '1 / -1' },
+                textAlign: 'center',
+                mb: { xs: 1.5, lg: 2.5 },
+              }}
+            >
               <Typography
                 sx={{
                   color: '#fff',
                   fontSize: { xs: '1.5rem', md: '2rem' },
                   fontWeight: 700,
-                  maxWidth: 440,
                   lineHeight: 1.3,
                   mb: 1,
                   fontFamily: 'inherit',
@@ -115,92 +123,111 @@ export default function ROICalculator() {
                 sx={{
                   color: 'rgba(255,255,255,0.85)',
                   fontSize: '0.9375rem',
-                  maxWidth: 440,
                   lineHeight: 1.65,
-                  mb: 2.5,
                   fontFamily: 'inherit',
+                  maxWidth: 760,
+                  mx: 'auto',
                 }}
               >
                 Don't let job hunting become a second unpaid job. Calculate your potential ROI by delegating the grunt work to us.
               </Typography>
+            </Box>
 
-              <Typography sx={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.8125rem', fontWeight: 500, mb: 0.5, fontFamily: 'inherit' }}>
-                Your hourly income ($)
-              </Typography>
-              <Box sx={{ position: 'relative', mb: 1.5 }}>
-                <Box component="span" sx={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.6)', fontSize: '0.9375rem' }}>$</Box>
-                <Box
-                  component="input"
-                  type="number"
-                  value={hourlyIncome}
-                  onChange={handleHourlyChange}
-                  placeholder="20"
-                  sx={{
-                    width: '100%',
-                    background: 'rgba(0,0,0,0.3)',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    borderRadius: '9999px',
-                    padding: '0.875rem 1.25rem 0.875rem 2rem',
-                    fontSize: '0.9375rem',
-                    color: '#fff',
-                    fontFamily: 'inherit',
-                    outline: 'none',
-                    '&::placeholder': { color: 'rgba(255,255,255,0.4)' },
-                  }}
-                />
-              </Box>
-              <Typography sx={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.8125rem', fontWeight: 500, mb: 0.5, fontFamily: 'inherit' }}>
-                Minutes per job application
-              </Typography>
-              <Box sx={{ position: 'relative', mb: 1.5 }}>
-                <Box component="span" sx={{ position: 'absolute', right: 18, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.6)', fontSize: '0.8125rem' }}>Min</Box>
-                <Box
-                  component="input"
-                  type="number"
-                  value={minutesPerJob}
-                  onChange={handleMinutesChange}
-                  placeholder="10"
-                  sx={{
-                    width: '100%',
-                    background: 'rgba(0,0,0,0.3)',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    borderRadius: '9999px',
-                    padding: '0.875rem 3rem 0.875rem 1.25rem',
-                    fontSize: '0.9375rem',
-                    color: '#fff',
-                    fontFamily: 'inherit',
-                    outline: 'none',
-                    '&::placeholder': { color: 'rgba(255,255,255,0.4)' },
-                  }}
-                />
-              </Box>
+            {/* Inputs split left/right */}
+            <Box>
               <Box
-                component="button"
                 sx={{
-                  width: '100%',
-                  background: '#000',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '9999px',
-                  padding: '0.875rem 1.5rem',
-                  fontSize: '0.8125rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.08em',
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  mt: 0.5,
-                  textTransform: 'uppercase',
-                  '&:hover': { background: '#1a1a1a' },
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr', md: '1fr' },
+                  gap: { xs: 2, md: 2.5 },
+                  alignItems: 'start',
                 }}
               >
-                Calculate Savings
+                <Box>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.8125rem', fontWeight: 500, mb: 0.5, fontFamily: 'inherit' }}>
+                    Your hourly income ($)
+                  </Typography>
+                  <Box sx={{ position: 'relative' }}>
+                    <Box component="span" sx={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.6)', fontSize: '0.9375rem' }}>$</Box>
+                    <Box
+                      component="input"
+                      type="number"
+                      value={hourlyIncome}
+                      onChange={handleHourlyChange}
+                      placeholder="20"
+                      sx={{
+                        width: '100%',
+                        background: 'rgba(0,0,0,0.3)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: '9999px',
+                        padding: '0.875rem 1.25rem 0.875rem 2rem',
+                        fontSize: '0.9375rem',
+                        color: '#fff',
+                        fontFamily: 'inherit',
+                        outline: 'none',
+                        '&::placeholder': { color: 'rgba(255,255,255,0.4)' },
+                      }}
+                    />
+                  </Box>
+                </Box>
+
+                <Box>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.8125rem', fontWeight: 500, mb: 0.5, fontFamily: 'inherit' }}>
+                    Minutes per job application
+                  </Typography>
+                  <Box sx={{ position: 'relative' }}>
+                    <Box component="span" sx={{ position: 'absolute', right: 18, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.6)', fontSize: '0.8125rem' }}>Min</Box>
+                    <Box
+                      component="input"
+                      type="number"
+                      value={minutesPerJob}
+                      onChange={handleMinutesChange}
+                      placeholder="10"
+                      sx={{
+                        width: '100%',
+                        background: 'rgba(0,0,0,0.3)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: '9999px',
+                        padding: '0.875rem 3rem 0.875rem 1.25rem',
+                        fontSize: '0.9375rem',
+                        color: '#fff',
+                        fontFamily: 'inherit',
+                        outline: 'none',
+                        '&::placeholder': { color: 'rgba(255,255,255,0.4)' },
+                      }}
+                    />
+                  </Box>
+                </Box>
+
+                <Box sx={{ mt: 0.5 }}>
+                  <Box
+                    component="button"
+                    sx={{
+                      width: '100%',
+                      background: '#000',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '9999px',
+                      padding: '0.875rem 1.5rem',
+                      fontSize: '0.8125rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.08em',
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                      textTransform: 'uppercase',
+                      '&:hover': { background: '#1a1a1a' },
+                    }}
+                  >
+                    Calculate Savings
+                  </Box>
+                </Box>
               </Box>
             </Box>
 
             {/* Right: Results card */}
             <Box
               sx={{
-                background: 'rgba(0,0,0,0.5)',
+                background: 'linear-gradient(180deg, #000 0%, #626262 100%)',
                 borderRadius: '24px',
                 padding: 2.5,
                 display: 'flex',

@@ -11,29 +11,51 @@ export default function AboutUs() {
         display: 'flex',
         flexDirection: 'column',
         fontFamily: 'inherit',
+        marginTop: { xs: '-64px', md: '-72px' },
+        paddingTop: { xs: '64px', md: '72px' },
+        background: 'linear-gradient(180deg, #09316f 0%, #115ace 100%)',
       }}
     >
-      {/* Blue Gradient Banner */}
+      {/* Hero Section */}
       <Box
         sx={{
-          background: 'linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%)',
-          py: { xs: 4, md: 5 },
+          background: 'transparent',
+          py: { xs: 6, md: 8 },
+          px: { xs: 1.5, md: 2 },
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <Typography
-          component="h1"
-          sx={{
-            fontSize: { xs: '2rem', md: '2.5rem' },
-            fontWeight: 700,
-            color: '#FFFFFF',
-            textAlign: 'center',
-          }}
-        >
-          About Us
-        </Typography>
+        <Container maxWidth="md" sx={{ textAlign: 'center' }}>
+          <Typography
+            component="h1"
+            sx={{
+              fontSize: { xs: '2rem', md: '2.5rem' },
+              fontWeight: 700,
+              color: '#FFFFFF',
+              mb: 1,
+            }}
+          >
+            About ApplyForMe
+          </Typography>
+          <Typography
+            sx={{
+              fontWeight: 600,
+              color: '#F5C518',
+              mb: 2,
+              fontSize: { xs: '1.1rem', md: '1.25rem' },
+            }}
+          >
+            Stop Applying. Start Delegating.
+          </Typography>
+          <Typography sx={{ mb: 2, lineHeight: 1.75, color: 'rgba(255,255,255,0.9)', fontSize: '1rem' }}>
+            ApplyForMe started with a simple realisation: Modern job searching feels like a full-time job. Between work, study, family, and daily responsibilities, keeping up with dozens of applications every week is exhausting. Talented, capable people miss opportunities not because they lack skill, but because they lack time and consistency.
+          </Typography>
+          <Typography sx={{ lineHeight: 1.75, color: 'rgba(255,255,255,0.9)', fontSize: '1rem' }}>
+            We built ApplyForMe to solve that problem properly.
+          </Typography>
+        </Container>
       </Box>
 
       {/* Main Content */}
@@ -46,44 +68,15 @@ export default function AboutUs() {
         }}
       >
         <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 } }}>
-          {/* About ApplyForMe */}
-          <Typography
-            component="h2"
-            sx={{
-              fontWeight: 700,
-              color: '#111827',
-              mb: 0.5,
-              fontSize: '1.25rem',
-            }}
-          >
-            About ApplyForMe
-          </Typography>
-          <Typography
-            sx={{
-              fontWeight: 600,
-              color: '#2563eb',
-              mb: 2,
-              fontSize: '1.0625rem',
-            }}
-          >
-            Stop Applying. Start Delegating.
-          </Typography>
-          <Typography sx={{ mb: 2, lineHeight: 1.75, color: '#1f2937', fontSize: '1rem' }}>
-            ApplyForMe started with a simple realisation: Modern job searching feels like a full-time job. Between work, study, family, and daily responsibilities, keeping up with dozens of applications every week is exhausting. Talented, capable people miss opportunities not because they lack skill, but because they lack time and consistency.
-          </Typography>
-          <Typography sx={{ mb: 3, lineHeight: 1.75, color: '#1f2937', fontSize: '1rem' }}>
-            We built ApplyForMe to solve that problem properly.
-          </Typography>
-
           {/* Our Story */}
           <Typography
             component="h2"
             sx={{
-              fontWeight: 700,
+              fontWeight: 800,
               color: '#111827',
               mt: 3,
-              mb: 1,
-              fontSize: '1.25rem',
+              mb: 1.5,
+              fontSize: { xs: '1.8rem', md: '2.2rem' },
             }}
           >
             Our Story
@@ -104,57 +97,100 @@ export default function AboutUs() {
             Real people. Real applications. Real consistency.
           </Typography>
 
-          {/* What We Do */}
-          <Typography
-            component="h2"
+          {/* What We Do + Who We Support cards */}
+          <Box
             sx={{
-              fontWeight: 700,
-              color: '#111827',
-              mt: 3,
-              mb: 1,
-              fontSize: '1.25rem',
+              backgroundColor: '#F3F4F6',
+              borderRadius: '1rem',
+              p: { xs: 1.5, md: 2 },
+              mb: 3,
+              width: '100vw',
+              ml: 'calc(50% - 50vw)',
+              mr: 'calc(50% - 50vw)',
+              px: { xs: 2, md: 4 },
             }}
           >
-            What We Do
-          </Typography>
-          <Typography sx={{ mb: 1, lineHeight: 1.75, color: '#1f2937', fontSize: '1rem' }}>
-            When you join ApplyForMe, you are supported by a real human assistant who manages your applications based on your goals, experience, and preferences. We help by:
-          </Typography>
-          <Box component="ul" sx={{ pl: 3, mb: 2, '& li': { mb: 0.5, lineHeight: 1.75 } }}>
-            <li><Typography component="span" sx={{ color: '#1f2937', fontSize: '1rem' }}>Submitting applications consistently</Typography></li>
-            <li><Typography component="span" sx={{ color: '#1f2937', fontSize: '1rem' }}>Targeting roles aligned with your profile</Typography></li>
-            <li><Typography component="span" sx={{ color: '#1f2937', fontSize: '1rem' }}>Keeping your job search organised</Typography></li>
-            <li><Typography component="span" sx={{ color: '#1f2937', fontSize: '1rem' }}>Saving you hours every week</Typography></li>
-          </Box>
-          <Typography sx={{ mb: 3, lineHeight: 1.75, color: '#1f2937', fontSize: '1rem' }}>
-            You focus on preparing for interviews and progressing confidently in your career. We handle the repetitive work behind the scenes.
-          </Typography>
+            <Box
+              sx={{
+                maxWidth: '1100px',
+                mx: 'auto',
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                gap: { xs: 2, md: 3 },
+              }}
+            >
+              <Box
+                sx={{
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #E5E7EB',
+                  borderRadius: '1rem',
+                  p: { xs: 2, md: 2.5 },
+                }}
+              >
+              <Typography component="h3" sx={{ fontWeight: 700, color: '#111827', mb: 1, fontSize: '1.25rem' }}>
+                What We Do
+              </Typography>
+              <Typography sx={{ mb: 1, lineHeight: 1.75, color: '#1f2937', fontSize: '1rem' }}>
+                When you join ApplyForMe, you are supported by a real human assistant who manages your applications based on your goals, experience, and preferences. We help by:
+              </Typography>
+              <Box sx={{ mb: 2 }}>
+                {[
+                  'Submitting applications consistently',
+                  'Targeting roles aligned with your profile',
+                  'Keeping your job search organised',
+                  'Saving you hours every week',
+                ].map((point) => (
+                  <Box key={point} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
+                    <Box component="span" sx={{ color: '#22C55E', fontWeight: 700, lineHeight: 1.6 }}>
+                      ✓
+                    </Box>
+                    <Typography sx={{ color: '#1f2937', fontSize: '1rem', lineHeight: 1.75 }}>
+                      {point}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+              <Typography sx={{ lineHeight: 1.75, color: '#1f2937', fontSize: '1rem' }}>
+                You focus on preparing for interviews and progressing confidently in your career. We handle the repetitive work behind the scenes.
+              </Typography>
+              </Box>
 
-          {/* Who We Support */}
-          <Typography
-            component="h2"
-            sx={{
-              fontWeight: 700,
-              color: '#111827',
-              mt: 3,
-              mb: 1,
-              fontSize: '1.25rem',
-            }}
-          >
-            Who We Support
-          </Typography>
-          <Typography sx={{ mb: 1, lineHeight: 1.75, color: '#1f2937', fontSize: '1rem' }}>
-            We work with job seekers across Australia, including:
-          </Typography>
-          <Box component="ul" sx={{ pl: 3, mb: 2, '& li': { mb: 0.5, lineHeight: 1.75 } }}>
-            <li><Typography component="span" sx={{ color: '#1f2937', fontSize: '1rem' }}>Students and recent graduates</Typography></li>
-            <li><Typography component="span" sx={{ color: '#1f2937', fontSize: '1rem' }}>Skilled migrants</Typography></li>
-            <li><Typography component="span" sx={{ color: '#1f2937', fontSize: '1rem' }}>Professionals changing careers</Typography></li>
-            <li><Typography component="span" sx={{ color: '#1f2937', fontSize: '1rem' }}>Anyone actively searching for work</Typography></li>
+              <Box
+                sx={{
+                  background: 'linear-gradient(180deg, #09316f 0%, #115ace 100%)',
+                  borderRadius: '1rem',
+                  p: { xs: 2, md: 2.5 },
+                }}
+              >
+              <Typography component="h3" sx={{ fontWeight: 700, color: '#FFFFFF', mb: 1, fontSize: '1.25rem' }}>
+                Who We Support
+              </Typography>
+              <Typography sx={{ mb: 1, lineHeight: 1.75, color: 'rgba(255,255,255,0.9)', fontSize: '1rem' }}>
+                We work with job seekers across Australia, including:
+              </Typography>
+              <Box sx={{ mb: 2 }}>
+                {[
+                  'Students and recent graduates',
+                  'Skilled migrants',
+                  'Professionals changing careers',
+                  'Anyone actively searching for work',
+                ].map((point) => (
+                  <Box key={point} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
+                    <Box component="span" sx={{ color: '#22C55E', fontWeight: 700, lineHeight: 1.6 }}>
+                      ✓
+                    </Box>
+                    <Typography sx={{ color: '#FFFFFF', fontSize: '1rem', lineHeight: 1.75 }}>
+                      {point}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+              <Typography sx={{ lineHeight: 1.75, color: 'rgba(255,255,255,0.9)', fontSize: '1rem' }}>
+                Whether you are applying for your first role or your next step, we support the process with structure and momentum.
+              </Typography>
+              </Box>
+            </Box>
           </Box>
-          <Typography sx={{ mb: 3, lineHeight: 1.75, color: '#1f2937', fontSize: '1rem' }}>
-            Whether you are applying for your first role or your next step, we support the process with structure and momentum.
-          </Typography>
 
           {/* Our Approach */}
           <Typography
@@ -172,11 +208,22 @@ export default function AboutUs() {
           <Typography sx={{ mb: 1, lineHeight: 1.75, color: '#1f2937', fontSize: '1rem' }}>
             We believe job searching should feel supported, not overwhelming. That means:
           </Typography>
-          <Box component="ul" sx={{ pl: 3, mb: 2, '& li': { mb: 0.5, lineHeight: 1.75 } }}>
-            <li><Typography component="span" sx={{ color: '#1f2937', fontSize: '1rem' }}>Clear, transparent pricing</Typography></li>
-            <li><Typography component="span" sx={{ color: '#1f2937', fontSize: '1rem' }}>Real human assistance</Typography></li>
-            <li><Typography component="span" sx={{ color: '#1f2937', fontSize: '1rem' }}>Honest expectations</Typography></li>
-            <li><Typography component="span" sx={{ color: '#1f2937', fontSize: '1rem' }}>No unrealistic promises</Typography></li>
+          <Box sx={{ mb: 2 }}>
+            {[
+              'Clear, transparent pricing',
+              'Real human assistance',
+              'Honest expectations',
+              'No unrealistic promises',
+            ].map((point) => (
+              <Box key={point} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
+                <Box component="span" sx={{ color: '#22C55E', fontWeight: 700, lineHeight: 1.6 }}>
+                  ✓
+                </Box>
+                <Typography sx={{ color: '#1f2937', fontSize: '1rem', lineHeight: 1.75 }}>
+                  {point}
+                </Typography>
+              </Box>
+            ))}
           </Box>
           <Typography sx={{ mb: 2, lineHeight: 1.75, color: '#1f2937', fontSize: '1rem' }}>
             We do not guarantee jobs or interviews because no legitimate service can. What we do guarantee is consistent, professional application submission. In today&apos;s market, consistency is often the difference.

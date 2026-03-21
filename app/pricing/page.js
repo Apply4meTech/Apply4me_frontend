@@ -228,6 +228,9 @@ export default function Pricing() {
       <Box
         sx={{
           minHeight: '100vh',
+          marginTop: { xs: '-64px', md: '-72px' },
+          paddingTop: { xs: '64px', md: '72px' },
+          background: 'linear-gradient(180deg, #09316f 0%, #115ace 100%)',
           display: 'flex',
           flexDirection: 'column',
           width: '100%',
@@ -237,9 +240,9 @@ export default function Pricing() {
         {/* Hero Section - Solid Deep Navy */}
         <Box
           sx={{
-            backgroundColor: '#002B70',
+            background: 'transparent',
             paddingTop: { xs: '5rem', md: '5rem' },
-            paddingBottom: { xs: '4rem', md: '4rem' },
+            paddingBottom: { xs: '1.5rem', md: '2rem' },
             paddingX: { xs: '1rem', sm: '2.5rem' },
             position: 'relative',
             overflow: 'hidden',
@@ -307,8 +310,8 @@ export default function Pricing() {
       {/* Pricing Plans Section - Unified deep navy with glassmorphism cards */}
       <Box
         sx={{
-          background: '#002B70',
-          paddingTop: { xs: '2rem', md: '2.5rem' },
+          background: 'transparent',
+          paddingTop: { xs: '0.75rem', md: '0.75rem' },
           paddingBottom: { xs: '4rem', md: '5rem' },
           paddingX: { xs: '1.5rem', md: '2rem' },
           flex: 1,
@@ -427,7 +430,9 @@ export default function Pricing() {
                         top: '-0.75rem',
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        backgroundColor: '#1e3a8a',
+                        background: plan.badge.toLowerCase().includes('popular')
+                          ? 'linear-gradient(90deg, #22D3EE 0%, #3B82F6 100%)'
+                          : 'linear-gradient(90deg, #34D399 0%, #10B981 100%)',
                         color: '#FFFFFF',
                         padding: '0.25rem 0.75rem',
                         borderRadius: '9999px',
@@ -438,7 +443,7 @@ export default function Pricing() {
                         zIndex: '999999 !important',
                       }}
                     >
-                      {plan.badge.toUpperCase()}{plan.badge.toLowerCase().includes('value') && !plan.badge.includes('!') ? '!' : ''}
+                      {plan.badge.toUpperCase().replace(/!/g, '')}
                     </Box>
                   ) : null}
                   {/* Content wrapper with relative positioning */}
@@ -703,7 +708,7 @@ export default function Pricing() {
             sx={{
               fontSize: { xs: '1.75rem', md: '2.25rem' },
               fontWeight: 700,
-              color: '#111',
+              color: '#111827',
               textAlign: 'center',
               marginBottom: '2rem',
               fontFamily: 'inherit',
@@ -833,7 +838,7 @@ export default function Pricing() {
       {/* Optional Add-Ons - Deep Navy Section */}
       <Box
         sx={{
-          backgroundColor: '#002B70',
+          background: 'linear-gradient(180deg, #09316f 0%, #115ace 100%)',
           paddingY: { xs: '4rem', md: '5rem' },
           paddingX: { xs: '1.5rem', md: '2rem' },
         }}
@@ -900,56 +905,9 @@ export default function Pricing() {
                   <Typography sx={{ fontSize: '1.125rem', fontWeight: 700, color: '#FFFFFF', fontFamily: 'inherit' }}>
                     ${addon.price} AUD
                   </Typography>
-                  <Box
-                    component="button"
-                    sx={{
-                      background: 'rgba(255,255,255,0.2)',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      borderRadius: '9999px',
-                      padding: '0.5rem 1rem',
-                      fontSize: '0.8125rem',
-                      fontWeight: 600,
-                      color: '#FFFFFF',
-                      cursor: 'pointer',
-                      fontFamily: 'inherit',
-                      '&:hover': { background: 'rgba(255,255,255,0.3)' },
-                    }}
-                  >
-                    ADD +
-                  </Box>
                 </Box>
               </Box>
             ))}
-          </Box>
-        </Container>
-      </Box>
-
-      <Box sx={{ padding: { xs: '4rem 1.5rem', md: '4rem 2rem' }, backgroundColor: '#FFFFFF' }}>
-        <Container maxWidth="lg">
-          <Box
-            ref={logosRef}
-            sx={{
-              opacity: logosVisible ? 1 : 0,
-              transform: logosVisible ? 'translateY(0)' : 'translateY(30px)',
-              transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
-            }}
-          >
-            <Typography
-              component="h3"
-              sx={{
-                textAlign: 'center',
-                fontSize: { xs: '0.875rem', md: '1.125rem' },
-                fontWeight: 700,
-                color: '#64748B',
-                fontFamily: 'inherit',
-                marginBottom: { xs: '2rem', md: '3rem' },
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}
-            >
-              ROLES OUR CLIENTS HAVE APPLIED TO AT
-            </Typography>
-            <CompanyLogos title="Roles Our Clients Have Applied To At" />
           </Box>
         </Container>
       </Box>

@@ -46,7 +46,16 @@ const API_URL = getApiUrl();
 const BlogDetailSkeleton = () => {
   return (
     <MainLayout>
-      <Box sx={{ width: '100%', minHeight: '100vh', bgcolor: '#fff', py: 6 }}>
+      <Box
+        sx={{
+          width: '100%',
+          minHeight: '100vh',
+          marginTop: { xs: '-64px', md: '-72px' },
+          paddingTop: { xs: '64px', md: '72px' },
+          background: 'linear-gradient(180deg, #09316f 0%, #115ace 100%)',
+        }}
+      >
+        <Box sx={{ width: '100%', bgcolor: '#fff', py: 6 }}>
         <Container maxWidth="md">
           {/* Tag Skeleton */}
           <Skeleton variant="rounded" width={100} height={32} sx={{ mb: 3 }} />
@@ -93,6 +102,7 @@ const BlogDetailSkeleton = () => {
             />
           ))}
         </Container>
+        </Box>
       </Box>
     </MainLayout>
   );
@@ -380,11 +390,13 @@ export default function BlogDetailPage() {
         <Box
           sx={{
             minHeight: '100vh',
-            bgcolor: 'background.default',
-            py: 8
+            marginTop: { xs: '-64px', md: '-72px' },
+            paddingTop: { xs: '64px', md: '72px' },
+            background: 'linear-gradient(180deg, #09316f 0%, #115ace 100%)',
+            py: 4,
           }}
         >
-          <Container maxWidth="lg">
+          <Container maxWidth="lg" sx={{ bgcolor: '#fff', borderRadius: 2, p: 3 }}>
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
             </Alert>
@@ -418,7 +430,10 @@ export default function BlogDetailPage() {
         sx={{
           width: '100%',
           minHeight: '100vh',
-          position: 'relative'
+          position: 'relative',
+          marginTop: { xs: '-64px', md: '-72px' },
+          paddingTop: { xs: '64px', md: '72px' },
+          background: 'linear-gradient(180deg, #09316f 0%, #115ace 100%)',
         }}
       >
         {/* Scroll to Top Button */}
@@ -454,201 +469,210 @@ export default function BlogDetailPage() {
           </IconButton>
         )}
 
-        {/* Main Blog Content Section - Full Width White Background */}
+        {/* Hero — blends with header */}
         <Box
           sx={{
             width: '100%',
-            bgcolor: '#fff',
-            py: { xs: 4, md: 6 }
+            background: 'transparent',
+            py: { xs: 3, md: 4 },
           }}
         >
-          <Container maxWidth="md" >
-            {/* Tag */}
+          <Container maxWidth="md">
             {blog.tags && blog.tags.length > 0 && (
-              <Box sx={{ mb: 2}}>
+              <Box sx={{ mb: 2, textAlign: 'center' }}>
                 <Chip
                   label={blog.tags[0]}
                   sx={{
-                    bgcolor: '#E3F2FD',
-                    color: '#1976D2',
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    color: '#FFFFFF',
                     fontWeight: 500,
                     fontSize: '0.875rem',
                     height: '32px',
-                    borderRadius: '16px'
+                    borderRadius: '16px',
+                    border: '1px solid rgba(255,255,255,0.35)',
                   }}
                 />
               </Box>
             )}
 
-            <Box sx={{  width:'90%', margin: '0 auto'}}>
-            {/* Title */}
-            <Typography
-              variant="h3"
-              component="h1"
-              sx={{
-                fontWeight: 700,
-                mb: 3,
-                color: '#000',
-                fontSize: { xs: '1.25rem', md: '2.25rem' },
-                lineHeight: 1.2,
-                textAlign: 'center'
-              }}
-            >
-              {blog.title}
-            </Typography>
-
-            {/* Description */}
-            <Typography
-              variant="body1"
-              sx={{
-                mb: 4,
-                color: '#666',
-                fontSize: '0.95rem',
-                lineHeight: 1.2,
-                fontWeight: 400,
-                textAlign: 'center'
-              }}
-            >
-              {blog.description}
-            </Typography>
-
-           <Box sx={{display:'flex',alignItems:'center', justifyContent:'center'}}>
-            {/* Author Info */}
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 2,
-                mb: 4
-              }}
-            >
-              <Avatar
+            <Box sx={{ width: '90%', margin: '0 auto' }}>
+              <Typography
+                variant="h3"
+                component="h1"
                 sx={{
-                  width: 40,
-                  height: 40,
-                  bgcolor: '#1976D2'
+                  fontWeight: 700,
+                  mb: 3,
+                  color: '#FFFFFF',
+                  fontSize: { xs: '1.25rem', md: '2.25rem' },
+                  lineHeight: 1.2,
+                  textAlign: 'center',
                 }}
               >
-                {blog.authorName?.charAt(0) || 'A'}
-              </Avatar>
-              <Box>
-                <Typography
-                  variant="body1"
+                {blog.title}
+              </Typography>
+
+              <Typography
+                variant="body1"
+                sx={{
+                  mb: 4,
+                  color: 'rgba(255,255,255,0.9)',
+                  fontSize: '0.95rem',
+                  lineHeight: 1.5,
+                  fontWeight: 400,
+                  textAlign: 'center',
+                }}
+              >
+                {blog.description}
+              </Typography>
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexWrap: 'wrap',
+                  gap: 2,
+                }}
+              >
+                <Box
                   sx={{
-                    fontWeight: 600,
-                    color: '#000',
-                    fontSize: '0.85rem',
-                    mb: 0.5
-                  }}
-                >
-                  {blog.authorName || 'Admin'}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#757575',
-                    fontSize: '0.75rem',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1
+                    justifyContent: 'center',
+                    gap: 2,
+                    mb: 2,
                   }}
                 >
-                  {formatDate(blog.createdAt)} • 1 min read
-                </Typography>
-              </Box>
-            </Box>
+                  <Avatar
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      bgcolor: 'rgba(255,255,255,0.25)',
+                      color: '#fff',
+                      border: '1px solid rgba(255,255,255,0.4)',
+                    }}
+                  >
+                    {blog.authorName?.charAt(0) || 'A'}
+                  </Avatar>
+                  <Box>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontWeight: 600,
+                        color: '#FFFFFF',
+                        fontSize: '0.85rem',
+                        mb: 0.5,
+                      }}
+                    >
+                      {blog.authorName || 'Admin'}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'rgba(255,255,255,0.8)',
+                        fontSize: '0.75rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                      }}
+                    >
+                      {formatDate(blog.createdAt)} • 1 min read
+                    </Typography>
+                  </Box>
+                </Box>
 
-            {/* Like and Bookmark Buttons */}
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 3,
-                mb: 4,
-                ml:4,
-                flexWrap: 'wrap'
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1
-                }}
-              >
-                <IconButton
-                  onClick={handleLike}
-                  disabled={isLiking}
+                <Box
                   sx={{
-                    color: isLiked ? '#f44336' : '#757575',
-                    '&:hover': {
-                      bgcolor: isLiked ? 'rgba(244, 67, 54, 0.08)' : 'rgba(0, 0, 0, 0.04)'
-                    },
-                    transition: 'all 0.2s ease'
-                  }}
-                  aria-label="like blog"
-                >
-                  {isLiked ? (
-                    <FavoriteIcon sx={{ fontSize: '28px' }} />
-                  ) : (
-                    <FavoriteBorderIcon sx={{ fontSize: '28px' }} />
-                  )}
-                </IconButton>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#666',
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    minWidth: '30px'
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 3,
+                    mb: 2,
+                    flexWrap: 'wrap',
                   }}
                 >
-                  {likeCount}
-                </Typography>
-              </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <IconButton
+                      onClick={handleLike}
+                      disabled={isLiking}
+                      sx={{
+                        color: isLiked ? '#f44336' : 'rgba(255,255,255,0.85)',
+                        '&:hover': {
+                          bgcolor: isLiked
+                            ? 'rgba(244, 67, 54, 0.15)'
+                            : 'rgba(255,255,255,0.12)',
+                        },
+                        transition: 'all 0.2s ease',
+                      }}
+                      aria-label="like blog"
+                    >
+                      {isLiked ? (
+                        <FavoriteIcon sx={{ fontSize: '28px' }} />
+                      ) : (
+                        <FavoriteBorderIcon sx={{ fontSize: '28px' }} />
+                      )}
+                    </IconButton>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'rgba(255,255,255,0.9)',
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        minWidth: '30px',
+                      }}
+                    >
+                      {likeCount}
+                    </Typography>
+                  </Box>
 
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1
-                }}
-              >
-                <IconButton
-                  onClick={handleBookmark}
-                  disabled={isBookmarking}
-                  sx={{
-                    color: isBookmarked ? '#1976D2' : '#757575',
-                    '&:hover': {
-                      bgcolor: isBookmarked ? 'rgba(25, 118, 210, 0.08)' : 'rgba(0, 0, 0, 0.04)'
-                    },
-                    transition: 'all 0.2s ease'
-                  }}
-                  aria-label="bookmark blog"
-                >
-                  {isBookmarked ? (
-                    <BookmarkIcon sx={{ fontSize: '28px' }} />
-                  ) : (
-                    <BookmarkBorderIcon sx={{ fontSize: '28px' }} />
-                  )}
-                </IconButton>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#666',
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    minWidth: '30px'
-                  }}
-                >
-                  {bookmarkCount}
-                </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <IconButton
+                      onClick={handleBookmark}
+                      disabled={isBookmarking}
+                      sx={{
+                        color: isBookmarked ? '#7dd3fc' : 'rgba(255,255,255,0.85)',
+                        '&:hover': {
+                          bgcolor: isBookmarked
+                            ? 'rgba(125, 211, 252, 0.15)'
+                            : 'rgba(255,255,255,0.12)',
+                        },
+                        transition: 'all 0.2s ease',
+                      }}
+                      aria-label="bookmark blog"
+                    >
+                      {isBookmarked ? (
+                        <BookmarkIcon sx={{ fontSize: '28px' }} />
+                      ) : (
+                        <BookmarkBorderIcon sx={{ fontSize: '28px' }} />
+                      )}
+                    </IconButton>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'rgba(255,255,255,0.9)',
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        minWidth: '30px',
+                      }}
+                    >
+                      {bookmarkCount}
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
             </Box>
-            </Box>
-            </Box>
+          </Container>
+        </Box>
+
+        {/* Article body */}
+        <Box
+          sx={{
+            width: '100%',
+            bgcolor: '#fff',
+            py: { xs: 4, md: 6 },
+          }}
+        >
+          <Container maxWidth="md">
             {/* Featured Image */}
             {blog.featuredImage?.url && (
               <Box
