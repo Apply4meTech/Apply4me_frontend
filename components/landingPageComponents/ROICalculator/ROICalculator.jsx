@@ -129,7 +129,7 @@ export default function ROICalculator() {
                   mx: 'auto',
                 }}
               >
-                Don't let job hunting become a second unpaid job. Calculate your potential ROI by delegating the grunt work to us.
+                Calculate your potential savings by delegating the grunt work to us.
               </Typography>
             </Box>
 

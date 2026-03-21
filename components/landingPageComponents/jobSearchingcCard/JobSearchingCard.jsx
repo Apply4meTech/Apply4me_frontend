@@ -1,11 +1,33 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Box, Container, Typography } from '@mui/material';
 
 export default function JobSearchingCard() {
+  const sectionRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setIsVisible(true);
+      },
+      { threshold: 0.2, rootMargin: '0px 0px -50px 0px' }
+    );
+    const el = sectionRef.current;
+    if (el) observer.observe(el);
+    return () => el && observer.unobserve(el);
+  }, []);
+
+  const revealStyles = (delay) => ({
+    opacity: isVisible ? 1 : 0,
+    transform: isVisible ? 'translateY(0)' : 'translateY(24px)',
+    transition: `opacity 0.6s ease-out ${delay}s, transform 0.6s ease-out ${delay}s`,
+  });
+
   return (
     <Box
+      ref={sectionRef}
       sx={{
         padding: { xs: '4rem 1.5rem', md: '5rem 2rem' },
         textAlign: 'center',
@@ -22,6 +44,7 @@ export default function JobSearchingCard() {
             marginBottom: '1rem',
             fontFamily: 'inherit',
             lineHeight: 1.2,
+            ...revealStyles(0),
           }}
         >
           Built for Australian Job Seekers
@@ -37,9 +60,10 @@ export default function JobSearchingCard() {
             lineHeight: 1.7,
             maxWidth: 860,
             mx: 'auto',
+            ...revealStyles(0.15),
           }}
         >
-          Searching for a job has become a full-time commitment — on average professionals spend more than 100 hours just submitting applications. By outsourcing this to us, you reclaim your evenings and weekends.
+          Searching for a job has become a full-time commitment. By outsourcing this to us, you reclaim your evenings and weekends.
         </Typography>
 
         {/* Stat highlight */}
@@ -51,6 +75,7 @@ export default function JobSearchingCard() {
             borderRadius: '1.25rem',
             padding: '1.5rem 3rem',
             textAlign: 'center',
+            ...revealStyles(0.3),
           }}
         >
           <Typography

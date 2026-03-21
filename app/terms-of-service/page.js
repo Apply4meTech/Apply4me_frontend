@@ -59,7 +59,7 @@ export default function TermsOfService() {
                 mt: 2,
               }}
             >
-              Last updated: 19 March 2026
+              Last updated: 21 March 2026
             </Typography>
           </Container>
         </Box>
@@ -78,7 +78,7 @@ export default function TermsOfService() {
             {/* Introduction - Light yellow/cream box */}
             <Box sx={{ p: 3, bgcolor: '#FFF9E1', borderRadius: '16px' }}>
               <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontStyle: 'italic', fontSize: '0.9375rem' }}>
-                This Terms of Service (&quot;Agreement&quot;) is a legally binding agreement between <strong>ApplyForMe Pty Ltd</strong> (&quot;ApplyForMe,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) and the individual or entity accessing or using our services (&quot;Customer,&quot; &quot;you,&quot; or &quot;your&quot;).
+                This Terms of Service (&quot;Agreement&quot;) is a legally binding agreement between <strong>ApplyForMe</strong> (&quot;ApplyForMe,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) and the individual or entity accessing or using our services (&quot;Customer,&quot; &quot;you,&quot; or &quot;your&quot;).
               </Typography>
               <Typography sx={{ color: '#1f2937', lineHeight: 1.8, mt: 2, fontStyle: 'italic', fontSize: '0.9375rem' }}>
                 By purchasing, accessing, or using our Services, you agree to be bound by this Agreement.
@@ -167,18 +167,33 @@ export default function TermsOfService() {
                 By using our Services, you authorise ApplyForMe and its team members to:
               </Typography>
               <Box component="ul" sx={{ color: '#1f2937', lineHeight: 2, pl: 3, fontSize: '1rem' }}>
-                <li>Prepare resumes, cover letters, and application responses</li>
+                <li>Prepare resumes, cover letters, and application responses (May use AI)</li>
                 <li>Submit job applications and related communications on your behalf</li>
                 <li>Access Third-Party Platforms where credentials are provided by you</li>
+                <li>Create and manage email accounts or application profiles on your behalf where required to facilitate job applications</li>
               </Box>
               <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 2 }}>
-                You confirm that all information provided is accurate, lawful, and up to date.
+                You acknowledge and consent to the creation and use of such accounts solely for the purpose of delivering the Services.
               </Typography>
               <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 1 }}>
-                You remain solely responsible for the content and legality of applications submitted under your name.
+                Where you provide login credentials or where accounts are created on your behalf, you confirm that such access is authorised and lawful.
               </Typography>
               <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 1 }}>
-                ApplyForMe is not responsible for account restrictions, suspensions, or actions taken by Third-Party Platforms.
+                You are responsible for ensuring that all information and credentials provided are accurate, lawful, and up to date.
+              </Typography>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 1 }}>
+                You remain solely responsible for the content and legality of all applications submitted under your name.
+              </Typography>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 2 }}>
+                ApplyForMe will take reasonable steps to handle account access securely. However, we are not responsible for:
+              </Typography>
+              <Box component="ul" sx={{ color: '#1f2937', lineHeight: 2, pl: 3, fontSize: '1rem' }}>
+                <li>Account restrictions, suspensions, or bans imposed by Third-Party Platforms</li>
+                <li>Actions taken by employers or platforms in response to applications</li>
+                <li>Unauthorised access or issues arising outside our reasonable control</li>
+              </Box>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 2 }}>
+                You acknowledge that the use of shared or managed accounts may be subject to the terms and policies of Third-Party Platforms.
               </Typography>
             </Box>
 
@@ -216,7 +231,7 @@ export default function TermsOfService() {
               </Typography>
             </Box>
 
-            {/* Section 6 - Refund Policy */}
+            {/* Section 6 */}
             <Box>
               <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
                 6. Refund Policy
@@ -324,11 +339,8 @@ export default function TermsOfService() {
               <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
                 13. Contact
               </Typography>
-              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', fontWeight: 600 }}>
-                ApplyForMe Pty Ltd
-              </Typography>
               <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem' }}>
-                Email: <a href="mailto:contactus@applyforme.com.au" style={{ color: '#2563eb', textDecoration: 'none' }}>contactus@applyforme.com.au</a>
+                ApplyForMe Email: <a href="mailto:contactus@applyforme.com.au" style={{ color: '#2563eb', textDecoration: 'none' }}>contactus@applyforme.com.au</a>
               </Typography>
             </Box>
           </Box>

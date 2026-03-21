@@ -53,7 +53,7 @@ export default function AboutUs() {
             ApplyForMe started with a simple realisation: Modern job searching feels like a full-time job. Between work, study, family, and daily responsibilities, keeping up with dozens of applications every week is exhausting. Talented, capable people miss opportunities not because they lack skill, but because they lack time and consistency.
           </Typography>
           <Typography sx={{ lineHeight: 1.75, color: 'rgba(255,255,255,0.9)', fontSize: '1rem' }}>
-            We built ApplyForMe to solve that problem properly.
+            ApplyForMe was built to solve this problem.
           </Typography>
         </Container>
       </Box>
@@ -261,9 +261,6 @@ export default function AboutUs() {
             }}
           >
             ApplyForMe
-          </Typography>
-          <Typography sx={{ color: '#64748b', fontStyle: 'italic' }}>
-            Career support for job seekers who want momentum.
           </Typography>
         </Container>
       </Box>

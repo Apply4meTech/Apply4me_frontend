@@ -284,9 +284,25 @@ export default function Pricing() {
                   maxWidth: '48rem',
                   marginX: 'auto',
                   lineHeight: 1.75,
+                  fontWeight: 700,
                 }}
               >
-                One-time payment (AUD). Choose the plan that fits your goals. Start landing interviews sooner.
+                Simple. Transparent. Built for Results.
+              </Typography>
+              <Typography
+                component="p"
+                sx={{
+                  fontSize: { xs: '0.9375rem', md: '1.0625rem' },
+                  color: 'rgba(255,255,255,0.85)',
+                  textAlign: 'center',
+                  marginBottom: '0.5rem',
+                  fontFamily: 'inherit',
+                  maxWidth: '48rem',
+                  marginX: 'auto',
+                  lineHeight: 1.75,
+                }}
+              >
+                Choose the plan that fits your goals.
               </Typography>
               <Typography
                 component="p"
@@ -770,11 +786,11 @@ export default function Pricing() {
                 </TableHead>
                 <TableBody>
                   <TableRow>
-                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0, maxWidth: 160 }}>Job Search (Who Applies)</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>You (100)</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>50% us / 50% you (175)</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>75% us / 25% you (250)</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>100% us (350)</TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0, maxWidth: 160 }}>Job Search by our team</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>0 Jobs<Box component="small" sx={{ display: 'block', opacity: 0.8, fontSize: '0.75rem' }}>*Add-Ons available</Box></TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>90 Jobs</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>190 Jobs</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>350 Jobs</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0 }}>Human Assistant</TableCell>
@@ -792,10 +808,10 @@ export default function Pricing() {
                   </TableRow>
                   <TableRow>
                     <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0 }}>Resume (ATS-Aligned)</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Review Only (Add-on)</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>We Create</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>We Create</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>We Create</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Add-on</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Tailored Per Job</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Tailored Per Job</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Tailored Per Job</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0 }}>LinkedIn Optimisation</TableCell>
@@ -808,7 +824,7 @@ export default function Pricing() {
                     <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0 }}>Priority Processing</TableCell>
                     <TableCell align="center"><Box component="span" sx={{ color: '#EF4444', fontSize: '1.25rem', fontWeight: 700 }}>✕</Box></TableCell>
                     <TableCell align="center"><Box component="span" sx={{ color: '#EF4444', fontSize: '1.25rem', fontWeight: 700 }}>✕</Box></TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Add-on</TableCell>
+                    <TableCell align="center"><Box component="span" sx={{ color: '#EF4444', fontSize: '1.25rem', fontWeight: 700 }}>✕</Box></TableCell>
                     <TableCell align="center"><CheckCircleIcon sx={{ color: '#4ADE80', fontSize: '1.25rem' }} /></TableCell>
                   </TableRow>
                   <TableRow>
@@ -822,14 +838,26 @@ export default function Pricing() {
                     <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0 }}>Interview prep</TableCell>
                     <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Add-on</TableCell>
                     <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Add-on</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>1+ Add-on</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>3+ Add-on</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>1 Session</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>3 Sessions</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
             </Box>
           </Box>
+
+          <Typography
+            sx={{
+              fontSize: '0.8125rem',
+              color: '#6B7280',
+              textAlign: 'center',
+              marginTop: '1rem',
+              fontFamily: 'inherit',
+            }}
+          >
+            *Add-Ons available
+          </Typography>
 
           {/* Optional Add-Ons Section - moved to dark navy box below */}
         </Container>
@@ -873,15 +901,14 @@ export default function Pricing() {
               display: 'grid',
               gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
               gap: '1.25rem',
-              '& > *:nth-of-type(4), & > *:nth-of-type(5)': { gridColumn: { md: 'span 1' } },
+              '& > *:nth-of-type(4)': { gridColumn: { md: 'span 1' } },
             }}
           >
             {[
               { name: 'Job Search by Our Team', desc: 'We search and shortlist relevant jobs based on role & location.', price: 69 },
               { name: 'Custom Resume Rewrite (ATS-Optimised)', desc: 'Complete resume rewrite with keyword optimisation.', price: 39 },
-              { name: 'LinkedIn Profile Optimisation', desc: 'Headline, summary & recruiter keyword optimisation.', price: 49 },
+              { name: 'LinkedIn Profile Optimisation', desc: 'Headline, summary & recruiter keyword optimisation.', price: 29 },
               { name: 'Interview Prep', desc: 'Preparation session for your interviews.', price: 20 },
-              { name: 'Priority Processing Upgrade', desc: 'Faster handling vs standard queue.', price: 19 },
             ].map((addon) => (
               <Box
                 key={addon.name}
@@ -952,17 +979,17 @@ export default function Pricing() {
           >
             {[
   {
-    question: 'What exactly do you do?',
+    question: 'What do we do?',
     answer:
-      "We apply to jobs on your behalf using your resume and preferences. You give us the details, and our human team submits each application (cover letters included). It's 100% manual – we're here to handle the busywork of your job search.",
+      'We professionally manage and submit job applications on your behalf, aligned with your resume and role preferences. Once you provide your details, our dedicated human team prepares and submits each application manually, including customised cover letters.',
   },
   {
-    question: "Do you guarantee I'll get a job?",
+    question: 'Do we guarantee jobs?',
     answer:
       'We do not guarantee interviews or job offers, as hiring decisions are made solely by employers. What we do guarantee is a structured, transparent, and professionally managed application process.',
   },
   {
-    question: 'Where do you apply?',
+    question: 'Where do we apply?',
     answer:
       'Applications are submitted via your selected channels, including company career pages, leading job platforms such as Seek and LinkedIn, and any direct application links you provide.',
   },
@@ -972,19 +999,19 @@ export default function Pricing() {
       'We work for you, not for employers. Agencies often match candidates to employers (and they typically represent companies, not you). Our sole focus is on getting you in front of as many relevant doors as possible. Think of us as your personal application team, not a head-hunter.',
   },
   {
-    question: 'Can I see proof of applications?',
+    question: 'Can you see progress?',
     answer:
       'You will have access to a live tracking dashboard that logs every application submitted on your behalf. This allows you to monitor where and when each submission has been made.',
   },
   {
     question: 'How does pricing and cancellation work?',
     answer:
-      'After purchase and submission of your details, our team promptly begins preparing and submitting applications on your behalf. As the service involves immediate time and resource allocation, refunds cannot be provided once work has commenced. Cancellations requested prior to service initiation are eligible for a full refund. Once applications are being processed or submitted, the service is non-refundable.',
+      'After purchase and submission of your details, our team promptly begins preparing and submitting applications on your behalf.\n\nAs the service involves immediate time and resource allocation, refunds cannot be provided once work has commenced.\n\nCancellations requested prior to service initiation are eligible for a full refund. Once applications are being processed or submitted, the service is non-refundable.',
   },
   {
     question: 'Is my data secure?',
     answer:
-      'We collect only the information necessary to manage and submit job applications on your behalf, including your resume, contact details, and role preferences. Your information is stored securely and used solely for the purpose of facilitating job applications through the channels you authorise. We do not sell, rent, or share your personal information with any third parties outside our internal team, except where required to submit applications as directed by you. In accordance with the Australian Privacy Act, you have the right to access, update, or request deletion of your personal information at any time. Requests can be made by contacting our team directly.',
+      'We collect only the information necessary to manage and submit job applications on your behalf, including your resume, contact details, and role preferences.\n\nYour information is stored securely and used solely for the purpose of facilitating job applications through the channels you authorise. We do not sell, rent, or share your personal information with any third parties outside our internal team, except where required to submit applications as directed by you.\n\nIn accordance with the Australian Privacy Act, you have the right to access, update, or request deletion of your personal information at any time. Requests can be made by contacting our team directly.',
   },
 ]
 .map((faq, index) => (
@@ -1052,6 +1079,7 @@ export default function Pricing() {
                       paddingTop: { xs: '1rem', md: '1.25rem' },
                       paddingBottom: { xs: '1.25rem', md: '1.5rem' },
                       paddingX: { xs: '1.25rem', md: '1.75rem' },
+                      whiteSpace: 'pre-line',
                     }}
                   >
                     {faq.answer}

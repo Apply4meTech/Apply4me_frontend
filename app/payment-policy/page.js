@@ -70,7 +70,7 @@ export default function PaymentPolicy() {
               Last updated: 19 March 2026
             </Typography>
             <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 2 }}>
-              This Payment Policy explains how payments are processed, terms related to payment, and your rights when purchasing services from ApplyForMe Pty Ltd (&quot;ApplyForMe&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;).
+              This Payment Policy explains how payments are processed, terms related to payment, and your rights when purchasing services from ApplyForMe (&quot;ApplyForMe&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;).
             </Typography>
             <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 4 }}>
               By purchasing any services from ApplyForMe, you agree to the terms of this policy.
@@ -222,7 +222,7 @@ export default function PaymentPolicy() {
                   If you have any questions regarding billing, payments, or issues with your transaction, please contact:
                 </Typography>
                 <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', fontWeight: 600 }}>
-                  ApplyForMe Pty Ltd
+                  ApplyForMe
                 </Typography>
                 <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem' }}>
                   📧 <a href="mailto:contactus@applyforme.com.au" style={{ color: '#2563eb', textDecoration: 'none' }}>contactus@applyforme.com.au</a>

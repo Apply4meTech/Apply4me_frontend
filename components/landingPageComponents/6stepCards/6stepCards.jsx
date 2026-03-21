@@ -16,7 +16,7 @@ const steps = [
   {
     number: 2,
     title: 'Select Roles to Apply For',
-    description: "Provide job links you're interested in or let us shortlist opportunities that fit your criteria — you stay in control.",
+    description: "Provide job links through our Chrome extension or let us shortlist opportunities that fit your criteria.",
     gradient: 'linear-gradient(180deg, #f5c518 0%, #e8a80a 50%, #d4940a 100%)',
     titleColor: '#1e3a8a',
     textColor: 'rgba(30,58,138,0.9)',
@@ -133,7 +133,7 @@ export default function SixStepCards() {
               transition: 'opacity 0.6s ease-out 0.1s, transform 0.6s ease-out 0.1s',
             }}
           >
-            We don't use bots or shortcuts — we manually submit tailored applications on your behalf. Most job seekers fail to get responses because applications are rushed and generic. Our approach is strategic, accurate, and professional.
+            We manually submit tailored applications on your behalf. No bots, no shortcuts. While most job seekers send rushed, generic applications, ours are strategic, accurate, and professional.
           </Typography>
         </Box>
 
