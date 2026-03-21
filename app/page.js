@@ -54,11 +54,12 @@ export default function Home() {
           <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
             <Box
               sx={{
-                display: 'flex',
+                display: 'grid',
+                gridTemplateColumns: { xs: 'auto auto', md: 'repeat(3, auto)' },
                 justifyContent: 'center',
-                flexWrap: 'wrap',
+                justifyItems: 'center',
                 gap: { xs: '0.75rem', md: '1rem' },
-                mb: '1.25rem',
+                mb: { xs: '1.9rem', md: '1.25rem' },
                 opacity: heroVisible ? 1 : 0,
                 transform: heroVisible ? 'translateY(0)' : 'translateY(20px)',
                 transition: 'opacity 0.8s ease-out 0.1s, transform 0.8s ease-out 0.1s',
@@ -79,6 +80,7 @@ export default function Home() {
                   color: '#FFFFFF',
                   fontSize: { xs: '0.75rem', md: '0.8125rem' },
                   fontWeight: 500,
+                  whiteSpace: 'nowrap',
                 }}
               >
                 <Box
@@ -110,6 +112,7 @@ export default function Home() {
                   color: '#FFFFFF',
                   fontSize: { xs: '0.75rem', md: '0.8125rem' },
                   fontWeight: 500,
+                  whiteSpace: 'nowrap',
                 }}
               >
                 Built for <Box component="span" sx={{ color: '#F5C518', fontWeight: 700 }}>Australia</Box>
@@ -117,6 +120,8 @@ export default function Home() {
 
               <Box
                 sx={{
+                  gridColumn: { xs: '1 / -1', md: 'auto' },
+                  justifySelf: 'center',
                   background: 'rgba(255,255,255,0.12)',
                   backdropFilter: 'blur(12px)',
                   WebkitBackdropFilter: 'blur(12px)',
@@ -130,6 +135,7 @@ export default function Home() {
                   color: '#FFFFFF',
                   fontSize: { xs: '0.75rem', md: '0.8125rem' },
                   fontWeight: 500,
+                  whiteSpace: 'nowrap',
                 }}
               >
                 <Box
@@ -220,11 +226,11 @@ export default function Home() {
                     sx={{
                       background: '#fff !important',
                       color: '#2563EB !important',
-                      py: 1.25,
-                      px: 3,
+                      py: { xs: 0.85, md: 1.25 },
+                      px: { xs: 2, md: 3 },
                       borderRadius: '9999px',
                       fontWeight: 600,
-                      fontSize: '1rem',
+                      fontSize: { xs: '0.8125rem', md: '1rem' },
                       '&:hover': { background: '#f0f4ff !important' },
                     }}
                   >
@@ -240,11 +246,11 @@ export default function Home() {
                           WebkitBackdropFilter: 'blur(12px)',
                           border: '1px solid rgba(255,255,255,0.25)',
                           color: 'rgba(255,255,255,0.95) !important',
-                          py: 1.25,
-                          px: 3,
+                          py: { xs: 0.85, md: 1.25 },
+                          px: { xs: 2, md: 3 },
                           borderRadius: '9999px',
                           fontWeight: 600,
-                          fontSize: '1rem',
+                          fontSize: { xs: '0.8125rem', md: '1rem' },
                           '&:hover': { background: 'rgba(255,255,255,0.18) !important' },
                         }}
                       >
@@ -259,11 +265,11 @@ export default function Home() {
                           WebkitBackdropFilter: 'blur(12px)',
                           border: '1px solid rgba(255,255,255,0.25)',
                           color: 'rgba(255,255,255,0.95) !important',
-                          py: 1.25,
-                          px: 3,
+                          py: { xs: 0.85, md: 1.25 },
+                          px: { xs: 2, md: 3 },
                           borderRadius: '9999px',
                           fontWeight: 600,
-                          fontSize: '1rem',
+                          fontSize: { xs: '0.8125rem', md: '1rem' },
                           '&:hover': { background: 'rgba(255,255,255,0.18) !important' },
                         }}
                       >
