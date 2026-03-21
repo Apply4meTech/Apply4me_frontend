@@ -10,16 +10,21 @@ export default function TermsOfService() {
       <Box
         sx={{
           minHeight: '100vh',
-          bgcolor: '#f6f6f8',
-          fontFamily: '"Manrope", sans-serif',
+          display: 'flex',
+          flexDirection: 'column',
+          fontFamily: 'inherit',
         }}
       >
-        {/* Hero Section */}
+        {/* Hero Section - Blue gradient (dark navy left to royal blue right) */}
         <Box
           sx={{
-            background: 'linear-gradient(180deg, #1E3A8A 0%, #0F172A 100%)',
-            py: { xs: 8, md: 12 },
+            background: 'linear-gradient(to right, #0D3370 0%, #1E62D0 100%)',
+            py: { xs: 5, md: 7 },
             textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
           <Container maxWidth="lg">
@@ -36,10 +41,11 @@ export default function TermsOfService() {
             </Typography>
             <Typography
               sx={{
-                fontSize: { xs: '1rem', md: '1.25rem' },
-                color: 'rgba(255, 255, 255, 0.8)',
-                maxWidth: '600px',
+                fontSize: { xs: '1rem', md: '1.125rem' },
+                color: 'rgba(255, 255, 255, 0.95)',
+                maxWidth: '560px',
                 margin: '0 auto',
+                lineHeight: 1.6,
               }}
             >
               Please read these terms carefully before using our services
@@ -47,371 +53,285 @@ export default function TermsOfService() {
             <Typography
               sx={{
                 fontSize: '0.875rem',
-                color: 'rgba(255, 255, 255, 0.6)',
+                color: 'rgba(255, 255, 255, 0.85)',
                 mt: 2,
               }}
             >
-              Last updated: [Insert Date]
+              Last updated: 19 March 2026
             </Typography>
           </Container>
         </Box>
 
-        {/* Content Section */}
-        <Container maxWidth="md" sx={{ py: { xs: 6, md: 10 } }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            {/* Introduction */}
-            <Box sx={{ p: 3, bgcolor: '#fef3c7', borderRadius: '8px', borderLeft: '4px solid #f59e0b' }}>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, fontStyle: 'italic' }}>
-                This Terms of Service (&quot;Agreement&quot;) is a legally binding contract between <strong>ApplyForMe Pty Ltd</strong> (&quot;ApplyForMe,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) and the person or entity that purchases, accesses, or uses our services (&quot;Customer,&quot; &quot;you,&quot; or &quot;your&quot;). By clicking &quot;I agree,&quot; completing a purchase, or using the Services, you agree to be bound by this Agreement.
+        {/* Content Section - White background */}
+        <Box
+          sx={{
+            flex: 1,
+            backgroundColor: '#FFFFFF',
+            py: { xs: 5, md: 8 },
+            px: { xs: 1.5, md: 2 },
+          }}
+        >
+        <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 } }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {/* Introduction - Light yellow/cream box */}
+            <Box sx={{ p: 3, bgcolor: '#FFF9E1', borderRadius: '16px' }}>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontStyle: 'italic', fontSize: '0.9375rem' }}>
+                This Terms of Service (&quot;Agreement&quot;) is a legally binding agreement between <strong>ApplyForMe Pty Ltd</strong> (&quot;ApplyForMe,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) and the individual or entity accessing or using our services (&quot;Customer,&quot; &quot;you,&quot; or &quot;your&quot;).
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mt: 2, fontStyle: 'italic' }}>
-                <strong>ApplyForMe is a career support service. We are not a recruitment agency, employment agency, or employer and we do not provide legal, immigration, or hiring advice.</strong>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, mt: 2, fontStyle: 'italic', fontSize: '0.9375rem' }}>
+                By purchasing, accessing, or using our Services, you agree to be bound by this Agreement.
+              </Typography>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, mt: 2, fontStyle: 'italic', fontSize: '0.9375rem' }}>
+                <strong>ApplyForMe is a career support service. We are not a recruitment agency, employment agency, or employer. We do not provide legal, immigration, financial, or hiring advice.</strong>
               </Typography>
             </Box>
 
             {/* Section 1 */}
             <Box>
-              <Typography
-                component="h2"
-                sx={{
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  color: '#1E293B',
-                  mb: 2,
-                }}
-              >
+              <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
                 1. Definitions
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box>
-                  <Typography sx={{ color: '#475569', lineHeight: 1.8 }}>
-                    <strong>&quot;Services&quot;</strong> means ApplyForMe&apos;s human-assisted job application services, including resume and cover letter preparation, form completion, job submission, profile optimisation, dashboards, extensions, and all related software or systems.
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography sx={{ color: '#475569', lineHeight: 1.8 }}>
-                    <strong>&quot;Customer Content&quot;</strong> means all information you provide (including resumes, personal data, credentials, job preferences) and all documents generated for you.
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography sx={{ color: '#475569', lineHeight: 1.8 }}>
-                    <strong>&quot;Third-Party Platforms&quot;</strong> means job boards, employer websites, ATS platforms, and recruitment systems including LinkedIn, Seek, Indeed, company career portals, and similar services.
-                  </Typography>
-                </Box>
+                <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem' }}>
+                  <strong>Services</strong> means ApplyForMe&apos;s human-assisted job application support services, including resume and cover letter preparation, application submission, form completion, dashboard access, profile optimisation, and related systems.
+                </Typography>
+                <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem' }}>
+                  <strong>Customer Content</strong> means all information and documents you provide, including resumes, credentials, personal data, and job preferences.
+                </Typography>
+                <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem' }}>
+                  <strong>Third-Party Platforms</strong> means job boards, employer websites, ATS platforms, and recruitment systems such as LinkedIn, Seek, Indeed, and company career portals.
+                </Typography>
               </Box>
             </Box>
 
             {/* Section 2 */}
             <Box>
-              <Typography
-                component="h2"
-                sx={{
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  color: '#1E293B',
-                  mb: 2,
-                }}
-              >
+              <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
                 2. Nature of the Services
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mb: 2 }}>
-                ApplyForMe provides <strong>career services and job-application assistance only</strong>.
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 2 }}>
+                ApplyForMe provides job application management and career support services only.
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mb: 2 }}>
-                We do <strong>not</strong>:
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 2 }}>
+                We do not:
               </Typography>
-              <Box component="ul" sx={{ color: '#475569', lineHeight: 2, pl: 3 }}>
+              <Box component="ul" sx={{ color: '#1f2937', lineHeight: 2, pl: 3, fontSize: '1rem' }}>
                 <li>Act as a recruiter, staffing firm, or employment agency</li>
                 <li>Represent employers</li>
-                <li>Guarantee interviews, job offers, salary, or employment</li>
+                <li>Guarantee interviews, job offers, salary outcomes, or employment</li>
               </Box>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mt: 2 }}>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 2 }}>
                 All hiring decisions are made solely by employers.
+              </Typography>
+            </Box>
+
+            {/* Section 2A */}
+            <Box>
+              <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
+                2A. Service Conditions
+              </Typography>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', fontWeight: 600, mb: 1 }}>
+                Job Posting Expiry
+              </Typography>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 2 }}>
+                ApplyForMe is not responsible for applications that cannot be submitted due to job listings expiring, being filled, withdrawn, or otherwise closed prior to submission. This includes roles with short or unspecified application windows.
+              </Typography>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 2 }}>
+                While we make reasonable efforts to process applications promptly, submission timing may vary depending on workload, package volume, and the timely provision of information by the Customer.
+              </Typography>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 2 }}>
+                Customers are encouraged to provide job links as early as possible to reduce the risk of expiry.
+              </Typography>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', fontWeight: 600, mb: 1 }}>
+                Service Validity Period
+              </Typography>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 2 }}>
+                Each purchased service package is valid for 90 days from the date of purchase unless otherwise specified in writing.
+              </Typography>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 2 }}>
+                Any unused applications, credits, or service entitlements remaining after the 90-day period will expire and will not be carried forward or refunded.
+              </Typography>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem' }}>
+                Customers are responsible for providing necessary information, documents, and job links within the validity period to enable service delivery.
               </Typography>
             </Box>
 
             {/* Section 3 */}
             <Box>
-              <Typography
-                component="h2"
-                sx={{
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  color: '#1E293B',
-                  mb: 2,
-                }}
-              >
-                3. Authorization to Act on Your Behalf
+              <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
+                3. Authorisation to Act on Your Behalf
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mb: 2 }}>
-                By using our Services, you authorize ApplyForMe and our staff or contractors to:
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 2 }}>
+                By using our Services, you authorise ApplyForMe and its team members to:
               </Typography>
-              <Box component="ul" sx={{ color: '#475569', lineHeight: 2, pl: 3 }}>
+              <Box component="ul" sx={{ color: '#1f2937', lineHeight: 2, pl: 3, fontSize: '1rem' }}>
                 <li>Prepare resumes, cover letters, and application responses</li>
-                <li>Log into Third-Party Platforms using credentials you provide</li>
-                <li>Submit applications and communications on your behalf</li>
+                <li>Submit job applications and related communications on your behalf</li>
+                <li>Access Third-Party Platforms where credentials are provided by you</li>
               </Box>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mt: 2 }}>
-                You confirm that all information you provide is accurate and lawful.
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 2 }}>
+                You confirm that all information provided is accurate, lawful, and up to date.
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mt: 1 }}>
-                You accept full responsibility for all applications submitted under your name.
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 1 }}>
+                You remain solely responsible for the content and legality of applications submitted under your name.
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mt: 1 }}>
-                You acknowledge that Third-Party Platforms may restrict, block, or suspend accounts and that ApplyForMe is <strong>not responsible</strong> for such actions.
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 1 }}>
+                ApplyForMe is not responsible for account restrictions, suspensions, or actions taken by Third-Party Platforms.
               </Typography>
             </Box>
 
             {/* Section 4 */}
             <Box>
-              <Typography
-                component="h2"
-                sx={{
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  color: '#1E293B',
-                  mb: 2,
-                }}
-              >
+              <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
                 4. Client Responsibilities
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mb: 2 }}>
-                You agree that:
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 2 }}>
+                You agree that you will not:
               </Typography>
-              <Box component="ul" sx={{ color: '#475569', lineHeight: 2, pl: 3 }}>
-                <li>You will not provide false or misleading information</li>
-                <li>You will not violate employer, platform, or legal rules</li>
-                <li>You will not use our Services for fraud, misrepresentation, or unlawful activity</li>
+              <Box component="ul" sx={{ color: '#1f2937', lineHeight: 2, pl: 3, fontSize: '1rem' }}>
+                <li>Provide false or misleading information</li>
+                <li>Violate employer, platform, or legal requirements</li>
+                <li>Use our Services for fraudulent or unlawful purposes</li>
               </Box>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mt: 2 }}>
-                We may terminate your service immediately for any breach.
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 2 }}>
+                We reserve the right to suspend or terminate Services for any breach of this Agreement.
               </Typography>
             </Box>
 
             {/* Section 5 */}
             <Box>
-              <Typography
-                component="h2"
-                sx={{
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  color: '#1E293B',
-                  mb: 2,
-                }}
-              >
-                5. Fees & Payments
+              <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
+                5. Fees and Payments
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8 }}>
-                All fees are charged as stated at checkout.
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem' }}>
+                All fees are clearly stated at checkout.
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mt: 1 }}>
-                You are paying for <strong>services and effort</strong>, not employment outcomes.
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 1 }}>
+                Payments are made in exchange for professional services and effort, not employment outcomes.
+              </Typography>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 1 }}>
+                Unless otherwise stated, packages are offered as one-time payments.
               </Typography>
             </Box>
 
-            {/* Section 6 - NO REFUNDS */}
-            <Box sx={{ p: 3, bgcolor: '#fee2e2', borderRadius: '8px', borderLeft: '4px solid #ef4444' }}>
-              <Typography
-                component="h2"
-                sx={{
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  color: '#1E293B',
-                  mb: 2,
-                }}
-              >
-                6. NO REFUNDS – FINAL POLICY
+            {/* Section 6 - Refund Policy */}
+            <Box>
+              <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
+                6. Refund Policy
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mb: 2 }}>
-                All payments to ApplyForMe are <strong>final and non-refundable</strong>.
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 2 }}>
+                Due to the nature of our services, which involve immediate allocation of time and manual processing, refunds are generally not available once service delivery has commenced.
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mb: 2 }}>
-                Due to the nature of our services — including onboarding, assignment of human assistants, and immediate processing — <strong>we do not provide refunds, credits, or reversals under any circumstances once a purchase has been made.</strong>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 2 }}>
+                However, nothing in this Agreement excludes, restricts, or modifies any rights you may have under the Australian Consumer Law.
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mb: 2 }}>
-                This includes, without limitation:
-              </Typography>
-              <Box component="ul" sx={{ color: '#475569', lineHeight: 2, pl: 3, mb: 2 }}>
-                <li>Not receiving interviews</li>
-                <li>Employer rejections</li>
-                <li>Delays or restrictions by job platforms</li>
-                <li>Change of mind</li>
-                <li>Dissatisfaction with results</li>
-              </Box>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mb: 2 }}>
-                By purchasing, you expressly:
-              </Typography>
-              <Box component="ul" sx={{ color: '#475569', lineHeight: 2, pl: 3, mb: 2 }}>
-                <li>Waive your right to refunds</li>
-                <li>Waive your right to chargebacks or payment disputes</li>
-                <li>Agree that payment is for service, not results</li>
-              </Box>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8 }}>
-                Any chargeback or payment dispute will be treated as a <strong>material breach</strong> of this Agreement and may result in termination, collections, and reporting to payment processors.
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem' }}>
+                If you believe you are entitled to a remedy under consumer protection law, please contact us.
               </Typography>
             </Box>
 
             {/* Section 7 */}
             <Box>
-              <Typography
-                component="h2"
-                sx={{
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  color: '#1E293B',
-                  mb: 2,
-                }}
-              >
+              <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
                 7. No Guarantees
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mb: 2 }}>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 2 }}>
                 ApplyForMe does not guarantee:
               </Typography>
-              <Box component="ul" sx={{ color: '#475569', lineHeight: 2, pl: 3 }}>
+              <Box component="ul" sx={{ color: '#1f2937', lineHeight: 2, pl: 3, fontSize: '1rem' }}>
                 <li>Interviews</li>
-                <li>Offers</li>
+                <li>Job offers</li>
                 <li>Employment</li>
                 <li>Employer responses</li>
               </Box>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mt: 2 }}>
-                All hiring decisions are outside our control.
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 2 }}>
+                All employment decisions are made independently by employers.
               </Typography>
             </Box>
 
             {/* Section 8 */}
             <Box>
-              <Typography
-                component="h2"
-                sx={{
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  color: '#1E293B',
-                  mb: 2,
-                }}
-              >
+              <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
                 8. Limitation of Liability
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mb: 2 }}>
-                To the maximum extent permitted by law, ApplyForMe shall not be liable for:
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 2 }}>
+                To the maximum extent permitted by law, ApplyForMe excludes liability for indirect or consequential loss, including loss of income or opportunity.
               </Typography>
-              <Box component="ul" sx={{ color: '#475569', lineHeight: 2, pl: 3 }}>
-                <li>Lost opportunities</li>
-                <li>Lost income</li>
-                <li>Career outcomes</li>
-                <li>Emotional distress</li>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem' }}>
+                Where liability cannot be excluded under Australian Consumer Law, our liability is limited, at our option, to:
+              </Typography>
+              <Box component="ul" sx={{ color: '#1f2937', lineHeight: 2, pl: 3, fontSize: '1rem', mt: 1 }}>
+                <li>Re-supplying the Services; or</li>
+                <li>Refunding the amount paid for the Services.</li>
               </Box>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mt: 2 }}>
-                Our total liability shall never exceed the amount you paid us.
-              </Typography>
             </Box>
 
             {/* Section 9 */}
             <Box>
-              <Typography
-                component="h2"
-                sx={{
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  color: '#1E293B',
-                  mb: 2,
-                }}
-              >
-                9. Data & Security
+              <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
+                9. Data and Security
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8 }}>
-                We use reasonable security measures. However, no system is 100% secure.
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem' }}>
+                We implement reasonable security measures to protect personal information. However, no electronic system is completely secure.
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mt: 1 }}>
-                Our maximum liability for any data issue is limited to the fees you paid us.
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 1 }}>
+                Our <a href="/privacy-policy" style={{ color: '#2563eb', textDecoration: 'none' }}>Privacy Policy</a> explains how personal information is handled.
               </Typography>
             </Box>
 
             {/* Section 10 */}
             <Box>
-              <Typography
-                component="h2"
-                sx={{
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  color: '#1E293B',
-                  mb: 2,
-                }}
-              >
+              <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
                 10. Intellectual Property
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8 }}>
-                You own your personal documents.
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem' }}>
+                You retain ownership of your personal documents and personal information.
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mt: 1 }}>
-                We own all software, systems, processes, templates, and tools.
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mt: 1 }}>
+                ApplyForMe retains ownership of all proprietary systems, processes, templates, software, and materials used to deliver the Services.
               </Typography>
             </Box>
 
             {/* Section 11 */}
             <Box>
-              <Typography
-                component="h2"
-                sx={{
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  color: '#1E293B',
-                  mb: 2,
-                }}
-              >
-                11. Indemnification
+              <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
+                11. Indemnity
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8 }}>
-                You agree to indemnify and hold harmless ApplyForMe from any claims arising from:
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', mb: 2 }}>
+                You agree to indemnify ApplyForMe against claims arising from:
               </Typography>
-              <Box component="ul" sx={{ color: '#475569', lineHeight: 2, pl: 3, mt: 1 }}>
-                <li>Your information</li>
-                <li>Your applications</li>
-                <li>Your interactions with employers</li>
-                <li>Your violation of this Agreement</li>
+              <Box component="ul" sx={{ color: '#1f2937', lineHeight: 2, pl: 3, fontSize: '1rem' }}>
+                <li>Information you provide</li>
+                <li>Applications submitted under your name</li>
+                <li>Your breach of this Agreement</li>
               </Box>
             </Box>
 
             {/* Section 12 */}
             <Box>
-              <Typography
-                component="h2"
-                sx={{
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  color: '#1E293B',
-                  mb: 2,
-                }}
-              >
+              <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
                 12. Governing Law
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8 }}>
-                This Agreement is governed by the laws of <strong>Australia</strong>.
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem' }}>
+                This Agreement is governed by the laws of Australia. Any disputes shall be subject to the jurisdiction of Australian courts.
               </Typography>
             </Box>
 
             {/* Section 13 */}
             <Box>
-              <Typography
-                component="h2"
-                sx={{
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  color: '#1E293B',
-                  mb: 2,
-                }}
-              >
+              <Typography component="h2" sx={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', mb: 1.5 }}>
                 13. Contact
               </Typography>
-              <Typography sx={{ color: '#475569', lineHeight: 1.8, mb: 2 }}>
-                For support or legal questions:
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem', fontWeight: 600 }}>
+                ApplyForMe Pty Ltd
               </Typography>
-              <Box sx={{ mt: 2, p: 3, bgcolor: '#f1f5f9', borderRadius: '8px' }}>
-                <Typography sx={{ color: '#1E293B', fontWeight: 600 }}>ApplyForMe Pty Ltd</Typography>
-                <Typography sx={{ color: '#475569' }}>📧 <a href="mailto:contactus@applyforme.com.au" style={{ color: '#2463eb', textDecoration: 'none' }}>contactus@applyforme.com.au</a></Typography>
-              </Box>
+              <Typography sx={{ color: '#1f2937', lineHeight: 1.8, fontSize: '1rem' }}>
+                Email: <a href="mailto:contactus@applyforme.com.au" style={{ color: '#2563eb', textDecoration: 'none' }}>contactus@applyforme.com.au</a>
+              </Typography>
             </Box>
           </Box>
         </Container>
+        </Box>
       </Box>
     </MainLayout>
   );

@@ -5,7 +5,6 @@ import { Box, Container, Typography, Table, TableBody, TableCell, TableContainer
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import ROICalculator from '@/components/landingPageComponents/ROICalculator/ROICalculator';
 import Button from '@/components/Button';
 import MainLayout from '../../components/layouts/MainLayout';
 import CompanyLogos from '../../components/CompanyLogos';
@@ -18,7 +17,7 @@ import planService from '../../utils/planService';
 import Link from 'next/link';
 
 export default function Pricing() {
-  const [expandedFaq, setExpandedFaq] = useState(null);
+  const [expandedFaq, setExpandedFaq] = useState(0);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [processingPlan, setProcessingPlan] = useState(null);
   const [stripePromise, setStripePromise] = useState(null);
@@ -35,7 +34,6 @@ export default function Pricing() {
   const [heroRef, heroVisible] = useScrollAnimation();
   const [plansRef, plansVisible] = useScrollAnimation();
   const [tableRef, tableVisible] = useScrollAnimation();
-  const [roiRef, roiVisible] = useScrollAnimation();
   const [logosRef, logosVisible] = useScrollAnimation();
   const [faqRef, faqVisible] = useScrollAnimation();
 
@@ -236,12 +234,12 @@ export default function Pricing() {
           overflowX: 'hidden',
         }}
       >
-        {/* Hero Section - Royal Blue */}
+        {/* Hero Section - Solid Deep Navy */}
         <Box
           sx={{
-            backgroundColor: '#1056ce',
+            backgroundColor: '#002B70',
             paddingTop: { xs: '5rem', md: '5rem' },
-            paddingBottom: { xs: '10rem', md: '10rem' },
+            paddingBottom: { xs: '4rem', md: '4rem' },
             paddingX: { xs: '1rem', sm: '2.5rem' },
             position: 'relative',
             overflow: 'hidden',
@@ -269,14 +267,14 @@ export default function Pricing() {
                   letterSpacing: '-0.02em',
                 }}
               >
-                Simple. Transparent. Built for Results.
+                Invest in Your Career Acceleration.
               </Typography>
 
               <Typography
                 component="p"
                 sx={{
                   fontSize: { xs: '0.9375rem', md: '1.0625rem' },
-                  color: 'rgba(255,255,255,0.9)',
+                  color: 'rgba(255,255,255,0.85)',
                   textAlign: 'center',
                   marginBottom: '0.5rem',
                   fontFamily: 'inherit',
@@ -285,13 +283,13 @@ export default function Pricing() {
                   lineHeight: 1.75,
                 }}
               >
-                Choose a plan based on the number of professionally submitted applications you would like managed on your behalf.
+                One-time payment (AUD). Choose the plan that fits your goals. Start landing interviews sooner.
               </Typography>
               <Typography
                 component="p"
                 sx={{
                   fontSize: { xs: '0.875rem', md: '1rem' },
-                  color: 'rgba(255,255,255,0.8)',
+                  color: 'rgba(255,255,255,0.7)',
                   textAlign: 'center',
                   marginBottom: '3rem',
                   fontFamily: 'inherit',
@@ -300,17 +298,17 @@ export default function Pricing() {
                   lineHeight: 1.75,
                 }}
               >
-                No automation. No bulk spam. Just manual, structured submission handled by real people.
+                AUD · One-time payment
               </Typography>
             </Box>
           </Container>
         </Box>
 
-      {/* Pricing Plans Section - Dark navy with glassmorphism cards */}
+      {/* Pricing Plans Section - Unified deep navy with glassmorphism cards */}
       <Box
         sx={{
-          background: '#0A2540',
-          paddingTop: 0,
+          background: '#002B70',
+          paddingTop: { xs: '2rem', md: '2.5rem' },
           paddingBottom: { xs: '4rem', md: '5rem' },
           paddingX: { xs: '1.5rem', md: '2rem' },
           flex: 1,
@@ -322,7 +320,7 @@ export default function Pricing() {
           {userPlan && userPlan.subscription && userPlan.subscription.status === 'active' && (
             <Box
               sx={{
-                mt: { xs: '-2rem', md: '-4rem' },
+                mt: 0,
                 mb: 3,
                 p: 2,
                 bgcolor: '#FEF3C7',
@@ -355,7 +353,7 @@ export default function Pricing() {
                 lg: 'repeat(4, 1fr)',
               },
               gap: '2rem',
-              marginTop: { xs: '-4rem', md: '-6rem' },
+              marginTop: 0,
               position: 'relative',
               zIndex: 10,
               opacity: plansVisible ? 1 : 0,
@@ -383,51 +381,25 @@ export default function Pricing() {
                   key={plan.name}
                   sx={{
                     position: 'relative',
-                    background: 'rgba(191, 219, 254, 0.08)',
-                    border: '1px solid rgba(191, 219, 254, 0.3)',
+                    background: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(147, 197, 253, 0.25)',
                     backdropFilter: 'blur(16px)',
                     WebkitBackdropFilter: 'blur(16px)',
-                    borderRadius: '1.25rem',
+                    borderRadius: '1.5rem',
                     padding: '2rem',
                     display: 'flex',
                     flexDirection: 'column',
                     overflow: 'visible',
-                    boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
+                    boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
                     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                     opacity: plansVisible ? 1 : 0,
-                    // transform: plansVisible ? 'translateY(0)' : 'translateY(40px)',
-                    // animation: plansVisible ? `fadeInUp 0.6s ease-out ${planIndex * 0.1}s both` : 'none',
-                    // '@keyframes fadeInUp': {
-                    //   from: {
-                    //     opacity: 0,
-                    //     transform: 'translateY(40px)',
-                    //   },
-                    //   to: {
-                    //     opacity: 1,
-                    //     transform: 'translateY(0)',
-                    //   },
-                    // },
                     '&:hover': {
                       transform: 'translateY(-4px)',
-                      boxShadow: '0 25px 50px -10px rgba(30, 41, 59, 0.12)',
+                      boxShadow: '0 25px 50px -10px rgba(0,0,0,0.2)',
                     },
                   }}
                 >
-                  {/* Decorative blur circle effect */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      right: '-80px',
-                      top: '-80px',
-                      width: '256px',
-                      height: '256px',
-                      backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                      filter: 'blur(64px)',
-                      borderRadius: '50%',
-                      pointerEvents: 'none',
-                    }}
-                  />
-                  {/* Plan Badge (Your Plan / Most Popular / Best Value) */}
+                  {/* Plan Badge (Your Plan / Most Popular / Best Value!) */}
                   {userPlan && userPlan.subscription && userPlan.subscription.planName === plan.name ? (
                     <Box
                       sx={{
@@ -444,8 +416,6 @@ export default function Pricing() {
                         textTransform: 'uppercase',
                         letterSpacing: '0.05em',
                         zIndex: '999999 !important',
-                        transition: 'all 0.3s ease',
-                        boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.3), 0 2px 4px -1px rgba(16, 185, 129, 0.2)',
                       }}
                     >
                       YOUR PLAN
@@ -457,8 +427,8 @@ export default function Pricing() {
                         top: '-0.75rem',
                         left: '50%',
                         transform: 'translateX(-50%)',
-                        backgroundColor: '#BFDBFE',
-                        color: '#1e3a8a',
+                        backgroundColor: '#1e3a8a',
+                        color: '#FFFFFF',
                         padding: '0.25rem 0.75rem',
                         borderRadius: '9999px',
                         fontSize: '0.75rem',
@@ -466,16 +436,9 @@ export default function Pricing() {
                         textTransform: 'uppercase',
                         letterSpacing: '0.05em',
                         zIndex: '999999 !important',
-                        transition: 'all 0.3s ease',
-                        boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.3), 0 2px 4px -1px rgba(37, 99, 235, 0.2)',
-                        '&:hover': {
-                          transform: 'translateX(-50%) translateY(-2px)',
-                          boxShadow: '0 8px 12px -2px rgba(37, 99, 235, 0.4), 0 4px 6px -1px rgba(37, 99, 235, 0.3)',
-                          backgroundColor: '#1E3A8A',
-                        },
                       }}
                     >
-                      {plan.badge.toUpperCase()}
+                      {plan.badge.toUpperCase()}{plan.badge.toLowerCase().includes('value') && !plan.badge.includes('!') ? '!' : ''}
                     </Box>
                   ) : null}
                   {/* Content wrapper with relative positioning */}
@@ -489,12 +452,12 @@ export default function Pricing() {
                     }}
                   >
 
-                  {/* Plan Name */}
+                  {/* Plan Name - Pro gets cyan accent */}
                   <Typography
                     sx={{
                       fontSize: '1.5rem',
                       fontWeight: 700,
-                      color: '#FFFFFF',
+                      color: plan.name?.toLowerCase() === 'pro' ? '#00D1FF' : '#FFFFFF',
                       marginBottom: '0.5rem',
                       fontFamily: 'inherit',
                     }}
@@ -660,7 +623,7 @@ export default function Pricing() {
                         disabled={isDisabled}
                         sx={{
                           padding: '0.75rem 1.5rem',
-                          borderRadius: '0.5rem',
+                          borderRadius: '9999px',
                           border: colors.border,
                           backgroundColor: colors.bg,
                           color: colors.color,
@@ -674,6 +637,8 @@ export default function Pricing() {
                           alignItems: 'center',
                           justifyContent: 'center',
                           gap: '0.5rem',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.02em',
                           '&:hover': {
                             backgroundColor: isDisabled ? colors.bg : colors.hoverBg,
                             color: colors.hoverColor,
@@ -720,44 +685,6 @@ export default function Pricing() {
               })
             )}
           </Box>
-        </Container>
-      </Box>
-
-      {/* ROI Section with intro */}
-      <Box 
-        ref={roiRef}
-        sx={{
-          padding: { xs: '4rem 1.5rem', md: '5rem 2rem' },
-          backgroundColor: '#000',
-          opacity: roiVisible ? 1 : 0,
-          transform: roiVisible ? 'translateY(0)' : 'translateY(40px)',
-          transition: 'opacity 0.8s ease-out, transform 0.8s ease-out',
-        }}
-      >
-        <Container maxWidth="lg">
-          <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <Typography
-              sx={{
-                fontSize: { xs: '1.25rem', md: '1.5rem' },
-                fontWeight: 700,
-                color: '#FFFFFF',
-                fontFamily: 'inherit',
-                mb: 1,
-              }}
-            >
-              Job searching should not feel like a second unpaid job.
-            </Typography>
-            <Typography
-              sx={{
-                fontSize: '1rem',
-                color: 'rgba(255,255,255,0.8)',
-                fontFamily: 'inherit',
-              }}
-            >
-              Estimate the time and financial value of delegating your applications to our team
-            </Typography>
-          </Box>
-          <ROICalculator/>
         </Container>
       </Box>
 
@@ -903,10 +830,10 @@ export default function Pricing() {
         </Container>
       </Box>
 
-      {/* Optional Add-Ons - Dark Navy Section */}
+      {/* Optional Add-Ons - Deep Navy Section */}
       <Box
         sx={{
-          backgroundColor: '#0A2540',
+          backgroundColor: '#002B70',
           paddingY: { xs: '4rem', md: '5rem' },
           paddingX: { xs: '1.5rem', md: '2rem' },
         }}
@@ -1044,7 +971,7 @@ export default function Pricing() {
               textAlign: 'center',
               fontSize: { xs: '1.5rem', md: '2rem' },
               fontWeight: 700,
-              color: '#1E293B',
+              color: '#111827',
               fontFamily: 'inherit',
               marginBottom: { xs: '2rem', md: '3rem' },
               opacity: faqVisible ? 1 : 0,
@@ -1061,23 +988,23 @@ export default function Pricing() {
               display: 'flex',
               flexDirection: 'column',
               gap: '1rem',
-              maxWidth: '800px',
+              maxWidth: '720px',
               marginX: 'auto',
             }}
           >
             {[
   {
-    question: 'What do we do?',
+    question: 'What exactly do you do?',
     answer:
-      'We professionally manage and submit job applications on your behalf, aligned with your resume and role preferences. Once you provide your details, our dedicated human team prepares and submits each application manually, including customised cover letters.',
+      "We apply to jobs on your behalf using your resume and preferences. You give us the details, and our human team submits each application (cover letters included). It's 100% manual – we're here to handle the busywork of your job search.",
   },
   {
-    question: 'Do we guarantee jobs?',
+    question: "Do you guarantee I'll get a job?",
     answer:
       'We do not guarantee interviews or job offers, as hiring decisions are made solely by employers. What we do guarantee is a structured, transparent, and professionally managed application process.',
   },
   {
-    question: 'Where do we apply?',
+    question: 'Where do you apply?',
     answer:
       'Applications are submitted via your selected channels, including company career pages, leading job platforms such as Seek and LinkedIn, and any direct application links you provide.',
   },
@@ -1087,7 +1014,7 @@ export default function Pricing() {
       'We work for you, not for employers. Agencies often match candidates to employers (and they typically represent companies, not you). Our sole focus is on getting you in front of as many relevant doors as possible. Think of us as your personal application team, not a head-hunter.',
   },
   {
-    question: 'Can you see progress?',
+    question: 'Can I see proof of applications?',
     answer:
       'You will have access to a live tracking dashboard that logs every application submitted on your behalf. This allows you to monitor where and when each submission has been made.',
   },
@@ -1107,14 +1034,10 @@ export default function Pricing() {
                 key={index}
                 sx={{
                   backgroundColor: '#FFFFFF',
-                  borderRadius: '0.75rem',
-                  border: '1px solid #E2E8F0',
-                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                  borderRadius: '1rem',
+                  border: '1px solid #E5E7EB',
                   overflow: 'hidden',
                   transition: 'all 0.3s ease',
-                  '&:hover': {
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                  },
                 }}
               >
                 {/* Question Header */}
@@ -1124,7 +1047,7 @@ export default function Pricing() {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    padding: { xs: '1.25rem 1rem', md: '1.5rem 1.75rem' },
+                    padding: { xs: '1.25rem 1.25rem', md: '1.5rem 1.75rem' },
                     cursor: 'pointer',
                     userSelect: 'none',
                   }}
@@ -1132,8 +1055,8 @@ export default function Pricing() {
                   <Typography
                     sx={{
                       fontSize: { xs: '1rem', md: '1.125rem' },
-                      fontWeight: 600,
-                      color: '#1E293B',
+                      fontWeight: 500,
+                      color: '#111827',
                       fontFamily: 'inherit',
                       flex: 1,
                       paddingRight: '1rem',
@@ -1143,7 +1066,7 @@ export default function Pricing() {
                   </Typography>
                   <KeyboardArrowDownIcon
                     sx={{
-                      color: '#1E293B',
+                      color: '#6B7280',
                       fontSize: '1.5rem',
                       transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                       transform: expandedFaq === index ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -1158,19 +1081,19 @@ export default function Pricing() {
                     maxHeight: expandedFaq === index ? '800px' : 0,
                     overflow: 'hidden',
                     transition: 'max-height 0.35s ease-out, border-top 0.25s ease-out',
-                    borderTop: expandedFaq === index ? '1px solid #E2E8F0' : '1px solid transparent',
+                    borderTop: expandedFaq === index ? '1px solid #E5E7EB' : '1px solid transparent',
                   }}
                 >
                   <Typography
                     component="div"
                     sx={{
                       fontSize: { xs: '0.9375rem', md: '1rem' },
-                      color: '#64748B',
+                      color: '#374151',
                       fontFamily: 'inherit',
                       lineHeight: 1.7,
                       paddingTop: { xs: '1rem', md: '1.25rem' },
                       paddingBottom: { xs: '1.25rem', md: '1.5rem' },
-                      paddingX: { xs: '1rem', md: '1.75rem' },
+                      paddingX: { xs: '1.25rem', md: '1.75rem' },
                     }}
                   >
                     {faq.answer}
@@ -1182,83 +1105,6 @@ export default function Pricing() {
         </Container>
       </Box>
 
-      {/* let us handle  */}
-       {/* Final CTA Section */}
-       <Box
-          sx={{
-            width: '100%',
-            backgroundColor: '#1E293B',
-            py: { xs: 6, md: 6 },
-            px: { xs: 1, sm: 1.5, md: 2.5 },
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
-          <Box
-            sx={{
-              position: 'absolute',
-              inset: 0,
-              background:
-                'radial-gradient(circle at center, rgba(37,99,235,0.15), transparent 70%)',
-            }}
-          />
-          <Box
-            sx={{
-              position: 'relative',
-              zIndex: 10,
-              maxWidth: '768px',
-            }}
-          >
-            <Typography
-              component="h2"
-              sx={{
-                fontSize: { xs: '2.25rem', md: '3rem' },
-                fontWeight: 900,
-                color: '#FFFFFF',
-                mb: 3,
-                letterSpacing: '-0.02em',
-              }}
-            >
-              Ready to delegate your job search?
-            </Typography>
-            <Typography
-              sx={{
-                color: '#CBD5E1',
-                fontSize: '1.125rem',
-                mb: 4,
-                maxWidth: '576px',
-                mx: 'auto',
-              }}
-            >
-              Let us handle applications so you can focus on interviews.
-            </Typography>
-            <Button
-              sx={{
-                backgroundColor: '#2563EB',
-                color: '#FFFFFF',
-                fontSize: '1.125rem',
-                fontWeight: 700,
-                py: 2,
-                px: 5,
-                borderRadius: '12px',
-                boxShadow: '0 20px 40px -10px rgba(37, 99, 235, 0.5)',
-                textTransform: 'none',
-                '&:hover': {
-                  backgroundColor: '#1E3A8A',
-                  transform: 'scale(1.05)',
-                },
-                transition: 'all 0.3s',
-              }}
-              onClick={() => router.push('/signup')}
-            >
-              Sign up Now
-            </Button>
-          </Box>
-        </Box>
       </Box>
     </MainLayout>
   );

@@ -5,7 +5,7 @@ import { Box, Container, Typography } from '@mui/material';
 
 const companies = [
   { name: 'Atlassian', src: 'https://cdn.simpleicons.org/atlassian/0052CC' },
-  { name: 'Canva', src: 'https://logo.clearbit.com/canva.com' },
+  { name: 'Canva', src: 'https://cdn.simpleicons.org/canva/00C4CC' },
   { name: 'Afterpay', src: 'https://cdn.simpleicons.org/afterpay/00A9E0' },
   { name: 'Xero', src: 'https://cdn.simpleicons.org/xero/13B5EA' },
 ];
