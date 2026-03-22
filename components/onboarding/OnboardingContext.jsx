@@ -52,42 +52,48 @@ export const OnboardingProvider = ({ children }) => {
   };
 
   const getInitialData = () => ({
-    // Step 1: Personal Information
+    // Step 1: Personal Details
     fullName: '',
     email: '',
-    phoneCode: '+61', // Australia by default
+    phoneCode: '+61',
     phone: '',
-    address: '',
-    // Separate address fields
-    houseNumber: '',
-    streetName: '',
-    suburb: '',
-    state: '',
-    postcode: '',
-    openToRelocate: false,
-    countryOfWork: 'Australia', // Australia by default
-    visaSponsorshipRequired: false,
-    
-    // Step 2: Job Preferences & Compensation
-    primaryJobTitles: [],
-    skills: [],
-    totalYearsExperience: '',
-    seniorityLevel: '',
-    jobTypes: [],
-    workLocation: '',
-    locationPreference: '',
-    remoteOnly: false,
-    minAcceptableSalary: '',
-    preferredSalaryMin: '',
-    preferredSalaryMax: '',
-    equityPreference: false,
-    
-    // Step 3: Documents & Links
+    currentLocation: '',
+    workRightsInAustralia: '',
+    visaType: '',
+    // Step 2: Resume & Documents
     resume_details: null,
     cv_details: null,
-    portfolioWebsite: '',
-    github: '',
+    academicTranscripts_details: null,
+    certifications_details: null,
+    // Step 3: Employment History
+    currentRole: '',
+    previousRoles: '',
+    keyResponsibilities: '',
+    keyAchievements: '',
+    // Step 4: Compliance & Checks
+    policeCheck: '',
+    workingWithChildrenCheck: '',
+    securityClearance: '',
+    driversLicence: '',
+    // Step 5: Availability
+    availableStartDate: '',
+    noticePeriod: '',
+    // Step 6: Application Preferences
+    howToApply: '',
+    companiesToAvoid: '',
+    // Step 7: Additional Information
     linkedinProfile: '',
+    portfolioWebsite: '',
+    anythingElse: '',
+    // Step 8: Consent & Authorisation
+    consentInfoAccurate: false,
+    consentSubmitApplications: false,
+    consentAccountCreation: false,
+    consentTermsAndPrivacy: false,
+    // Legacy (backward compat)
+    primaryJobTitles: [],
+    address: '',
+    github: '',
     personalBlog: '',
   });
 
@@ -151,7 +157,7 @@ export const OnboardingProvider = ({ children }) => {
   };
 
   const nextStep = () => {
-    if (currentStep < 3) {
+    if (currentStep < 8) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -163,7 +169,7 @@ export const OnboardingProvider = ({ children }) => {
   };
 
   const goToStep = (step) => {
-    if (step >= 1 && step <= 3) {
+    if (step >= 1 && step <= 8) {
       setCurrentStep(step);
     }
   };

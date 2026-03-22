@@ -179,7 +179,8 @@ export default function OnboardingStep2() {
                 }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
+                    borderRadius: '24px',
+                    '& fieldset': { borderColor: '#d1d5db' },
                   },
                 }}
               />
@@ -233,7 +234,8 @@ export default function OnboardingStep2() {
                 }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
+                    borderRadius: '24px',
+                    '& fieldset': { borderColor: '#d1d5db' },
                   },
                 }}
               />
@@ -245,7 +247,7 @@ export default function OnboardingStep2() {
                 sx={{
                   bgcolor: '#2463eb',
                   textTransform: 'none',
-                  borderRadius: '8px',
+                  borderRadius: '24px',
                 }}
               >
                 Add
@@ -274,7 +276,8 @@ export default function OnboardingStep2() {
           inputProps={{ min: 0, max: 50 }}
           sx={{
             '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
+              borderRadius: '24px',
+              '& fieldset': { borderColor: '#d1d5db' },
             },
           }}
         />
@@ -288,7 +291,8 @@ export default function OnboardingStep2() {
           onChange={handleChange('seniorityLevel')}
           sx={{
             '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
+              borderRadius: '24px',
+              '& fieldset': { borderColor: '#d1d5db' },
             },
           }}
         >
@@ -331,7 +335,8 @@ export default function OnboardingStep2() {
           onChange={handleChange('workLocation')}
           sx={{
             '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
+              borderRadius: '24px',
+              '& fieldset': { borderColor: '#d1d5db' },
             },
           }}
         >
@@ -354,7 +359,8 @@ export default function OnboardingStep2() {
           placeholder="e.g., San Francisco, CA or New York, NY"
           sx={{
             '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
+              borderRadius: '24px',
+              '& fieldset': { borderColor: '#d1d5db' },
             },
           }}
         />
@@ -365,7 +371,12 @@ export default function OnboardingStep2() {
             <Switch
               checked={formData.remoteOnly}
               onChange={handleChange('remoteOnly')}
-              color="primary"
+              sx={{
+                '& .MuiSwitch-track': { bgcolor: '#d1d5db !important', borderRadius: '14px' },
+                '& .MuiSwitch-thumb': { bgcolor: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' },
+                '&.Mui-checked .MuiSwitch-track': { bgcolor: '#1e3a8a !important' },
+                '&.Mui-checked .MuiSwitch-thumb': { bgcolor: '#ffffff' },
+              }}
             />
           }
           label="Remote only"
@@ -393,7 +404,8 @@ export default function OnboardingStep2() {
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: '8px',
+                  borderRadius: '24px',
+                  '& fieldset': { borderColor: '#d1d5db' },
                 },
               }}
             />
@@ -412,7 +424,8 @@ export default function OnboardingStep2() {
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: '8px',
+                  borderRadius: '24px',
+                  '& fieldset': { borderColor: '#d1d5db' },
                 },
               }}
             />
@@ -425,7 +438,12 @@ export default function OnboardingStep2() {
             <Switch
               checked={formData.equityPreference}
               onChange={handleChange('equityPreference')}
-              color="primary"
+              sx={{
+                '& .MuiSwitch-track': { bgcolor: '#d1d5db !important', borderRadius: '14px' },
+                '& .MuiSwitch-thumb': { bgcolor: '#ffffff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' },
+                '&.Mui-checked .MuiSwitch-track': { bgcolor: '#1e3a8a !important' },
+                '&.Mui-checked .MuiSwitch-thumb': { bgcolor: '#ffffff' },
+              }}
             />
           }
           label="Equity Preference"
@@ -456,7 +474,8 @@ export default function OnboardingStep2() {
                 placeholder="Enter skills and press Enter"
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
+                    borderRadius: '24px',
+                    '& fieldset': { borderColor: '#d1d5db' },
                   },
                 }}
               />

@@ -18,11 +18,25 @@ import {
 } from '@mui/material';
 import { OnboardingProvider, useOnboarding } from '../../components/onboarding/OnboardingContext';
 import OnboardingStep1 from '../../components/onboarding/OnboardingStep1';
-import OnboardingStep2 from '../../components/onboarding/OnboardingStep2';
 import OnboardingStep3 from '../../components/onboarding/OnboardingStep3';
+import OnboardingStep4 from '../../components/onboarding/OnboardingStep4';
+import OnboardingStep5 from '../../components/onboarding/OnboardingStep5';
+import OnboardingStep6 from '../../components/onboarding/OnboardingStep6';
+import OnboardingStep7 from '../../components/onboarding/OnboardingStep7';
+import OnboardingStep8 from '../../components/onboarding/OnboardingStep8';
+import OnboardingStep9 from '../../components/onboarding/OnboardingStep9';
 import { setOnboardingComplete, updateUser } from '../../store/authSlice';
 
-const steps = ['Personal Information', 'Job Preferences', 'Documents & Links'];
+const steps = [
+  'Personal Details',
+  'Resume & Documents',
+  'Employment History',
+  'Compliance & Checks',
+  'Availability',
+  'Application Preferences',
+  'Additional Info',
+  'Consent',
+];
 
 function OnboardingContent() {
   const router = useRouter();
@@ -52,27 +66,108 @@ function OnboardingContent() {
       if (!formData.fullName?.trim()) {
         isValid = false;
         errorMessages.push('Full Name is required');
+        setFieldError('fullName', 'Full Name is required');
       }
-      if (!formData.email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      if (!formData.email?.trim()) {
         isValid = false;
         errorMessages.push('Valid Email is required');
+        setFieldError('email', 'Email is required');
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        isValid = false;
+        errorMessages.push('Please enter a valid email address');
+        setFieldError('email', 'Please enter a valid email address');
+      }
+      if (!formData.phone?.trim()) {
+        isValid = false;
+        errorMessages.push('Phone Number is required');
+        setFieldError('phone', 'Phone Number is required');
+      }
+      if (!formData.currentLocation?.trim()) {
+        isValid = false;
+        errorMessages.push('Current Location is required');
+        setFieldError('currentLocation', 'Current Location is required');
+      }
+      if (!formData.workRightsInAustralia?.trim()) {
+        isValid = false;
+        errorMessages.push('Work Rights in Australia is required');
+        setFieldError('workRightsInAustralia', 'Work Rights in Australia is required');
+      }
+      if (formData.workRightsInAustralia === 'Visa Holder' && !formData.visaType?.trim()) {
+        isValid = false;
+        errorMessages.push('Visa Type is required when you are a Visa Holder');
+        setFieldError('visaType', 'Visa Type is required when you are a Visa Holder');
       }
     }
 
     if (step === 2) {
-      if (!formData.primaryJobTitles || formData.primaryJobTitles.length === 0) {
-        isValid = false;
-        errorMessages.push('At least one Primary Job Title is required');
-        setFieldError('primaryJobTitles', 'At least one job title is required');
-      }
-    }
-
-    if (step === 3) {
-      // Resume is mandatory
       if (!formData.resume_details) {
         isValid = false;
         errorMessages.push('Resume is required');
         setFieldError('resume', 'Resume is required. Please upload your resume.');
+      }
+    }
+
+    if (step === 3) {
+      if (!formData.currentRole?.trim()) {
+        isValid = false;
+        errorMessages.push('Current / Most Recent Role is required');
+        setFieldError('currentRole', 'Current / Most Recent Role is required');
+      }
+    }
+
+    if (step === 4) {
+      // Compliance & Checks - no required fields
+    }
+
+    if (step === 5) {
+      if (!formData.availableStartDate?.trim()) {
+        isValid = false;
+        errorMessages.push('Available Start Date is required');
+        setFieldError('availableStartDate', 'Available Start Date is required');
+      }
+    }
+
+    if (step === 6) {
+      if (!formData.howToApply?.trim()) {
+        isValid = false;
+        errorMessages.push('How Would You Like Us to Apply? is required');
+        setFieldError('howToApply', 'Please select an option');
+      }
+    }
+
+    if (step === 7) {
+      if (formData.linkedinProfile?.trim() && !/^https?:\/\/.+/i.test(formData.linkedinProfile)) {
+        isValid = false;
+        errorMessages.push('Please enter a valid LinkedIn URL');
+        setFieldError('linkedinProfile', 'Please enter a valid URL');
+      }
+      if (formData.portfolioWebsite?.trim() && !/^https?:\/\/.+/i.test(formData.portfolioWebsite)) {
+        isValid = false;
+        errorMessages.push('Please enter a valid Portfolio/Website URL');
+        setFieldError('portfolioWebsite', 'Please enter a valid URL');
+      }
+    }
+
+    if (step === 8) {
+      if (!formData.consentInfoAccurate) {
+        isValid = false;
+        errorMessages.push('Please confirm information is accurate');
+        setFieldError('consentInfoAccurate', 'Required');
+      }
+      if (!formData.consentSubmitApplications) {
+        isValid = false;
+        errorMessages.push('Please authorise submission of applications');
+        setFieldError('consentSubmitApplications', 'Required');
+      }
+      if (!formData.consentAccountCreation) {
+        isValid = false;
+        errorMessages.push('Please authorise account creation where required');
+        setFieldError('consentAccountCreation', 'Required');
+      }
+      if (!formData.consentTermsAndPrivacy) {
+        isValid = false;
+        errorMessages.push('Please agree to Terms of Service and Privacy Policy');
+        setFieldError('consentTermsAndPrivacy', 'Required');
       }
     }
 
@@ -86,7 +181,7 @@ function OnboardingContent() {
   const handleNext = () => {
     if (validateStep(currentStep)) {
       setSubmitError(null);
-      if (currentStep < 3) {
+      if (currentStep < 8) {
         nextStep();
       } else {
         handleSubmit();
@@ -123,39 +218,44 @@ function OnboardingContent() {
 
       // Prepare JSON data (files are already uploaded separately)
       const onboardingData = {
-        // Step 1: Personal Information
+        // Step 1: Personal Details
         fullName: formData.fullName,
+        email: formData.email,
         phoneCode: formData.phoneCode,
         phone: formData.phone,
-        address: formData.address,
-        houseNumber: formData.houseNumber || '',
-        streetName: formData.streetName || '',
-        suburb: formData.suburb || '',
-        state: formData.state || '',
-        postcode: formData.postcode || '',
-        openToRelocate: formData.openToRelocate,
-        countryOfWork: formData.countryOfWork,
-        visaSponsorshipRequired: formData.visaSponsorshipRequired,
-        // Step 2: Job Preferences & Compensation
-        primaryJobTitles: formData.primaryJobTitles || [],
-        skills: formData.skills || [],
-        totalYearsExperience: formData.totalYearsExperience || '',
-        seniorityLevel: formData.seniorityLevel || '',
-        jobTypes: formData.jobTypes || [],
-        workLocation: formData.workLocation || '',
-        locationPreference: formData.locationPreference || '',
-        remoteOnly: formData.remoteOnly || false,
-        minAcceptableSalary: formData.minAcceptableSalary || '',
-        preferredSalaryMin: formData.preferredSalaryMin || '',
-        preferredSalaryMax: formData.preferredSalaryMax || '',
-        equityPreference: formData.equityPreference || false,
-        // Step 3: Documents & Links
+        currentLocation: formData.currentLocation || '',
+        workRightsInAustralia: formData.workRightsInAustralia || '',
+        visaType: formData.workRightsInAustralia === 'Visa Holder' ? (formData.visaType || '') : '',
+        // Step 2: Resume & Documents
         resume_details: formData.resume_details,
         cv_details: formData.cv_details || null,
-        portfolioWebsite: formData.portfolioWebsite || '',
-        github: formData.github || '',
+        academicTranscripts_details: formData.academicTranscripts_details || null,
+        certifications_details: formData.certifications_details || null,
+        // Step 3: Employment History
+        currentRole: formData.currentRole || '',
+        previousRoles: formData.previousRoles || '',
+        keyResponsibilities: formData.keyResponsibilities || '',
+        keyAchievements: formData.keyAchievements || '',
+        // Step 4: Compliance & Checks
+        policeCheck: formData.policeCheck || '',
+        workingWithChildrenCheck: formData.workingWithChildrenCheck || '',
+        securityClearance: formData.securityClearance || '',
+        driversLicence: formData.driversLicence || '',
+        // Step 5: Availability
+        availableStartDate: formData.availableStartDate || '',
+        noticePeriod: formData.noticePeriod || '',
+        // Step 6: Application Preferences
+        howToApply: formData.howToApply || '',
+        companiesToAvoid: formData.companiesToAvoid || '',
+        // Step 7: Additional Information
         linkedinProfile: formData.linkedinProfile || '',
-        personalBlog: formData.personalBlog || '',
+        portfolioWebsite: formData.portfolioWebsite || '',
+        anythingElse: formData.anythingElse || '',
+        // Step 8: Consent
+        consentInfoAccurate: formData.consentInfoAccurate || false,
+        consentSubmitApplications: formData.consentSubmitApplications || false,
+        consentAccountCreation: formData.consentAccountCreation || false,
+        consentTermsAndPrivacy: formData.consentTermsAndPrivacy || false,
       };
 
       const response = await fetch(`${API_URL}/api/onboarding`, {
@@ -209,9 +309,19 @@ function OnboardingContent() {
       case 1:
         return <OnboardingStep1 />;
       case 2:
-        return <OnboardingStep2 />;
+        return <OnboardingStep3 />; // Resume & Documents
       case 3:
-        return <OnboardingStep3 />;
+        return <OnboardingStep4 />; // Employment History
+      case 4:
+        return <OnboardingStep5 />; // Compliance & Checks
+      case 5:
+        return <OnboardingStep6 />; // Availability
+      case 6:
+        return <OnboardingStep7 />; // Application Preferences
+      case 7:
+        return <OnboardingStep8 />; // Additional Information
+      case 8:
+        return <OnboardingStep9 />; // Consent & Authorisation
       default:
         return null;
     }
@@ -230,8 +340,8 @@ function OnboardingContent() {
           elevation={0}
           sx={{
             p: 4,
-            borderRadius: '12px',
-            border: '1px solid #e2e8f0',
+            borderRadius: '48px',
+            border: '1px solid #e5e7eb',
           }}
         >
           {/* Header */}
@@ -240,25 +350,27 @@ function OnboardingContent() {
               Complete Your Profile
             </Typography>
             <Typography sx={{ color: '#64748b', fontSize: '1rem' }}>
-              Help us personalize your job search experience
+              Help us personalize your job search experience.
             </Typography>
           </Box>
 
           {/* Progress Stepper */}
           <Box sx={{ mb: 4 }}>
-            <Stepper activeStep={currentStep - 1} alternativeLabel>
+            <Stepper
+              activeStep={currentStep - 1}
+              alternativeLabel
+              sx={{
+                '& .MuiStepIcon-root.Mui-active': { color: '#1e3a8a' },
+                '& .MuiStepIcon-root.Mui-completed': { color: '#1e3a8a' },
+                '& .MuiStepIcon-root': { color: '#d1d5db' },
+                '& .MuiStepConnector-line': { borderColor: '#e5e7eb' },
+                '& .MuiStepLabel-label': { fontSize: '0.875rem', fontWeight: 500, color: '#6b7280' },
+                '& .MuiStepLabel-label.Mui-active': { color: '#374151', fontWeight: 600 },
+              }}
+            >
               {steps.map((label) => (
                 <Step key={label}>
-                  <StepLabel
-                    sx={{
-                      '& .MuiStepLabel-label': {
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                      },
-                    }}
-                  >
-                    {label}
-                  </StepLabel>
+                  <StepLabel>{label}</StepLabel>
                 </Step>
               ))}
             </Stepper>
@@ -279,13 +391,21 @@ function OnboardingContent() {
           {/* Navigation Buttons */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
             <Button
+              variant="outlined"
               onClick={handlePrevious}
               disabled={currentStep === 1 || isSubmitting}
               sx={{
                 textTransform: 'none',
-                color: '#64748b',
+                color: '#6b7280',
+                borderColor: '#d1d5db',
+                borderRadius: '24px',
+                px: 3,
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 500,
                 '&:hover': {
-                  bgcolor: '#f1f5f9',
+                  borderColor: '#9ca3af',
+                  bgcolor: '#f9fafb',
                 },
               }}
             >
@@ -297,11 +417,11 @@ function OnboardingContent() {
               onClick={handleNext}
               disabled={isSubmitting}
               sx={{
-                bgcolor: '#2463eb',
+                bgcolor: '#1e3a8a',
                 color: 'white',
                 px: 4,
                 py: 1.5,
-                borderRadius: '8px',
+                borderRadius: '24px',
                 fontSize: '1rem',
                 fontWeight: 600,
                 textTransform: 'none',
@@ -315,7 +435,7 @@ function OnboardingContent() {
             >
               {isSubmitting ? (
                 <CircularProgress size={20} sx={{ color: 'white' }} />
-              ) : currentStep === 3 ? (
+              ) : currentStep === 8 ? (
                 'Complete Setup'
               ) : (
                 'Next'

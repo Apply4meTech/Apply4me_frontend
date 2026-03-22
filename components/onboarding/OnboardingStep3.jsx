@@ -8,7 +8,6 @@ import {
   Typography,
   Input,
   CircularProgress,
-  Chip,
   IconButton,
 } from '@mui/material';
 import { useOnboarding } from './OnboardingContext';
@@ -29,26 +28,10 @@ export default function OnboardingStep3() {
   const { formData, updateFormData, errors, setFieldError } = useOnboarding();
   const [uploadingResume, setUploadingResume] = useState(false);
   const [uploadingCV, setUploadingCV] = useState(false);
+  const [uploadingTranscripts, setUploadingTranscripts] = useState(false);
+  const [uploadingCerts, setUploadingCerts] = useState(false);
   const [resumeUploaded, setResumeUploaded] = useState(false);
 
-  const handleChange = (field) => (e) => {
-    const value = e.target.value;
-    updateFormData(field, value);
-    
-    // URL validation
-    if (value && ['portfolioWebsite', 'github', 'linkedinProfile', 'personalBlog'].includes(field)) {
-      try {
-        new URL(value);
-        if (errors[field]) {
-          setFieldError(field, '');
-        }
-      } catch {
-        if (value && !value.startsWith('http')) {
-          setFieldError(field, 'Please enter a valid URL (must start with http:// or https://)');
-        }
-      }
-    }
-  };
 
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
@@ -58,54 +41,44 @@ export default function OnboardingStep3() {
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   };
 
+  const UPLOAD_CONFIG = {
+    resume: { type: 'resume', accept: '.pdf,.doc,.docx', maxMB: 10, setLoading: (v) => setUploadingResume(v) },
+    cv: { type: 'cv', accept: '.pdf,.doc,.docx', maxMB: 10, setLoading: (v) => setUploadingCV(v) },
+    academic_transcripts: { type: 'academic_transcripts', accept: '.pdf,.doc,.docx', maxMB: 10, setLoading: (v) => setUploadingTranscripts(v) },
+    certifications: { type: 'certifications', accept: '.pdf,.doc,.docx,.png,.jpg,.jpeg,.gif,.webp', maxMB: 10, setLoading: (v) => setUploadingCerts(v) },
+  };
+
   const handleFileChange = (field) => async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file type
-    const allowedTypes = {
-      resume: ['.pdf', '.doc', '.docx'],
-      cv: ['.pdf', '.doc', '.docx', '.txt'],
-    };
-    
-    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
-    const allowed = allowedTypes[field] || ['.pdf', '.doc', '.docx'];
-    
-    if (!allowed.includes(fileExtension)) {
-      setFieldError(field, `Please upload a ${allowed.join(', ')} file`);
-      return;
-    }
-    
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setFieldError(field, 'File size must be less than 5MB');
+    const config = UPLOAD_CONFIG[field];
+    if (!config) return;
+
+    const ext = '.' + (file.name.split('.').pop() || '').toLowerCase();
+    const allowed = config.accept.split(',').map((x) => x.trim().toLowerCase());
+    if (!allowed.includes(ext)) {
+      setFieldError(field, `Please upload a ${config.accept.replace(/\./g, '').replace(/,/g, ', ')} file`);
       return;
     }
 
-    // Clear any previous errors
-    if (errors[field]) {
-      setFieldError(field, '');
+    if (file.size > config.maxMB * 1024 * 1024) {
+      setFieldError(field, `File size must be less than ${config.maxMB}MB`);
+      return;
     }
 
-    // Upload file immediately
-    const isResume = field === 'resume';
-    if (isResume) {
-      setUploadingResume(true);
-    } else {
-      setUploadingCV(true);
-    }
+    if (errors[field]) setFieldError(field, '');
+
+    config.setLoading(true);
 
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentication required. Please login again.');
-      }
+      if (!token) throw new Error('Authentication required. Please login again.');
 
       const formDataToSend = new FormData();
       formDataToSend.append('file', file);
 
-      const fileType = isResume ? 'resume' : 'cv';
-      const response = await fetch(`${API_URL}/api/upload/${fileType}`, {
+      const response = await fetch(`${API_URL}/api/upload/${config.type}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -115,19 +88,12 @@ export default function OnboardingStep3() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to upload file');
-      }
+      if (!response.ok) throw new Error(data.error || 'Failed to upload file');
 
       if (data.success && data.fileDetails) {
-        // Save file details to form data
-        const detailsKey = isResume ? 'resume_details' : 'cv_details';
+        const detailsKey = field === 'resume' ? 'resume_details' : field === 'cv' ? 'cv_details' : field === 'academic_transcripts' ? 'academicTranscripts_details' : 'certifications_details';
         updateFormData(detailsKey, data.fileDetails);
-        
-        // If resume was uploaded, trigger ATS report display
-        if (isResume) {
-          setResumeUploaded(true);
-        }
+        if (field === 'resume') setResumeUploaded(true);
       } else {
         throw new Error('Invalid response from server');
       }
@@ -135,28 +101,27 @@ export default function OnboardingStep3() {
       console.error('Error uploading file:', error);
       setFieldError(field, error.message || 'Failed to upload file. Please try again.');
     } finally {
-      if (isResume) {
-        setUploadingResume(false);
-      } else {
-        setUploadingCV(false);
-      }
-      // Reset file input
+      config.setLoading(false);
       e.target.value = '';
     }
   };
 
+  const FILE_FIELD_MAP = {
+    resume: { type: 'resume', detailsKey: 'resume_details' },
+    cv: { type: 'cv', detailsKey: 'cv_details' },
+    academic_transcripts: { type: 'academic_transcripts', detailsKey: 'academicTranscripts_details' },
+    certifications: { type: 'certifications', detailsKey: 'certifications_details' },
+  };
+
   const handleRemoveFile = async (field) => {
-    const isResume = field === 'resume';
-    const fileType = isResume ? 'resume' : 'cv';
-    const detailsKey = isResume ? 'resume_details' : 'cv_details';
+    const map = FILE_FIELD_MAP[field];
+    if (!map) return;
 
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentication required');
-      }
+      if (!token) throw new Error('Authentication required');
 
-      const response = await fetch(`${API_URL}/api/upload/${fileType}`, {
+      const response = await fetch(`${API_URL}/api/upload/${map.type}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -166,13 +131,8 @@ export default function OnboardingStep3() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        // Remove from form data
-        updateFormData(detailsKey, null);
-        
-        // If resume was deleted, reset ATS report state
-        if (isResume) {
-          setResumeUploaded(false);
-        }
+        updateFormData(map.detailsKey, null);
+        if (field === 'resume') setResumeUploaded(false);
       } else {
         throw new Error(data.error || 'Failed to delete file');
       }
@@ -188,107 +148,75 @@ export default function OnboardingStep3() {
     }
   };
 
+  const FileUploadBlock = ({ field, label, required, details, helperText }) => {
+    const config = UPLOAD_CONFIG[field];
+    const map = FILE_FIELD_MAP[field];
+    if (!config || !map) return null;
+    const loading = field === 'resume' ? uploadingResume : field === 'cv' ? uploadingCV : field === 'academic_transcripts' ? uploadingTranscripts : uploadingCerts;
+
+    return (
+      <Box>
+        <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
+          {label} {required && <span style={{ color: '#dc2626' }}>*</span>}
+        </Typography>
+        {!details ? (
+          <Box>
+            <Button
+              variant="outlined"
+              component="label"
+              startIcon={loading ? <CircularProgress size={16} /> : <CloudUploadIcon />}
+              disabled={loading}
+              sx={{
+                borderRadius: '24px',
+                textTransform: 'none',
+                borderColor: '#e2e8f0',
+                color: '#0f172a',
+                '&:hover': { borderColor: '#2463eb', bgcolor: '#eff6ff' },
+                '&:disabled': { borderColor: '#cbd5e1', color: '#94a3b8' },
+              }}
+            >
+              {loading ? 'Uploading...' : `Upload ${label}`}
+              <Input type="file" accept={config.accept} onChange={handleFileChange(field)} disabled={loading} sx={{ display: 'none' }} />
+            </Button>
+            {errors[field] && (
+              <Typography sx={{ fontSize: '0.75rem', color: '#dc2626', mt: 1 }}>{errors[field]}</Typography>
+            )}
+          </Box>
+        ) : (
+          <Box sx={{ p: 2, border: '1px solid #e2e8f0', borderRadius: '24px', bgcolor: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
+              <DescriptionIcon sx={{ color: '#2463eb', fontSize: 32 }} />
+              <Box sx={{ flex: 1 }}>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>{details.fileName}</Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: '#64748b', mt: 0.5 }}>{formatFileSize(details.fileSize)}</Typography>
+              </Box>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <IconButton size="small" onClick={() => handleViewFile(details)} sx={{ color: '#2463eb', '&:hover': { bgcolor: '#eff6ff' } }} title="View file">
+                <VisibilityIcon />
+              </IconButton>
+              <IconButton size="small" onClick={() => handleRemoveFile(field)} sx={{ color: '#ef4444', '&:hover': { bgcolor: '#fee2e2' } }} title="Remove file">
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          </Box>
+        )}
+        {helperText && (
+          <Typography sx={{ fontSize: '0.75rem', color: '#64748b', mt: 0.5 }}>{helperText}</Typography>
+        )}
+      </Box>
+    );
+  };
+
   return (
     <Box>
       <Typography variant="h6" sx={{ fontWeight: 600, color: '#0f172a', mb: 3 }}>
-        Documents & Links
+        Resume & Documents
       </Typography>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        {/* Resume Upload */}
-        <Box>
-          <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
-            Resume <span style={{ color: '#dc2626' }}>*</span>
-          </Typography>
-          
-          {!formData.resume_details ? (
-            <Box>
-              <Button
-                variant="outlined"
-                component="label"
-                startIcon={uploadingResume ? <CircularProgress size={16} /> : <CloudUploadIcon />}
-                disabled={uploadingResume}
-                sx={{
-                  borderRadius: '8px',
-                  textTransform: 'none',
-                  borderColor: '#e2e8f0',
-                  color: '#0f172a',
-                  '&:hover': {
-                    borderColor: '#2463eb',
-                    bgcolor: '#eff6ff',
-                  },
-                  '&:disabled': {
-                    borderColor: '#cbd5e1',
-                    color: '#94a3b8',
-                  },
-                }}
-              >
-                {uploadingResume ? 'Uploading...' : 'Upload Resume'}
-                <Input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleFileChange('resume')}
-                  disabled={uploadingResume}
-                  sx={{ display: 'none' }}
-                />
-              </Button>
-              {errors.resume && (
-                <Typography sx={{ fontSize: '0.75rem', color: '#dc2626', mt: 1 }}>
-                  {errors.resume}
-                </Typography>
-              )}
-            </Box>
-          ) : (
-            <Box
-              sx={{
-                p: 2,
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                bgcolor: '#f8fafc',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 2,
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
-                <DescriptionIcon sx={{ color: '#2463eb', fontSize: 32 }} />
-                <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
-                    {formData.resume_details.fileName}
-                  </Typography>
-                  <Typography sx={{ fontSize: '0.75rem', color: '#64748b', mt: 0.5 }}>
-                    {formatFileSize(formData.resume_details.fileSize)}
-                  </Typography>
-                </Box>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <IconButton
-                  size="small"
-                  onClick={() => handleViewFile(formData.resume_details)}
-                  sx={{
-                    color: '#2463eb',
-                    '&:hover': { bgcolor: '#eff6ff' },
-                  }}
-                  title="View file"
-                >
-                  <VisibilityIcon />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() => handleRemoveFile('resume')}
-                  sx={{
-                    color: '#ef4444',
-                    '&:hover': { bgcolor: '#fee2e2' },
-                  }}
-                  title="Remove file"
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            </Box>
-          )}
-        </Box>
+        {/* Upload Resume * */}
+        <FileUploadBlock field="resume" label="Resume" required details={formData.resume_details} helperText="PDF or DOCX. Max 10MB" />
 
         {/* ATS Report - Show after resume is uploaded */}
         {formData.resume_details && (
@@ -303,168 +231,11 @@ export default function OnboardingStep3() {
           </Box>
         )}
 
-        {/* CV (Cover Letter) Upload */}
-        <Box>
-          <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
-            Cover Letter (CV)
-          </Typography>
-          
-          {!formData.cv_details ? (
-            <Box>
-              <Button
-                variant="outlined"
-                component="label"
-                startIcon={uploadingCV ? <CircularProgress size={16} /> : <CloudUploadIcon />}
-                disabled={uploadingCV}
-                sx={{
-                  borderRadius: '8px',
-                  textTransform: 'none',
-                  borderColor: '#e2e8f0',
-                  color: '#0f172a',
-                  '&:hover': {
-                    borderColor: '#2463eb',
-                    bgcolor: '#eff6ff',
-                  },
-                  '&:disabled': {
-                    borderColor: '#cbd5e1',
-                    color: '#94a3b8',
-                  },
-                }}
-              >
-                {uploadingCV ? 'Uploading...' : 'Upload Cover Letter'}
-                <Input
-                  type="file"
-                  accept=".pdf,.doc,.docx,.txt"
-                  onChange={handleFileChange('cv')}
-                  disabled={uploadingCV}
-                  sx={{ display: 'none' }}
-                />
-              </Button>
-              {errors.cv && (
-                <Typography sx={{ fontSize: '0.75rem', color: '#dc2626', mt: 1 }}>
-                  {errors.cv}
-                </Typography>
-              )}
-            </Box>
-          ) : (
-            <Box
-              sx={{
-                p: 2,
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                bgcolor: '#f8fafc',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 2,
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
-                <DescriptionIcon sx={{ color: '#2463eb', fontSize: 32 }} />
-                <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
-                    {formData.cv_details.fileName}
-                  </Typography>
-                  <Typography sx={{ fontSize: '0.75rem', color: '#64748b', mt: 0.5 }}>
-                    {formatFileSize(formData.cv_details.fileSize)}
-                  </Typography>
-                </Box>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <IconButton
-                  size="small"
-                  onClick={() => handleViewFile(formData.cv_details)}
-                  sx={{
-                    color: '#2463eb',
-                    '&:hover': { bgcolor: '#eff6ff' },
-                  }}
-                  title="View file"
-                >
-                  <VisibilityIcon />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() => handleRemoveFile('cv')}
-                  sx={{
-                    color: '#ef4444',
-                    '&:hover': { bgcolor: '#fee2e2' },
-                  }}
-                  title="Remove file"
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            </Box>
-          )}
-        </Box>
+        <FileUploadBlock field="cv" label="Cover Letter" required={false} details={formData.cv_details} helperText="Optional. PDF or DOCX" />
 
-        {/* Portfolio Website */}
-        <TextField
-          fullWidth
-          label="Portfolio website"
-          type="url"
-          value={formData.portfolioWebsite}
-          onChange={handleChange('portfolioWebsite')}
-          placeholder="https://yourportfolio.com"
-          error={!!errors.portfolioWebsite}
-          helperText={errors.portfolioWebsite}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
-            },
-          }}
-        />
+        <FileUploadBlock field="academic_transcripts" label="Academic Transcripts" required={false} details={formData.academicTranscripts_details} helperText="Optional. If applicable" />
 
-        {/* Github */}
-        <TextField
-          fullWidth
-          label="Github"
-          type="url"
-          value={formData.github}
-          onChange={handleChange('github')}
-          placeholder="https://github.com/username"
-          error={!!errors.github}
-          helperText={errors.github}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
-            },
-          }}
-        />
-
-        {/* LinkedIn Profile */}
-        <TextField
-          fullWidth
-          label="LinkedIn Profile"
-          type="url"
-          value={formData.linkedinProfile}
-          onChange={handleChange('linkedinProfile')}
-          placeholder="https://linkedin.com/in/yourprofile"
-          error={!!errors.linkedinProfile}
-          helperText={errors.linkedinProfile}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
-            },
-          }}
-        />
-
-        {/* Personal Blog */}
-        <TextField
-          fullWidth
-          label="Personal blog"
-          type="url"
-          value={formData.personalBlog}
-          onChange={handleChange('personalBlog')}
-          placeholder="https://yourblog.com"
-          error={!!errors.personalBlog}
-          helperText={errors.personalBlog}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '8px',
-            },
-          }}
-        />
+        <FileUploadBlock field="certifications" label="Certifications / Licences" required={false} details={formData.certifications_details} helperText="Optional. PDF or image" />
       </Box>
     </Box>
   );

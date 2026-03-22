@@ -52,7 +52,7 @@ const Header = () => {
     { href: '/about-us', label: 'About Us' },
     { href: '/pricing', label: 'Pricing' },
     { href: '/#how-works', label: 'How It Works' },
-    { href: '#', label: 'Connect' },
+    { href: '#connect', label: 'Connect' },
   ];
 
   const isActiveLink = (href) => {
@@ -272,7 +272,7 @@ const Header = () => {
             </Link>
           ))}
           <Link
-            href={isAuthenticated ? '/dashboard' : '/login'}
+            href={isAuthenticated ? (user?.isEmployee ? '/employee/dashboard' : '/dashboard') : '/login'}
             onClick={() => setMobileMenuOpen(false)}
             style={{ color: '#fff', textDecoration: 'none', padding: '0.75rem', marginTop: '1rem' }}
           >

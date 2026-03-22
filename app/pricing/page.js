@@ -27,7 +27,8 @@ export default function Pricing() {
   const [userPlan, setUserPlan] = useState(null);
   const [userPlanLoading, setUserPlanLoading] = useState(false);
   
-  const { token, user, isAuthenticated } = useSelector((state) => state.auth);
+  const { token: reduxToken, user, isAuthenticated } = useSelector((state) => state.auth);
+  const token = reduxToken || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
   const router = useRouter();
   
   // Animation refs
@@ -178,19 +179,32 @@ export default function Pricing() {
     setProcessingPlan(plan.name);
 
     try {
-      const price = plan.price;
-      
+      const price = Number(plan.price);
+      if (!price || price <= 0) {
+        alert('Invalid plan price. Please contact support.');
+        setProcessingPayment(false);
+        setProcessingPlan(null);
+        return;
+      }
+
       // Prepare order data (one-time payment)
       const orderData = {
         amount: price,
         customerInfo: {
-          name: user.name || 'User',
-          email: user.email,
-          phone: user.phone || ''
+          name: user?.name || user?.fullName || 'User',
+          email: user?.email || '',
+          phone: user?.phone || user?.phoneCode || ''
         },
         planName: plan.name,
         billingPeriod: 'onetime'
       };
+
+      if (!orderData.customerInfo.email) {
+        alert('Email is required for payment. Please update your profile.');
+        setProcessingPayment(false);
+        setProcessingPlan(null);
+        return;
+      }
 
       // Create Stripe payment intent
       const paymentIntentResult = await stripeService.createPaymentIntent(orderData, token);
@@ -202,8 +216,8 @@ export default function Pricing() {
         return;
       }
 
-      const paymentIntentId = paymentIntentResult.data.payment_intent_id;
-      const clientSecret = paymentIntentResult.client_secret;
+      const paymentIntentId = paymentIntentResult.data?.payment_intent_id || paymentIntentResult.data?.id;
+      const clientSecret = paymentIntentResult.client_secret || paymentIntentResult.data?.client_secret;
 
       if (!clientSecret || !paymentIntentId) {
         alert('Failed to initialize payment. Please try again.');
