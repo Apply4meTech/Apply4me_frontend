@@ -202,14 +202,7 @@ export default function Signup() {
           {/* Logo */}
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
             <Link href="/" style={{ textDecoration: 'none' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Box
-                  component="img"
-                  src="/afm_logo_black.png"
-                  alt="Apply For Me"
-                  sx={{ width: 44, height: 44, objectFit: 'contain', display: 'block' }}
-                />
-                <Typography
+              <Typography
                   sx={{
                     color: '#0f172a',
                     fontSize: '1.25rem',
@@ -231,7 +224,6 @@ export default function Signup() {
                     Me
                   </Box>
                 </Typography>
-              </Box>
             </Link>
           </Box>
 
@@ -484,17 +476,10 @@ export default function Signup() {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
               color: 'white',
               textDecoration: 'none',
             }}
           >
-            <Box
-              component="img"
-              src="/afm_logo_white.png"
-              alt="Apply For Me"
-              sx={{ width: 44, height: 44, objectFit: 'contain', display: 'block' }}
-            />
             <Typography
               sx={{
                 fontSize: '1.25rem',
