@@ -105,12 +105,6 @@ const Header = () => {
           }}
         >
           <Box
-            component="img"
-            src="/afm_logo_white.png"
-            alt="Apply For Me"
-            sx={{ width: { xs: 48, sm: 56 }, height: { xs: 48, sm: 56 }, objectFit: 'contain', display: 'block' }}
-          />
-          <Box
             component="span"
             sx={{
               color: '#FFFFFF',

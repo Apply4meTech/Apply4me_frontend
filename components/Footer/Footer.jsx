@@ -54,12 +54,6 @@ export default function Footer() {
           {/* Brand */}
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <Link href="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Box
-                component="img"
-                src="/afm_logo_black.png"
-                alt="Apply For Me"
-                sx={{ width: { xs: 48, sm: 56 }, height: { xs: 48, sm: 56 }, objectFit: 'contain', display: 'block' }}
-              />
               <Typography
                 component="span"
                 sx={{
