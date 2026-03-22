@@ -51,7 +51,6 @@ export default function Footer() {
             marginBottom: { xs: '2rem', md: '2.5rem' },
           }}
         >
-          {/* Brand */}
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <Link href="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
               <Typography
