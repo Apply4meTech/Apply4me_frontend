@@ -2,17 +2,26 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Box, useMediaQuery, useTheme, Drawer } from '@mui/material';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '@/store/authSlice';
 
 const Header = () => {
   const theme = useTheme();
+  const router = useRouter();
+  const dispatch = useDispatch();
   const isMobile = useMediaQuery(theme.breakpoints.down(650));
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { isAuthenticated, user } = useSelector((state) => state.auth);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    setMobileMenuOpen(false);
+    router.push('/');
+  };
 
   const isHome = pathname === '/';
   const isPricing = pathname === '/pricing';
@@ -190,40 +199,98 @@ const Header = () => {
           </Box>
         </Box>
 
-        {/* Box 3 - Right: Login/Dashboard (desktop) or Mobile menu button */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0 }}>
+        {/* Box 3 - Right: Login/Dashboard/Logout (desktop) or Mobile menu button */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0, gap: '0.5rem' }}>
           <Box
             sx={{
-              display: { xs: 'none', lg: 'block' },
+              display: { xs: 'none', lg: 'flex' },
+              alignItems: 'center',
+              gap: '0.5rem',
             }}
           >
-            <Link
-              href={isAuthenticated ? (user?.isEmployee ? '/employee/dashboard' : '/dashboard') : '/login'}
-              style={{ textDecoration: 'none' }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  color: '#fff',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  padding: '0.5rem 1.25rem',
-                  borderRadius: '9999px',
-                  border: '1px solid rgba(255,255,255,0.6)',
-                  background: 'transparent',
-                  transition: 'background 0.15s',
-                  '&:hover': { background: 'rgba(255,255,255,0.12)' },
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-                {isAuthenticated ? 'Dashboard' : 'Login'}
-              </Box>
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link
+                  href={user?.isEmployee ? '/employee/dashboard' : '/dashboard'}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      color: '#fff',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      padding: '0.5rem 1.25rem',
+                      borderRadius: '9999px',
+                      border: '1px solid rgba(255,255,255,0.6)',
+                      background: 'transparent',
+                      transition: 'background 0.15s',
+                      '&:hover': { background: 'rgba(255,255,255,0.12)' },
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    Dashboard
+                  </Box>
+                </Link>
+                <Box
+                  component="button"
+                  onClick={handleLogout}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    color: '#fff',
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    padding: '0.5rem 1.25rem',
+                    borderRadius: '9999px',
+                    border: '1px solid rgba(255,255,255,0.6)',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    transition: 'background 0.15s',
+                    '&:hover': { background: 'rgba(255,255,255,0.12)' },
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  Logout
+                </Box>
+              </>
+            ) : (
+              <Link href="/login" style={{ textDecoration: 'none' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    color: '#fff',
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    padding: '0.5rem 1.25rem',
+                    borderRadius: '9999px',
+                    border: '1px solid rgba(255,255,255,0.6)',
+                    background: 'transparent',
+                    transition: 'background 0.15s',
+                    '&:hover': { background: 'rgba(255,255,255,0.12)' },
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                  Login
+                </Box>
+              </Link>
+            )}
           </Box>
 
           {/* Mobile Menu Button */}
@@ -271,13 +338,43 @@ const Header = () => {
               {link.label}
             </Link>
           ))}
-          <Link
-            href={isAuthenticated ? (user?.isEmployee ? '/employee/dashboard' : '/dashboard') : '/login'}
-            onClick={() => setMobileMenuOpen(false)}
-            style={{ color: '#fff', textDecoration: 'none', padding: '0.75rem', marginTop: '1rem' }}
-          >
-            {isAuthenticated ? 'Dashboard' : 'Login'}
-          </Link>
+          <Box sx={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            {isAuthenticated ? (
+              <>
+                <Link
+                  href={user?.isEmployee ? '/employee/dashboard' : '/dashboard'}
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{ color: '#fff', textDecoration: 'none', padding: '0.75rem' }}
+                >
+                  Dashboard
+                </Link>
+                <Box
+                  component="button"
+                  onClick={handleLogout}
+                  sx={{
+                    color: '#fff',
+                    padding: '0.75rem',
+                    textAlign: 'left',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    fontSize: '1rem',
+                  }}
+                >
+                  Logout
+                </Box>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{ color: '#fff', textDecoration: 'none', padding: '0.75rem' }}
+              >
+                Login
+              </Link>
+            )}
+          </Box>
         </Box>
       </Drawer>
     </Box>
