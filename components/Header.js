@@ -76,7 +76,6 @@ const Header = () => {
         position: 'sticky',
         top: 0,
         zIndex: 1000,
-        // Keep header visually blended with hero:
         // - no background tint at top
         // - only blur behind the header after scroll
         background: showHeaderBg
@@ -114,12 +113,6 @@ const Header = () => {
             flexShrink: 0,
           }}
         >
-          <Box
-            component="img"
-            src="/afm_logo_white.png"
-            alt="Apply For Me"
-            sx={{ width: { xs: 48, sm: 56 }, height: { xs: 48, sm: 56 }, objectFit: 'contain', display: 'block' }}
-          />
           <Box
             component="span"
             sx={{
