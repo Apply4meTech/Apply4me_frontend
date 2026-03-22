@@ -67,7 +67,6 @@ const Header = () => {
         position: 'sticky',
         top: 0,
         zIndex: 1000,
-        // Keep header visually blended with hero:
         // - no background tint at top
         // - only blur behind the header after scroll
         background: showHeaderBg
