@@ -15,6 +15,9 @@ import {
   StepLabel,
   CircularProgress,
   Alert,
+  LinearProgress,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import { OnboardingProvider, useOnboarding } from '../../components/onboarding/OnboardingContext';
 import OnboardingStep1 from '../../components/onboarding/OnboardingStep1';
@@ -42,6 +45,8 @@ function OnboardingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { user } = useSelector((state) => state.auth);
   const {
     formData,
@@ -333,47 +338,72 @@ function OnboardingContent() {
         minHeight: '100vh',
         bgcolor: '#f8fafc',
         py: 4,
+        overflowX: 'hidden',
       }}
     >
-      <Container maxWidth="md">
+      <Container maxWidth="md" sx={{ px: { xs: 1.5, sm: 2 }, overflow: 'hidden' }}>
         <Paper
           elevation={0}
           sx={{
-            p: 4,
-            borderRadius: '48px',
+            p: { xs: 2, sm: 3, md: 4 },
+            borderRadius: { xs: '24px', sm: '36px', md: '48px' },
             border: '1px solid #e5e7eb',
+            overflow: 'hidden',
           }}
         >
           {/* Header */}
-          <Box sx={{ mb: 4, textAlign: 'center' }}>
-            <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a', mb: 1 }}>
+          <Box sx={{ mb: { xs: 2, sm: 4 }, textAlign: 'center' }}>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a', mb: 1, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
               Complete Your Profile
             </Typography>
-            <Typography sx={{ color: '#64748b', fontSize: '1rem' }}>
+            <Typography sx={{ color: '#64748b', fontSize: { xs: '0.875rem', sm: '1rem' } }}>
               Help us personalize your job search experience.
             </Typography>
           </Box>
 
-          {/* Progress Stepper */}
-          <Box sx={{ mb: 4 }}>
-            <Stepper
-              activeStep={currentStep - 1}
-              alternativeLabel
-              sx={{
-                '& .MuiStepIcon-root.Mui-active': { color: '#1e3a8a' },
-                '& .MuiStepIcon-root.Mui-completed': { color: '#1e3a8a' },
-                '& .MuiStepIcon-root': { color: '#d1d5db' },
-                '& .MuiStepConnector-line': { borderColor: '#e5e7eb' },
-                '& .MuiStepLabel-label': { fontSize: '0.875rem', fontWeight: 500, color: '#6b7280' },
-                '& .MuiStepLabel-label.Mui-active': { color: '#374151', fontWeight: 600 },
-              }}
-            >
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
+          {/* Progress Stepper - responsive: compact on mobile, full on desktop */}
+          <Box sx={{ mb: 4, overflow: 'hidden' }}>
+            {isMobile ? (
+              <Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+                    {steps[currentStep - 1]}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.8125rem', color: '#6b7280', fontWeight: 500 }}>
+                    Step {currentStep} of {steps.length}
+                  </Typography>
+                </Box>
+                <LinearProgress
+                  variant="determinate"
+                  value={(currentStep / steps.length) * 100}
+                  sx={{
+                    height: 6,
+                    borderRadius: 3,
+                    bgcolor: '#e5e7eb',
+                    '& .MuiLinearProgress-bar': { bgcolor: '#1e3a8a' },
+                  }}
+                />
+              </Box>
+            ) : (
+              <Stepper
+                activeStep={currentStep - 1}
+                alternativeLabel
+                sx={{
+                  '& .MuiStepIcon-root.Mui-active': { color: '#1e3a8a' },
+                  '& .MuiStepIcon-root.Mui-completed': { color: '#1e3a8a' },
+                  '& .MuiStepIcon-root': { color: '#d1d5db' },
+                  '& .MuiStepConnector-line': { borderColor: '#e5e7eb' },
+                  '& .MuiStepLabel-label': { fontSize: '0.875rem', fontWeight: 500, color: '#6b7280' },
+                  '& .MuiStepLabel-label.Mui-active': { color: '#374151', fontWeight: 600 },
+                }}
+              >
+                {steps.map((label) => (
+                  <Step key={label}>
+                    <StepLabel>{label}</StepLabel>
+                  </Step>
+                ))}
+              </Stepper>
+            )}
           </Box>
 
           {/* Error Alert */}
@@ -384,12 +414,12 @@ function OnboardingContent() {
           )}
 
           {/* Step Content */}
-          <Box sx={{ mb: 4, minHeight: '400px' }}>
+          <Box sx={{ mb: { xs: 3, sm: 4 }, minHeight: { xs: '280px', sm: '400px' } }}>
             {renderStepContent()}
           </Box>
 
           {/* Navigation Buttons */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}>
             <Button
               variant="outlined"
               onClick={handlePrevious}
@@ -399,9 +429,9 @@ function OnboardingContent() {
                 color: '#6b7280',
                 borderColor: '#d1d5db',
                 borderRadius: '24px',
-                px: 3,
+                px: { xs: 2, sm: 3 },
                 py: 1.5,
-                fontSize: '1rem',
+                fontSize: { xs: '0.875rem', sm: '1rem' },
                 fontWeight: 500,
                 '&:hover': {
                   borderColor: '#9ca3af',
@@ -419,10 +449,10 @@ function OnboardingContent() {
               sx={{
                 bgcolor: '#1e3a8a',
                 color: 'white',
-                px: 4,
+                px: { xs: 3, sm: 4 },
                 py: 1.5,
                 borderRadius: '24px',
-                fontSize: '1rem',
+                fontSize: { xs: '0.875rem', sm: '1rem' },
                 fontWeight: 600,
                 textTransform: 'none',
                 '&:hover': {
