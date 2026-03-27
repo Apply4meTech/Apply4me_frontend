@@ -102,6 +102,7 @@ export default function EmployeeDashboard() {
     totalCompleted: 0,
     totalPending: 0,
     totalInProgress: 0,
+    customerCount: 0,
     jobs: []
   });
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
@@ -829,6 +830,19 @@ export default function EmployeeDashboard() {
             </Typography>
             <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#1d4ed8' }}>
               {dashboardData.totalInProgress ?? 0}
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper elevation={0} sx={{ p: 3, borderRadius: '12px', border: '1px solid #e2e8f0', bgcolor: 'white' }}>
+            <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
+              {isSuperAdmin ? 'Total Customers' : 'My Customers'}
+            </Typography>
+            <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#7c3aed' }}>
+              {dashboardData.customerCount ?? 0}
+            </Typography>
+            <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', mt: 0.5 }}>
+              {isSuperAdmin ? 'Registered accounts (role: user)' : 'Distinct users with jobs assigned to you'}
             </Typography>
           </Paper>
         </Grid>

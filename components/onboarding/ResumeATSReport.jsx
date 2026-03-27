@@ -99,11 +99,11 @@ export default function ResumeATSReport({ resumeUploaded, onOptimizeComplete }) 
   }, [token]);
 
   useEffect(() => {
-    if (resumeUploaded) {
+    if (resumeUploaded && hasATSAccess) {
       const timer = setTimeout(() => fetchATSReport(), 3000);
       return () => clearTimeout(timer);
     }
-  }, [resumeUploaded]);
+  }, [resumeUploaded, hasATSAccess]);
 
   const fetchATSReport = async () => {
     try {
@@ -247,6 +247,27 @@ export default function ResumeATSReport({ resumeUploaded, onOptimizeComplete }) 
   };
 
   const isDevFakeEnabled = process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_ENABLE_DEV_FAKE_PAYMENT === 'true';
+
+  if (planLoading) {
+    return (
+      <Box sx={{ p: 2, textAlign: 'center' }}>
+        <CircularProgress size={28} />
+        <Typography sx={{ mt: 1, fontSize: '0.875rem', color: '#64748b' }}>Loading your plan…</Typography>
+      </Box>
+    );
+  }
+
+  if (!hasATSAccess) {
+    return (
+      <Alert severity="info" sx={{ mt: 2, borderRadius: '10px' }}>
+        <Typography sx={{ fontWeight: 600, mb: 0.5 }}>Resume on file</Typography>
+        <Typography sx={{ fontSize: '0.875rem', lineHeight: 1.5 }}>
+          Your Starter plan uses your uploaded resume as-is. ATS analysis and an ATS-friendly PDF are available on{' '}
+          <strong>Standard, Pro, or Premium</strong>, or with the <strong>Custom Resume Rewrite</strong> add-on.
+        </Typography>
+      </Alert>
+    );
+  }
 
   if (loading && !report) {
     return (

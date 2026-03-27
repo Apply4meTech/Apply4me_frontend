@@ -9,6 +9,9 @@ import MainLayout from '../../../components/layouts/MainLayout';
 import Link from 'next/link';
 import stripeService from '../../../utils/stripeService';
 import { updateUser } from '../../../store/authSlice';
+import { isAddonPlanCode } from '../../../utils/addonCatalog';
+
+const MAIN_PLANS = ['Starter', 'Standard', 'Pro', 'Premium'];
 
 function PaymentSuccessContent() {
   const router = useRouter();
@@ -36,21 +39,19 @@ function PaymentSuccessContent() {
         if (verifyResult.success) {
           setVerified(true);
           const planName = verifyResult.data?.planName;
-          if (planName === 'ATS_ADDON') {
+          if (planName && isAddonPlanCode(planName)) {
             const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
             const base = API_URL.endsWith('/api') ? API_URL.slice(0, -4) : API_URL;
             try {
               const planRes = await fetch(`${base}/api/users/my-plan`, { headers: { Authorization: `Bearer ${token}` } });
               const planData = await planRes.json();
-              if (planData.success && planData.data?.purchasedAddons) {
+              if (planData.success && Array.isArray(planData.data?.purchasedAddons)) {
                 dispatch(updateUser({ purchasedAddons: planData.data.purchasedAddons }));
-              } else {
-                dispatch(updateUser({ purchasedAddons: [{ name: 'resume_rewrite', purchasedAt: new Date() }] }));
               }
-            } catch {
-              dispatch(updateUser({ purchasedAddons: [{ name: 'resume_rewrite', purchasedAt: new Date() }] }));
+            } catch (e) {
+              console.error('Could not refresh add-ons after payment:', e);
             }
-          } else if (planName) {
+          } else if (planName && MAIN_PLANS.includes(planName)) {
             dispatch(updateUser({ hasActiveSubscription: true, subscription: { planName, status: 'active' } }));
           }
         } else {

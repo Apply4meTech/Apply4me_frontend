@@ -22,6 +22,7 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
+import YourAddonsSection from '../../../../components/dashboard/YourAddonsSection';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
 const getApiUrl = () => {
@@ -116,7 +117,10 @@ export default function PlanPage() {
     );
   }
 
-  if (!planData || !planData.plan) {
+  const purchasedAddons = planData?.purchasedAddons || [];
+  const hasSubscriptionPlan = !!(planData?.plan && planData?.subscription?.planName);
+
+  if (!hasSubscriptionPlan) {
     return (
       <Box>
         <Box sx={{ mb: 4 }}>
@@ -128,6 +132,8 @@ export default function PlanPage() {
           </Typography>
         </Box>
 
+        <YourAddonsSection purchasedAddons={purchasedAddons} />
+
         <Paper 
           elevation={0}
           sx={{ 
@@ -138,7 +144,9 @@ export default function PlanPage() {
           }}
         >
           <Typography sx={{ color: '#64748b', mb: 3, fontSize: '1.125rem' }}>
-            You don't have an active plan yet.
+            {purchasedAddons.length > 0
+              ? 'You do not have an active subscription plan yet. Your add-ons above stay on your account — choose a plan to unlock full job application services.'
+              : "You don't have an active plan yet."}
           </Typography>
           <Button
             component={Link}
@@ -181,6 +189,8 @@ export default function PlanPage() {
           View your current subscription plan and benefits.
         </Typography>
       </Box>
+
+      <YourAddonsSection purchasedAddons={purchasedAddons} />
 
       {subscription.status === 'expired' && (
         <Alert severity="warning" sx={{ mb: 3 }}>

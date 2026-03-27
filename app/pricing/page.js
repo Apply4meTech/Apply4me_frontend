@@ -14,7 +14,11 @@ import { useRouter } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 import stripeService from '../../utils/stripeService';
 import planService from '../../utils/planService';
+import { PRICING_ADDONS } from '../../utils/addonCatalog';
 import Link from 'next/link';
+
+/** Live payment test: charge A$1 for Premium only. Remove or set to null before production launch. */
+const PREMIUM_CHECKOUT_AMOUNT_AUD = 1;
 
 export default function Pricing() {
   const [expandedFaq, setExpandedFaq] = useState(0);
@@ -26,6 +30,7 @@ export default function Pricing() {
   const [plansError, setPlansError] = useState(null);
   const [userPlan, setUserPlan] = useState(null);
   const [userPlanLoading, setUserPlanLoading] = useState(false);
+  const [processingAddonCode, setProcessingAddonCode] = useState(null);
   
   const { token: reduxToken, user, isAuthenticated } = useSelector((state) => state.auth);
   const token = reduxToken || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
@@ -97,15 +102,7 @@ export default function Pricing() {
 
         const data = await response.json();
         if (data.success && data.data) {
-          // Check if plan is active (not expired)
-          const subscription = data.data.subscription;
-          if (subscription) {
-            const now = new Date();
-            const isExpired = subscription.endDate && new Date(subscription.endDate) < now;
-            if (!isExpired && subscription.status === 'active') {
-              setUserPlan(data.data);
-            }
-          }
+          setUserPlan(data.data);
         }
       } catch (error) {
         console.error('Error fetching user plan:', error);
@@ -163,7 +160,7 @@ export default function Pricing() {
       return;
     }
 
-    // Check if user already has an active plan
+    // Check if user already has an active plan (subscription packages only)
     if (userPlan && userPlan.subscription && userPlan.subscription.status === 'active') {
       alert(`You already have an active plan (${userPlan.subscription.planName}). Please wait for it to expire or contact support to upgrade.`);
       router.push('/dashboard/plan');
@@ -187,9 +184,14 @@ export default function Pricing() {
         return;
       }
 
+      const chargeAmount =
+        plan.name === 'Premium' && typeof PREMIUM_CHECKOUT_AMOUNT_AUD === 'number'
+          ? PREMIUM_CHECKOUT_AMOUNT_AUD
+          : price;
+
       // Prepare order data (one-time payment)
       const orderData = {
-        amount: price,
+        amount: chargeAmount,
         customerInfo: {
           name: user?.name || user?.fullName || 'User',
           email: user?.email || '',
@@ -233,6 +235,75 @@ export default function Pricing() {
       alert('Failed to initiate payment. Please try again.');
       setProcessingPayment(false);
       setProcessingPlan(null);
+    }
+  };
+
+  const hasPurchasedAddon = (storageName) =>
+    userPlan?.purchasedAddons?.some((a) => a.name === storageName);
+
+  const handlePurchaseAddon = async (addon) => {
+    if (!isAuthenticated || !token) {
+      router.push('/login?redirect=/pricing');
+      return;
+    }
+
+    if (hasPurchasedAddon(addon.storageName)) {
+      alert('You already have this add-on.');
+      return;
+    }
+
+    if (!stripePromise) {
+      alert('Stripe is not loaded. Please refresh the page and try again.');
+      return;
+    }
+
+    setProcessingPayment(true);
+    setProcessingAddonCode(addon.planCode);
+
+    try {
+      const orderData = {
+        amount: addon.priceAud,
+        customerInfo: {
+          name: user?.name || user?.fullName || 'User',
+          email: user?.email || '',
+          phone: user?.phone || user?.phoneCode || ''
+        },
+        planName: addon.planCode,
+        billingPeriod: 'onetime'
+      };
+
+      if (!orderData.customerInfo.email) {
+        alert('Email is required for payment. Please update your profile.');
+        setProcessingPayment(false);
+        setProcessingAddonCode(null);
+        return;
+      }
+
+      const paymentIntentResult = await stripeService.createPaymentIntent(orderData, token);
+
+      if (!paymentIntentResult.success) {
+        alert(paymentIntentResult.message || 'Failed to create payment intent. Please try again.');
+        setProcessingPayment(false);
+        setProcessingAddonCode(null);
+        return;
+      }
+
+      const paymentIntentId = paymentIntentResult.data?.payment_intent_id || paymentIntentResult.data?.id;
+      const clientSecret = paymentIntentResult.client_secret || paymentIntentResult.data?.client_secret;
+
+      if (!clientSecret || !paymentIntentId) {
+        alert('Failed to initialize payment. Please try again.');
+        setProcessingPayment(false);
+        setProcessingAddonCode(null);
+        return;
+      }
+
+      router.push(`/payment/checkout?payment_intent=${paymentIntentId}&client_secret=${encodeURIComponent(clientSecret)}`);
+    } catch (error) {
+      console.error('Error initiating add-on payment:', error);
+      alert('Failed to initiate payment. Please try again.');
+      setProcessingPayment(false);
+      setProcessingAddonCode(null);
     }
   };
 
@@ -918,14 +989,12 @@ export default function Pricing() {
               '& > *:nth-of-type(4)': { gridColumn: { md: 'span 1' } },
             }}
           >
-            {[
-              { name: 'Job Search by Our Team', desc: 'We search and shortlist relevant jobs based on role & location.', price: 69 },
-              { name: 'Custom Resume Rewrite (ATS-Optimised)', desc: 'Complete resume rewrite with keyword optimisation.', price: 39 },
-              { name: 'LinkedIn Profile Optimisation', desc: 'Headline, summary & recruiter keyword optimisation.', price: 29 },
-              { name: 'Interview Prep', desc: 'Preparation session for your interviews.', price: 20 },
-            ].map((addon) => (
+            {PRICING_ADDONS.map((addon) => {
+              const owned = hasPurchasedAddon(addon.storageName);
+              const busy = processingPayment && processingAddonCode === addon.planCode;
+              return (
               <Box
-                key={addon.name}
+                key={addon.planCode}
                 sx={{
                   background: 'rgba(255,255,255,0.08)',
                   border: '1px solid rgba(255,255,255,0.15)',
@@ -942,13 +1011,20 @@ export default function Pricing() {
                 <Typography sx={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.75)', fontFamily: 'inherit', marginBottom: '1rem', lineHeight: 1.5, flex: 1 }}>
                   {addon.desc}
                 </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap', marginTop: 'auto' }}>
                   <Typography sx={{ fontSize: '1.125rem', fontWeight: 700, color: '#FFFFFF', fontFamily: 'inherit' }}>
-                    ${addon.price} AUD
+                    ${addon.priceAud} AUD
                   </Typography>
+                  <Button
+                    variant="secondary"
+                    disabled={owned || busy || userPlanLoading}
+                    onClick={() => handlePurchaseAddon(addon)}
+                  >
+                    {owned ? 'Purchased' : busy ? 'Processing…' : 'Buy add-on'}
+                  </Button>
                 </Box>
               </Box>
-            ))}
+            );})}
           </Box>
         </Container>
       </Box>

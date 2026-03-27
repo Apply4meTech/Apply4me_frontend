@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   Box,
   Typography,
@@ -23,6 +24,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import DescriptionIcon from '@mui/icons-material/Description';
 import SaveIcon from '@mui/icons-material/Save';
 import ProfilePictureUpload from '../../../../components/profile/ProfilePictureUpload';
+import YourAddonsSection from '../../../../components/dashboard/YourAddonsSection';
 import { updateUser } from '../../../../store/authSlice';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
@@ -35,17 +37,23 @@ const seniorityLevels = ['Intern', 'Junior', 'Mid level', 'Senior/Lead'];
 const jobTypes = ['Full time', 'Part-time', 'Contract', 'Internship'];
 const workLocations = ['Remote', 'Hybrid', 'On-site'];
 
+/** Plans that can call POST /api/resume/optimize without the resume_rewrite add-on */
+const ATS_OPTIMIZE_PLANS = ['Standard', 'Pro', 'Premium'];
+
 export default function ProfilePage() {
   const { user: reduxUser } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [loadingAtsResume, setLoadingAtsResume] = useState(false);
+  const [optimizingResume, setOptimizingResume] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [countries, setCountries] = useState([]);
   const [phoneCodes, setPhoneCodes] = useState([]);
+  const [planInfo, setPlanInfo] = useState(null);
+  const [planLoading, setPlanLoading] = useState(true);
   
   const [formData, setFormData] = useState({
     // Step 1: Personal Information
@@ -84,6 +92,28 @@ export default function ProfilePage() {
   useEffect(() => {
     fetchProfile();
     fetchCountries();
+  }, []);
+
+  useEffect(() => {
+    const fetchPlan = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setPlanLoading(false);
+        return;
+      }
+      try {
+        const res = await fetch(`${getApiUrl()}/api/users/my-plan`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (data.success && data.data) setPlanInfo(data.data);
+      } catch {
+        /* ignore */
+      } finally {
+        setPlanLoading(false);
+      }
+    };
+    fetchPlan();
   }, []);
 
   const fetchCountries = async () => {
@@ -188,7 +218,7 @@ export default function ProfilePage() {
   };
 
   const handleViewAtsResume = async () => {
-    if (!formData.optimizedResumeDetails) return;
+    if (!formData.optimizedResumeDetails?.key) return;
     try {
       setLoadingAtsResume(true);
       const token = localStorage.getItem('token');
@@ -210,6 +240,35 @@ export default function ProfilePage() {
       setError('Failed to load resume preview');
     } finally {
       setLoadingAtsResume(false);
+    }
+  };
+
+  /** Create optimized PDF (same as onboarding). Requires prior ATS analyze + eligible plan. */
+  const handleGenerateAtsResume = async () => {
+    try {
+      setOptimizingResume(true);
+      setError(null);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication required');
+        return;
+      }
+      const response = await fetch(`${getApiUrl()}/api/resume/optimize`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || data.details || 'Failed to generate ATS resume');
+      }
+      await fetchProfile();
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 4000);
+    } catch (err) {
+      console.error('Optimize resume:', err);
+      setError(err.message || 'Failed to generate ATS resume');
+    } finally {
+      setOptimizingResume(false);
     }
   };
 
@@ -331,6 +390,11 @@ export default function ProfilePage() {
           border: '1px solid #e2e8f0',
         }}
       >
+        <YourAddonsSection
+          purchasedAddons={planInfo?.purchasedAddons}
+          loading={planLoading}
+          sx={{ mb: 4 }}
+        />
         <form onSubmit={handleSubmit}>
           {/* Top Section: Profile Picture on Left, Tabs on Right */}
           <Box sx={{ 
@@ -657,7 +721,70 @@ export default function ProfilePage() {
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
                 />
                 
-                {formData.optimizedResumeDetails && (
+                {formData.resume_details && !formData.optimizedResumeDetails?.key && (() => {
+                  const planName = planInfo?.subscription?.planName;
+                  const hasAddon = planInfo?.purchasedAddons?.some((a) => a.name === 'resume_rewrite');
+                  const hasOptimizeAccess =
+                    (planName && ATS_OPTIMIZE_PLANS.includes(planName)) || hasAddon;
+
+                  return (
+                    <Alert severity="info" sx={{ borderRadius: '8px' }}>
+                      <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, mb: 0.5 }}>
+                        No ATS-optimized resume file yet
+                      </Typography>
+                      {planLoading ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+                          <CircularProgress size={20} />
+                          <Typography sx={{ fontSize: '0.8125rem', color: '#64748b' }}>
+                            Loading your plan…
+                          </Typography>
+                        </Box>
+                      ) : hasOptimizeAccess ? (
+                        <>
+                          <Typography sx={{ fontSize: '0.8125rem', lineHeight: 1.5, mb: 1.5 }}>
+                            On Standard+ or with the add-on, an ATS-friendly PDF is <strong>generated automatically in the background</strong> after you
+                            upload or replace your resume (may take a minute). You can also generate or refresh it with the button below.
+                          </Typography>
+                          <Button
+                            type="button"
+                            variant="contained"
+                            size="small"
+                            disabled={optimizingResume}
+                            onClick={handleGenerateAtsResume}
+                            sx={{ textTransform: 'none', borderRadius: '8px' }}
+                          >
+                            {optimizingResume ? (
+                              <>
+                                <CircularProgress size={18} sx={{ mr: 1, color: 'inherit' }} />
+                                Generating…
+                              </>
+                            ) : (
+                              'Generate ATS-optimized resume now'
+                            )}
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Typography sx={{ fontSize: '0.8125rem', lineHeight: 1.5, mb: 1 }}>
+                            On <strong>Starter</strong>, ATS resume optimization is available via the{' '}
+                            <strong>Custom Resume Rewrite</strong> add-on, or upgrade to{' '}
+                            <strong>Standard</strong> or higher. Then open{' '}
+                            <Link href="/onboarding" style={{ color: '#2463eb', fontWeight: 600 }}>
+                              onboarding
+                            </Link>{' '}
+                            → resume step → <strong>Analyze</strong> → <strong>Create ATS-Friendly Resume</strong>.
+                          </Typography>
+                          <Typography sx={{ fontSize: '0.8125rem', color: '#64748b' }}>
+                            See <Link href="/pricing" style={{ color: '#2463eb', fontWeight: 600 }}>pricing</Link> for
+                            add-ons and upgrades.
+                          </Typography>
+                        </>
+                      )}
+                    </Alert>
+                  );
+                })()}
+
+                {formData.optimizedResumeDetails?.key && (
                   <Paper 
                     sx={{ 
                       p: 2, 
@@ -760,7 +887,7 @@ export default function ProfilePage() {
                   </Paper>
                 )}
                 
-                {formData.cv_details && (
+                {formData.cv_details?.key && (
                   <Paper 
                     sx={{ 
                       p: 2, 

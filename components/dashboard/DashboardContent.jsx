@@ -53,6 +53,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import SaveIcon from '@mui/icons-material/Save';
 import AddJobModal from './AddJobModal';
+import YourAddonsSection from './YourAddonsSection';
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
 const getApiUrl = () => {
@@ -237,6 +238,8 @@ export default function DashboardContent() {
 
   return (
     <Box>
+      <YourAddonsSection purchasedAddons={userPlan?.purchasedAddons} sx={{ mb: 3 }} />
+
       {/* Top Section with Greeting and Summary Boxes */}
       <Box sx={{ mb: 4, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, gap: 3 }}>
         {/* Left Side - Greeting and Summary Boxes */}
