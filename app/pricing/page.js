@@ -948,7 +948,6 @@ export default function Pricing() {
         </Container>
       </Box>
 
-      {/* Optional Add-Ons - Deep Navy Section */}
       <Box
         sx={{
           background: 'linear-gradient(180deg, #09316f 0%, #115ace 100%)',
