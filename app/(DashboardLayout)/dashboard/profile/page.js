@@ -19,10 +19,12 @@ import {
   Divider,
   Tabs,
   Tab,
+  Input,
 } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import DescriptionIcon from '@mui/icons-material/Description';
 import SaveIcon from '@mui/icons-material/Save';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import ProfilePictureUpload from '../../../../components/profile/ProfilePictureUpload';
 import YourAddonsSection from '../../../../components/dashboard/YourAddonsSection';
 import { updateUser } from '../../../../store/authSlice';
@@ -54,6 +56,8 @@ export default function ProfilePage() {
   const [phoneCodes, setPhoneCodes] = useState([]);
   const [planInfo, setPlanInfo] = useState(null);
   const [planLoading, setPlanLoading] = useState(true);
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const [atsRefreshPolls, setAtsRefreshPolls] = useState(0);
   
   const [formData, setFormData] = useState({
     // Step 1: Personal Information
@@ -93,6 +97,17 @@ export default function ProfilePage() {
     fetchProfile();
     fetchCountries();
   }, []);
+
+  /** Poll profile after resume upload while ATS + optimized PDF regenerate in the background */
+  useEffect(() => {
+    if (atsRefreshPolls <= 0) return;
+    const t = setTimeout(() => {
+      fetchProfile().finally(() => {
+        setAtsRefreshPolls((n) => (n > 1 ? n - 1 : 0));
+      });
+    }, 6000);
+    return () => clearTimeout(t);
+  }, [atsRefreshPolls]);
 
   useEffect(() => {
     const fetchPlan = async () => {
@@ -190,6 +205,9 @@ export default function ProfilePage() {
           cv_details: data.user.cv_details || null,
           profilePicture: data.user.profilePicture || null,
         });
+        if (data.user.optimizedResumeDetails?.key) {
+          setAtsRefreshPolls(0);
+        }
       }
     } catch (err) {
       console.error('Error fetching profile:', err);
@@ -269,6 +287,63 @@ export default function ProfilePage() {
       setError(err.message || 'Failed to generate ATS resume');
     } finally {
       setOptimizingResume(false);
+    }
+  };
+
+  const handleResumeFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const ext = '.' + (file.name.split('.').pop() || '').toLowerCase();
+    const allowed = ['.pdf', '.doc', '.docx'];
+    if (!allowed.includes(ext)) {
+      setError('Please upload a PDF, DOC, or DOCX file');
+      e.target.value = '';
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError('File size must be less than 10MB');
+      e.target.value = '';
+      return;
+    }
+
+    setUploadingResume(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication required');
+        return;
+      }
+      const formDataToSend = new FormData();
+      formDataToSend.append('file', file);
+      const response = await fetch(`${getApiUrl()}/api/upload/resume`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formDataToSend,
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || data.details || 'Failed to upload resume');
+      }
+      if (data.fileDetails) {
+        setFormData((prev) => ({
+          ...prev,
+          resume_details: data.fileDetails,
+          optimizedResumeDetails: null,
+        }));
+      }
+      await fetchProfile();
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 5000);
+      if (data.atsPipelineInProgress) {
+        setAtsRefreshPolls(20);
+      }
+    } catch (err) {
+      console.error('Resume upload:', err);
+      setError(err.message || 'Failed to upload resume');
+    } finally {
+      setUploadingResume(false);
+      e.target.value = '';
     }
   };
 
@@ -681,6 +756,40 @@ export default function ProfilePage() {
             {/* Tab Panel 3: Documents & Links */}
             {tabValue === 2 && (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Box>
+                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', mb: 1 }}>
+                    Resume
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.8125rem', color: '#64748b', mb: 1.5, lineHeight: 1.5 }}>
+                    Upload a new file to replace your current resume. On Standard, Pro, or Premium, ATS analysis and an
+                    ATS-friendly PDF regenerate automatically in the background (usually within a minute).
+                  </Typography>
+                  <Button
+                    component="label"
+                    variant="outlined"
+                    startIcon={uploadingResume ? <CircularProgress size={18} /> : <CloudUploadIcon />}
+                    disabled={uploadingResume}
+                    sx={{ textTransform: 'none', borderRadius: '8px' }}
+                  >
+                    {uploadingResume
+                      ? 'Uploading…'
+                      : formData.resume_details
+                        ? 'Replace resume'
+                        : 'Upload resume'}
+                    <Input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      sx={{ display: 'none' }}
+                      onChange={handleResumeFileChange}
+                    />
+                  </Button>
+                  {atsRefreshPolls > 0 && (
+                    <Typography sx={{ fontSize: '0.75rem', color: '#64748b', mt: 1, display: 'block' }}>
+                      Checking for updated ATS report and optimized PDF…
+                    </Typography>
+                  )}
+                </Box>
+
                 <TextField
                   fullWidth
                   label="Portfolio Website"

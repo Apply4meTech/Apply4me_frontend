@@ -42,6 +42,7 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
   const [jobDescription, setJobDescription] = useState('');
   const [savingMetadata, setSavingMetadata] = useState(false);
   const [customizingResume, setCustomizingResume] = useState(false);
+  const [uploadingCustomerResume, setUploadingCustomerResume] = useState(false);
 
   const formatFileSize = (bytes) => {
     if (!bytes) return '0 Bytes';
@@ -136,6 +137,53 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
   const handleViewFile = (fileData) => {
     if (fileData && fileData.url) {
       window.open(fileData.url, '_blank');
+    }
+  };
+
+  /** Update the linked customer's profile resume (prefetched ATS + original). */
+  const handleCustomerProfileResumeUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !job?.userId) return;
+
+    const ext = '.' + (file.name.split('.').pop() || '').toLowerCase();
+    if (!['.pdf', '.doc', '.docx'].includes(ext)) {
+      alert('Please upload a PDF, DOC, or DOCX file');
+      e.target.value = '';
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size must be less than 10MB');
+      e.target.value = '';
+      return;
+    }
+
+    try {
+      setUploadingCustomerResume(true);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Authentication required');
+        return;
+      }
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await fetch(`${getApiUrl()}/api/employee/jobs/${job.id}/customer-resume`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        alert(data.message || 'Customer resume updated on their profile');
+        if (onUpdate) onUpdate();
+      } else {
+        alert(data.error || 'Failed to update customer resume');
+      }
+    } catch (err) {
+      console.error('Customer profile resume upload:', err);
+      alert('Failed to update customer resume');
+    } finally {
+      setUploadingCustomerResume(false);
+      e.target.value = '';
     }
   };
 
@@ -279,28 +327,69 @@ export default function ViewDataModal({ open, onClose, job, mode = 'view', onUpd
         {mode === 'fill' ? (
           // Fill Data mode - Prefetched resumes, Job description, Customize resume, Uploads, Notes
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            {/* Prefetched User Resumes & CV - for reference when uploading */}
-            {job.userResumes?.length > 0 && (
+            {/* Customer profile resumes (prefetched) + replace on their account */}
+            {job.userId && (
               <Paper sx={{ p: 2, bgcolor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px' }}>
                 <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#1e40af', mb: 1.5 }}>
                   User's Resume & CV (prefetched)
                 </Typography>
                 <Typography sx={{ fontSize: '0.8rem', color: '#3b82f6', mb: 2 }}>
-                  Download these when uploading Job Resume below. Use ATS resume if available.
+                  Download these when uploading Job Resume below. Use ATS resume if available. To change the
+                  customer&apos;s master resume on their account (updates ATS/original here after processing), use
+                  Replace resume on profile.
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  {job.userResumes.map((r, i) => (
-                    <Button
-                      key={i}
-                      variant="outlined"
-                      size="small"
-                      startIcon={<DescriptionIcon />}
-                      onClick={() => window.open(r.url, '_blank')}
-                      sx={{ textTransform: 'none', borderRadius: '8px', borderColor: r.type === 'ats' ? '#16a34a' : '#2463eb', color: r.type === 'ats' ? '#16a34a' : '#2463eb' }}
-                    >
-                      {r.label} Resume
-                    </Button>
-                  ))}
+                {job.userResumes?.length > 0 ? (
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
+                    {job.userResumes.map((r, i) => (
+                      <Button
+                        key={i}
+                        variant="outlined"
+                        size="small"
+                        startIcon={<DescriptionIcon />}
+                        onClick={() => window.open(r.url, '_blank')}
+                        sx={{
+                          textTransform: 'none',
+                          borderRadius: '8px',
+                          borderColor: r.type === 'ats' ? '#16a34a' : '#2463eb',
+                          color: r.type === 'ats' ? '#16a34a' : '#2463eb',
+                        }}
+                      >
+                        {r.label} Resume
+                      </Button>
+                    ))}
+                  </Box>
+                ) : (
+                  <Typography sx={{ fontSize: '0.8rem', color: '#64748b', mb: 2 }}>
+                    No resume on file yet for this customer — upload one using the button below.
+                  </Typography>
+                )}
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.5 }}>
+                  <Button
+                    component="label"
+                    variant="contained"
+                    size="small"
+                    startIcon={
+                      uploadingCustomerResume ? <CircularProgress size={18} color="inherit" /> : <CloudUploadIcon />
+                    }
+                    disabled={uploadingCustomerResume}
+                    sx={{
+                      textTransform: 'none',
+                      borderRadius: '8px',
+                      bgcolor: '#1e40af',
+                      '&:hover': { bgcolor: '#1e3a8a' },
+                    }}
+                  >
+                    {uploadingCustomerResume ? 'Uploading…' : 'Replace resume on profile'}
+                    <Input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      sx={{ display: 'none' }}
+                      onChange={handleCustomerProfileResumeUpload}
+                    />
+                  </Button>
+                  <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    PDF, DOC, DOCX · max 10MB · updates the customer&apos;s profile (not the job-specific resume below)
+                  </Typography>
                 </Box>
               </Paper>
             )}
