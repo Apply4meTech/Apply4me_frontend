@@ -113,10 +113,19 @@ function OnboardingContent() {
     }
 
     if (step === 3) {
-      if (!formData.currentRole?.trim()) {
+      const rows = Array.isArray(formData.employmentHistory) ? formData.employmentHistory : [];
+      const first = rows[0] || {};
+      let empErr = '';
+      if (!first.jobTitle?.trim()) empErr = 'Enter job title for your most recent role.';
+      else if (!first.company?.trim()) empErr = 'Enter company name.';
+      else if (!first.startDate?.trim()) empErr = 'Enter start date.';
+      else if (!first.isCurrent && !first.endDate?.trim()) {
+        empErr = 'Enter end date or mark this role as current.';
+      }
+      if (empErr) {
         isValid = false;
-        errorMessages.push('Current / Most Recent Role is required');
-        setFieldError('currentRole', 'Current / Most Recent Role is required');
+        errorMessages.push(empErr);
+        setFieldError('employmentHistory', empErr);
       }
     }
 
@@ -237,9 +246,34 @@ function OnboardingContent() {
         academicTranscripts_details: formData.academicTranscripts_details || null,
         certifications_details: formData.certifications_details || null,
         // Step 3: Employment History
-        currentRole: formData.currentRole || '',
-        previousRoles: formData.previousRoles || '',
-        keyResponsibilities: formData.keyResponsibilities || '',
+        ...(() => {
+          const rows = Array.isArray(formData.employmentHistory) ? formData.employmentHistory : [];
+          const first = rows[0];
+          const currentRole = first
+            ? `${first.jobTitle || ''}${first.company ? ` at ${first.company}` : ''}`.trim()
+            : '';
+          const previousRoles = rows
+            .slice(1)
+            .map(
+              (r) =>
+                `${r.jobTitle || ''}${r.company ? ` at ${r.company}` : ''}${r.startDate || r.endDate ? ` (${[r.startDate, r.isCurrent ? 'Present' : r.endDate].filter(Boolean).join(' – ')})` : ''}`
+            )
+            .filter(Boolean)
+            .join('\n');
+          const keyResponsibilities = rows
+            .map((r) => {
+              if (!r.responsibilities?.trim()) return '';
+              return `${r.jobTitle || 'Role'}: ${r.responsibilities.trim()}`;
+            })
+            .filter(Boolean)
+            .join('\n\n');
+          return {
+            currentRole,
+            previousRoles,
+            keyResponsibilities,
+            employmentHistory: rows,
+          };
+        })(),
         keyAchievements: formData.keyAchievements || '',
         // Step 4: Compliance & Checks
         policeCheck: formData.policeCheck || '',

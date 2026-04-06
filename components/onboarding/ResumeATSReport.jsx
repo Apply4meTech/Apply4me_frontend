@@ -14,8 +14,6 @@ import {
   AccordionSummary,
   AccordionDetails,
   Alert,
-  LinearProgress,
-  Divider,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -37,19 +35,6 @@ const getApiUrl = () => {
 const API_URL = getApiUrl();
 
 const ATS_PLANS = ['Standard', 'Pro', 'Premium'];
-
-const getScoreColor = (score) => {
-  if (score >= 80) return '#10b981';
-  if (score >= 60) return '#f59e0b';
-  return '#ef4444';
-};
-
-const getScoreLabel = (score) => {
-  if (score >= 80) return 'Excellent';
-  if (score >= 60) return 'Good';
-  if (score >= 40) return 'Fair';
-  return 'Needs Improvement';
-};
 
 const getSeverityColor = (severity) => {
   switch (severity) {
@@ -118,8 +103,7 @@ export default function ResumeATSReport({ resumeUploaded, onOptimizeComplete }) 
       const data = await response.json();
 
       if (response.ok && data.success) {
-        const hasValidData = data.report && data.report.score != null;
-        if (hasValidData) setReport(data.report);
+        if (data.report) setReport(data.report);
         else if (data.canAnalyze) await triggerAnalysis();
         else throw new Error(data.error || 'Failed to fetch ATS report');
       } else if (response.status === 404 && data.canAnalyze) {
@@ -300,11 +284,10 @@ export default function ResumeATSReport({ resumeUploaded, onOptimizeComplete }) 
     );
   }
 
-  const { score, summary, recommendations = [], strengths = [], weaknesses = [], optimizedResumeDetails, optimizationScore } = report;
+  const { summary, recommendations = [], strengths = [], weaknesses = [], optimizedResumeDetails, optimizationScore } = report;
 
   return (
     <Box sx={{ mt: 3 }}>
-      {/* Compact ATS Score Card */}
       <Box
         sx={{
           display: 'flex',
@@ -316,67 +299,29 @@ export default function ResumeATSReport({ resumeUploaded, onOptimizeComplete }) 
           bgcolor: 'white',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Box
-            sx={{
-              width: 56,
-              height: 56,
-              borderRadius: '50%',
-              bgcolor: getScoreColor(score),
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontWeight: 700,
-              fontSize: '1.25rem',
-            }}
-          >
-            {score}
-          </Box>
-          <Box>
-            <Typography sx={{ fontSize: '0.875rem', color: '#64748b' }}>ATS Score</Typography>
-            <Typography sx={{ fontSize: '1rem', fontWeight: 600, color: '#0f172a' }}>{getScoreLabel(score)}</Typography>
-          </Box>
+        <Box sx={{ flex: 1, minWidth: 0, pr: 2 }}>
+          <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 0.5 }}>Resume analysis</Typography>
+          <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, color: '#0f172a', lineHeight: 1.4 }}>
+            {summary ? `${summary.slice(0, 140)}${summary.length > 140 ? '…' : ''}` : 'Your resume has been reviewed. Open details for strengths and suggestions.'}
+          </Typography>
         </Box>
         <Button
           variant="outlined"
           size="small"
           startIcon={<VisibilityIcon />}
           onClick={() => setDetailsOpen(true)}
-          sx={{ textTransform: 'none', borderRadius: '8px' }}
+          sx={{ textTransform: 'none', borderRadius: '8px', flexShrink: 0 }}
         >
           View full details
         </Button>
       </Box>
 
-      {/* Full Details Dialog */}
       <Dialog open={detailsOpen} onClose={() => setDetailsOpen(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: '16px' } }}>
-        <DialogTitle sx={{ fontWeight: 700, fontSize: '1.25rem' }}>ATS Resume Report</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 700, fontSize: '1.25rem' }}>Resume report</DialogTitle>
         <DialogContent dividers>
           <Box sx={{ mb: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-              <Box
-                sx={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: '50%',
-                  bgcolor: getScoreColor(score),
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontWeight: 700,
-                  fontSize: '1.5rem',
-                }}
-              >
-                {score}
-              </Box>
-              <Box>
-                <Typography sx={{ fontWeight: 600, fontSize: '1.125rem' }}>{getScoreLabel(score)}</Typography>
-                <Typography sx={{ fontSize: '0.875rem', color: '#64748b' }}>{summary || 'ATS analysis completed'}</Typography>
-              </Box>
-            </Box>
-            <LinearProgress variant="determinate" value={score} sx={{ height: 8, borderRadius: 4, bgcolor: '#e2e8f0', '& .MuiLinearProgress-bar': { bgcolor: getScoreColor(score), borderRadius: 4 } }} />
+            <Typography sx={{ fontWeight: 600, fontSize: '1.0625rem', mb: 1 }}>Summary</Typography>
+            <Typography sx={{ fontSize: '0.875rem', color: '#64748b', lineHeight: 1.6 }}>{summary || 'Analysis completed. Review the sections below for strengths and recommendations.'}</Typography>
           </Box>
 
           {hasATSAccess ? (
@@ -385,8 +330,7 @@ export default function ResumeATSReport({ resumeUploaded, onOptimizeComplete }) 
                 <Box sx={{ mb: 3, p: 2, bgcolor: '#f0fdf4', borderRadius: '8px', border: '1px solid #86efac' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                     <CheckCircleIcon sx={{ color: '#10b981' }} />
-                    <Typography sx={{ fontWeight: 600 }}>Optimized Score: {optimizationScore}</Typography>
-                    <Chip label={`+${optimizationScore - score}`} size="small" sx={{ bgcolor: '#10b981', color: 'white' }} />
+                    <Typography sx={{ fontWeight: 600 }}>Optimized resume ready</Typography>
                   </Box>
                   <Button variant="contained" size="small" startIcon={<DownloadIcon />} onClick={handleDownloadOptimized} sx={{ mt: 1, bgcolor: '#10b981', '&:hover': { bgcolor: '#059669' } }}>
                     Download Optimized Resume

@@ -15,8 +15,6 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import ResumeATSReport from './ResumeATSReport';
-
 // Ensure API_URL doesn't end with /api to avoid double /api/api
 const getApiUrl = () => {
   const url = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
@@ -30,8 +28,6 @@ export default function OnboardingStep3() {
   const [uploadingCV, setUploadingCV] = useState(false);
   const [uploadingTranscripts, setUploadingTranscripts] = useState(false);
   const [uploadingCerts, setUploadingCerts] = useState(false);
-  const [resumeUploaded, setResumeUploaded] = useState(false);
-
 
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
@@ -93,7 +89,6 @@ export default function OnboardingStep3() {
       if (data.success && data.fileDetails) {
         const detailsKey = field === 'resume' ? 'resume_details' : field === 'cv' ? 'cv_details' : field === 'academic_transcripts' ? 'academicTranscripts_details' : 'certifications_details';
         updateFormData(detailsKey, data.fileDetails);
-        if (field === 'resume') setResumeUploaded(true);
       } else {
         throw new Error('Invalid response from server');
       }
@@ -132,7 +127,6 @@ export default function OnboardingStep3() {
 
       if (response.ok && data.success) {
         updateFormData(map.detailsKey, null);
-        if (field === 'resume') setResumeUploaded(false);
       } else {
         throw new Error(data.error || 'Failed to delete file');
       }
@@ -191,7 +185,17 @@ export default function OnboardingStep3() {
                 <Typography sx={{ fontSize: '0.75rem', color: '#64748b', mt: 0.5 }}>{formatFileSize(details.fileSize)}</Typography>
               </Box>
             </Box>
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
+              <Button
+                variant="outlined"
+                size="small"
+                component="label"
+                disabled={loading}
+                sx={{ textTransform: 'none', borderRadius: '20px', fontSize: '0.8125rem' }}
+              >
+                {loading ? 'Uploading…' : 'Replace'}
+                <Input type="file" accept={config.accept} onChange={handleFileChange(field)} disabled={loading} sx={{ display: 'none' }} />
+              </Button>
               <IconButton size="small" onClick={() => handleViewFile(details)} sx={{ color: '#2463eb', '&:hover': { bgcolor: '#eff6ff' } }} title="View file">
                 <VisibilityIcon />
               </IconButton>
@@ -216,20 +220,7 @@ export default function OnboardingStep3() {
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         {/* Upload Resume * */}
-        <FileUploadBlock field="resume" label="Resume" required details={formData.resume_details} helperText="PDF or DOCX. Max 10MB" />
-
-        {/* ATS Report - Show after resume is uploaded */}
-        {formData.resume_details && (
-          <Box sx={{ mt: 3 }}>
-            <ResumeATSReport 
-              resumeUploaded={resumeUploaded}
-              onOptimizeComplete={(data) => {
-                console.log('Resume optimized:', data);
-                // Optionally refresh or show success message
-              }}
-            />
-          </Box>
-        )}
+        <FileUploadBlock field="resume" label="Resume" required details={formData.resume_details} helperText="PDF or DOCX. Max 10MB. Use Replace to upload a different file." />
 
         <FileUploadBlock field="cv" label="Cover Letter" required={false} details={formData.cv_details} helperText="Optional. PDF or DOCX" />
 

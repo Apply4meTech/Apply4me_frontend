@@ -41,7 +41,20 @@ export const OnboardingProvider = ({ children }) => {
           if (user?.email && savedData.email && savedData.email !== user.email) {
             return initialData;
           }
-          return { ...initialData, ...savedData };
+          const merged = { ...initialData, ...savedData };
+          if (!merged.employmentHistory?.length) {
+            merged.employmentHistory = [
+              {
+                jobTitle: merged.currentRole || '',
+                company: '',
+                startDate: '',
+                endDate: '',
+                isCurrent: false,
+                responsibilities: merged.keyResponsibilities || '',
+              },
+            ];
+          }
+          return merged;
         } catch (e) {
           return initialData;
         }
@@ -65,11 +78,21 @@ export const OnboardingProvider = ({ children }) => {
     cv_details: null,
     academicTranscripts_details: null,
     certifications_details: null,
-    // Step 3: Employment History
+    // Step 3: Employment History (structured rows + legacy strings filled on submit)
     currentRole: '',
     previousRoles: '',
     keyResponsibilities: '',
     keyAchievements: '',
+    employmentHistory: [
+      {
+        jobTitle: '',
+        company: '',
+        startDate: '',
+        endDate: '',
+        isCurrent: false,
+        responsibilities: '',
+      },
+    ],
     // Step 4: Compliance & Checks
     policeCheck: '',
     workingWithChildrenCheck: '',
