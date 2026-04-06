@@ -950,8 +950,6 @@ export default function Pricing() {
           >
             *Add-Ons available
           </Typography>
-
-          {/* Optional Add-Ons Section - moved to dark navy box below */}
         </Container>
       </Box>
 
