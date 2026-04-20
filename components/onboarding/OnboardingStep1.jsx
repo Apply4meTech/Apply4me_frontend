@@ -172,6 +172,7 @@ export default function OnboardingStep1() {
           error={!!errors.workRightsInAustralia}
           helperText={errors.workRightsInAustralia}
           sx={inputSx}
+          InputLabelProps={{ shrink: true }}
           SelectProps={{ displayEmpty: true, renderValue: (v) => v || 'Select...' }}
         >
           <MenuItem value="">
