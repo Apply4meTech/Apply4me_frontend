@@ -654,7 +654,14 @@ export default function Pricing() {
                       marginBottom: '2rem',
                     }}
                   >
-                    {plan.features.map((feature, index) => (
+                    {(plan.features || [])
+                      .filter((feature) => {
+                        const text = String(feature?.text || '').toLowerCase().trim();
+                        if (text === 'no. of jobs we apply') return false;
+                        if (text.startsWith('job search by our team')) return false;
+                        return true;
+                      })
+                      .map((feature, index) => (
                       <Box
                         key={index}
                         sx={{
@@ -871,8 +878,15 @@ export default function Pricing() {
                 </TableHead>
                 <TableBody>
                   <TableRow>
-                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0, maxWidth: 180, whiteSpace: { xs: 'normal', md: 'nowrap' } }}>Job search by our team (applications we submit)</TableCell>
-                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>15 Jobs<Box component="small" sx={{ display: 'block', opacity: 0.85, fontSize: '0.75rem' }}>*Add-Ons available</Box></TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0, maxWidth: 180, whiteSpace: { xs: 'normal', md: 'nowrap' } }}>No. Of jobs we apply</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>100 Jobs</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>175 Jobs</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>250 Jobs</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>350 Jobs</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0, maxWidth: 180, whiteSpace: { xs: 'normal', md: 'nowrap' } }}>Job search by our team</TableCell>
+                    <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>0 Jobs<Box component="small" sx={{ display: 'block', opacity: 0.85, fontSize: '0.75rem' }}>*Add-Ons available</Box></TableCell>
                     <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>90 Jobs</TableCell>
                     <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>190 Jobs</TableCell>
                     <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>350 Jobs</TableCell>
