@@ -23,13 +23,13 @@ export const PRICING_ADDONS = [
     desc: 'Complete resume rewrite with keyword optimisation.',
     priceAud: 39
   },
-  {
-    planCode: 'ADDON_LINKEDIN',
-    storageName: 'linkedin_optimisation',
-    name: 'LinkedIn Profile Optimisation',
-    desc: 'Headline, summary & recruiter keyword optimisation.',
-    priceAud: 29
-  },
+  // {
+  //   planCode: 'ADDON_LINKEDIN',
+  //   storageName: 'linkedin_optimisation',
+  //   name: 'LinkedIn Profile Optimisation',
+  //   desc: 'Headline, summary & recruiter keyword optimisation.',
+  //   priceAud: 29
+  // },
   {
     planCode: 'ADDON_INTERVIEW_PREP',
     storageName: 'interview_prep',

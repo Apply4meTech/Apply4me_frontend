@@ -912,13 +912,13 @@ export default function Pricing() {
                     <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Tailored Per Job</TableCell>
                     <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Tailored Per Job</TableCell>
                   </TableRow>
-                  <TableRow>
+                  {/* <TableRow>
                     <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0 }}>LinkedIn Optimisation</TableCell>
                     <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Add-on</TableCell>
                     <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Add-on</TableCell>
                     <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF' }}>Add-on</TableCell>
                     <TableCell align="center"><CheckCircleIcon sx={{ color: '#4ADE80', fontSize: '1.25rem' }} /></TableCell>
-                  </TableRow>
+                  </TableRow> */}
                   <TableRow>
                     <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0 }}>Priority Processing</TableCell>
                     <TableCell align="center"><Box component="span" sx={{ color: '#EF4444', fontSize: '1.25rem', fontWeight: 700 }}>✕</Box></TableCell>
