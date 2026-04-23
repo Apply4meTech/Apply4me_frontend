@@ -89,7 +89,6 @@ export default function OnboardingStep1() {
           sx={inputSx}
         />
 
-        {/* Email Address * */}
         <TextField
           fullWidth
           label="Email Address *"

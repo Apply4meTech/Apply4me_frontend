@@ -878,7 +878,7 @@ export default function Pricing() {
                 </TableHead>
                 <TableBody>
                   <TableRow>
-                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0, maxWidth: 180, whiteSpace: { xs: 'normal', md: 'nowrap' } }}>No. Of jobs we apply</TableCell>
+                    <TableCell sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, fontWeight: 500, color: '#FFFFFF', paddingLeft: 0, maxWidth: 180, whiteSpace: { xs: 'normal', md: 'nowrap' } }}>No. of Jobs We Apply</TableCell>
                     <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>100 Jobs</TableCell>
                     <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>175 Jobs</TableCell>
                     <TableCell align="center" sx={{ fontSize: { xs: '0.8125rem', md: '0.9375rem' }, color: '#FFFFFF', lineHeight: 1.4 }}>250 Jobs</TableCell>
