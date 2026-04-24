@@ -825,7 +825,6 @@ export default function Pricing() {
             Package Features Comparison
           </Typography>
 
-          {/* Comparison Table Card - Dark navy gradient */}
           <Box
             sx={{
               background: 'linear-gradient(180deg, #1e3a8a 0%, #2563eb 100%)',
