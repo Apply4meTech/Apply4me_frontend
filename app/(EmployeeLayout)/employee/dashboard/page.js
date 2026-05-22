@@ -103,7 +103,8 @@ export default function EmployeeDashboard() {
     totalPending: 0,
     totalInProgress: 0,
     customerCount: 0,
-    jobs: []
+    customerList: [],
+    jobs: [],
   });
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 0 });
   const [searchInput, setSearchInput] = useState('');
@@ -834,17 +835,100 @@ export default function EmployeeDashboard() {
           </Paper>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: '12px', border: '1px solid #e2e8f0', bgcolor: 'white' }}>
-            <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
-              {isSuperAdmin ? 'Total Customers' : 'My Customers'}
-            </Typography>
-            <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#7c3aed' }}>
-              {dashboardData.customerCount ?? 0}
-            </Typography>
-            <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', mt: 0.5 }}>
-              {isSuperAdmin ? 'Registered accounts (role: user)' : 'Distinct users with jobs assigned to you'}
-            </Typography>
-          </Paper>
+          <Tooltip
+            arrow
+            placement="top"
+            enterDelay={200}
+            disableInteractive={false}
+            disableHoverListener={(dashboardData.customerCount ?? 0) === 0}
+            slotProps={{
+              tooltip: {
+                sx: {
+                  maxWidth: 380,
+                  bgcolor: '#1e293b',
+                  p: 1.5,
+                  borderRadius: '10px',
+                },
+              },
+            }}
+            title={
+              (dashboardData.customerList?.length ?? 0) > 0 ? (
+                <Box>
+                  <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: '#e2e8f0', mb: 1 }}>
+                    {isSuperAdmin ? 'All registered customers' : 'Your customers'}
+                  </Typography>
+                  <Box sx={{ maxHeight: 240, overflowY: 'auto', pr: 0.5 }}>
+                    {dashboardData.customerList.map((c) => (
+                      <Box
+                        key={c.id}
+                        sx={{
+                          py: 0.75,
+                          borderBottom: '1px solid rgba(255,255,255,0.08)',
+                          '&:last-child': { borderBottom: 'none' },
+                        }}
+                      >
+                        <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#f8fafc', lineHeight: 1.3 }}>
+                          {c.name}
+                        </Typography>
+                        <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', wordBreak: 'break-all' }}>
+                          {c.email}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                  {isSuperAdmin && (
+                    <Typography
+                      component={Link}
+                      href="/employee/admin/customers"
+                      sx={{
+                        display: 'block',
+                        mt: 1.25,
+                        fontSize: '0.7rem',
+                        color: '#93c5fd',
+                        textDecoration: 'none',
+                        '&:hover': { textDecoration: 'underline' },
+                      }}
+                    >
+                      Open Customers for full onboarding →
+                    </Typography>
+                  )}
+                </Box>
+              ) : (
+                <Typography sx={{ fontSize: '0.8rem' }}>No customers yet</Typography>
+              )
+            }
+          >
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                borderRadius: '12px',
+                border: '1px solid #e2e8f0',
+                bgcolor: 'white',
+                cursor: (dashboardData.customerCount ?? 0) > 0 ? 'help' : 'default',
+                transition: 'box-shadow 0.2s, border-color 0.2s',
+                '&:hover':
+                  (dashboardData.customerCount ?? 0) > 0
+                    ? {
+                        borderColor: '#c4b5fd',
+                        boxShadow: '0 4px 12px rgba(124, 58, 237, 0.12)',
+                      }
+                    : {},
+              }}
+            >
+              <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
+                {isSuperAdmin ? 'Total Customers' : 'My Customers'}
+              </Typography>
+              <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#7c3aed' }}>
+                {dashboardData.customerCount ?? 0}
+              </Typography>
+              <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', mt: 0.5 }}>
+                {isSuperAdmin
+                  ? 'Hover for names & emails · full profile in Customers'
+                  : 'Hover for names & emails on your assigned jobs'}
+              </Typography>
+            </Paper>
+          </Tooltip>
         </Grid>
       </Grid>
 

@@ -43,6 +43,7 @@ import ArticleIcon from '@mui/icons-material/Article';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import WorkIcon from '@mui/icons-material/Work';
 import PeopleIcon from '@mui/icons-material/People';
+import GroupsIcon from '@mui/icons-material/Groups';
 
 const getMenuItems = (userRole) => {
   const items = [
@@ -56,7 +57,8 @@ const getMenuItems = (userRole) => {
       { text: 'Blogs', icon: <ArticleIcon />, path: '/employee/blogs' },
       { text: 'Job Titles', icon: <WorkIcon />, path: '/employee/admin/job-titles' },
       { text: 'Plan Management', icon: <AdminPanelSettingsIcon />, path: '/employee/admin/plans' },
-      { text: 'Affiliates', icon: <PeopleIcon />, path: '/employee/admin/affiliates' }
+      { text: 'Affiliates', icon: <PeopleIcon />, path: '/employee/admin/affiliates' },
+      { text: 'Customers', icon: <GroupsIcon />, path: '/employee/admin/customers' }
     );
   }
 
