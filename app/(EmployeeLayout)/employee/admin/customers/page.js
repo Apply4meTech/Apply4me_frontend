@@ -28,9 +28,11 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import Link from 'next/link';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import CloseIcon from '@mui/icons-material/Close';
 import CustomerOnboardingDetail from '../../../../../components/employee/CustomerOnboardingDetail';
+import PlanQuotaChip from '../../../../../components/employee/PlanQuotaChip';
 
 const getApiBase = () => {
   const url = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
@@ -51,6 +53,7 @@ export default function CustomersPage() {
   const [detailError, setDetailError] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [fullProfile, setFullProfile] = useState(null);
+  const [recentApplications, setRecentApplications] = useState([]);
 
   const fetchCustomers = useCallback(async () => {
     try {
@@ -93,6 +96,7 @@ export default function CustomersPage() {
     setSelectedCustomer(customer);
     setDetailOpen(true);
     setFullProfile(null);
+    setRecentApplications([]);
     setDetailError('');
     setDetailLoading(true);
     try {
@@ -103,6 +107,7 @@ export default function CustomersPage() {
       const data = await res.json();
       if (data.success && data.user) {
         setFullProfile(data.user);
+        setRecentApplications(data.recentApplications || []);
       } else {
         setDetailError(data.error || 'Failed to load profile');
       }
@@ -129,7 +134,7 @@ export default function CustomersPage() {
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a' }}>
-          Customers
+          Customer Database
         </Typography>
         <Button
           startIcon={<RefreshIcon />}
@@ -142,7 +147,7 @@ export default function CustomersPage() {
       </Box>
 
       <Typography sx={{ color: '#64748b', fontSize: '0.875rem', mb: 3 }}>
-        View every field customers submit during onboarding — personal details, documents, employment history, compliance, and consent.
+        Browse all customers, application counts, payment dates, and full onboarding profiles.
       </Typography>
 
       {error && (
@@ -199,7 +204,9 @@ export default function CustomersPage() {
                   <TableRow sx={{ bgcolor: '#f8fafc' }}>
                     <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Email</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }} align="center">Plan usage</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Plan</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Payment</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Onboarding</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Joined</TableCell>
                     <TableCell sx={{ fontWeight: 600 }} align="right">
@@ -210,7 +217,7 @@ export default function CustomersPage() {
                 <TableBody>
                   {customers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} sx={{ textAlign: 'center', py: 6, color: '#64748b' }}>
+                      <TableCell colSpan={8} sx={{ textAlign: 'center', py: 6, color: '#64748b' }}>
                         No customers found
                       </TableCell>
                     </TableRow>
@@ -222,10 +229,18 @@ export default function CustomersPage() {
                             <Avatar sx={{ width: 32, height: 32, bgcolor: '#2463eb', fontSize: '0.8rem' }}>
                               {(c.fullName || c.name || 'U').charAt(0).toUpperCase()}
                             </Avatar>
-                            {c.fullName || c.name || '—'}
+                            <Link
+                              href={`/employee/customers/${c.id}`}
+                              style={{ color: '#2463eb', textDecoration: 'none', fontWeight: 500 }}
+                            >
+                              {c.fullName || c.name || '—'}
+                            </Link>
                           </Box>
                         </TableCell>
                         <TableCell>{c.email}</TableCell>
+                        <TableCell align="center">
+                          <PlanQuotaChip planQuota={c.planQuota} />
+                        </TableCell>
                         <TableCell>
                           {c.subscription?.planName ? (
                             <Chip label={c.subscription.planName} size="small" sx={{ bgcolor: '#eff6ff', color: '#2463eb' }} />
@@ -233,6 +248,7 @@ export default function CustomersPage() {
                             '—'
                           )}
                         </TableCell>
+                        <TableCell>{formatDate(c.paymentCompletedAt)}</TableCell>
                         <TableCell>
                           <Chip
                             label={c.isOnboardingComplete ? 'Complete' : 'Incomplete'}
@@ -303,7 +319,9 @@ export default function CustomersPage() {
             </Box>
           )}
           {detailError && <Alert severity="error">{detailError}</Alert>}
-          {!detailLoading && !detailError && fullProfile && <CustomerOnboardingDetail user={fullProfile} />}
+          {!detailLoading && !detailError && fullProfile && (
+            <CustomerOnboardingDetail user={fullProfile} recentApplications={recentApplications} />
+          )}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={handleCloseDetail} sx={{ textTransform: 'none' }}>

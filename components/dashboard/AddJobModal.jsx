@@ -185,6 +185,7 @@ export default function AddJobModal({ open, onClose, onSuccess }) {
           location: urlForm.location.trim() || undefined,
           jobUrl: urlForm.jobUrl.trim(),
           platform: urlForm.platform,
+          submissionSource: 'dashboard_url',
         }),
       });
 
@@ -229,6 +230,7 @@ export default function AddJobModal({ open, onClose, onSuccess }) {
         location: customForm.location.trim() || undefined,
         platform: customForm.platform,
         metadata: {},
+        submissionSource: 'dashboard_manual',
       };
 
       // Only include jobUrl if provided

@@ -44,10 +44,12 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import WorkIcon from '@mui/icons-material/Work';
 import PeopleIcon from '@mui/icons-material/People';
 import GroupsIcon from '@mui/icons-material/Groups';
+import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 
 const getMenuItems = (userRole) => {
   const items = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/employee/dashboard' },
+    { text: 'Job Finder', icon: <TravelExploreIcon />, path: '/employee/job-finder' },
     { text: 'Profile', icon: <PersonIcon />, path: '/employee/profile' },
   ];
 
@@ -58,7 +60,7 @@ const getMenuItems = (userRole) => {
       { text: 'Job Titles', icon: <WorkIcon />, path: '/employee/admin/job-titles' },
       { text: 'Plan Management', icon: <AdminPanelSettingsIcon />, path: '/employee/admin/plans' },
       { text: 'Affiliates', icon: <PeopleIcon />, path: '/employee/admin/affiliates' },
-      { text: 'Customers', icon: <GroupsIcon />, path: '/employee/admin/customers' }
+      { text: 'Customer Database', icon: <GroupsIcon />, path: '/employee/admin/customers' }
     );
   }
 

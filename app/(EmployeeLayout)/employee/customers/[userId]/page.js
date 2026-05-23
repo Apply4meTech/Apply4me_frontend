@@ -28,6 +28,7 @@ export default function CustomerProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
+  const [recentApplications, setRecentApplications] = useState([]);
 
   useEffect(() => {
     if (userId) {
@@ -52,6 +53,7 @@ export default function CustomerProfilePage() {
       }
       if (data.success && data.user) {
         setUser(data.user);
+        setRecentApplications(data.recentApplications || []);
       } else {
         throw new Error('Invalid response');
       }
@@ -117,6 +119,18 @@ export default function CustomerProfilePage() {
               Full onboarding profile (view only)
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+              {user.planQuota?.display && (
+                <Chip
+                  label={`Plan: ${user.planQuota.display}`}
+                  size="small"
+                  sx={{
+                    bgcolor: user.planQuota.isAtLimit ? '#fee2e2' : '#f0fdf4',
+                    color: user.planQuota.isAtLimit ? '#dc2626' : '#16a34a',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                  }}
+                />
+              )}
               {user.subscription?.planName && (
                 <Chip
                   label={user.subscription.planName}
@@ -137,7 +151,7 @@ export default function CustomerProfilePage() {
           </Box>
         </Box>
 
-        <CustomerOnboardingDetail user={user} />
+        <CustomerOnboardingDetail user={user} recentApplications={recentApplications} />
       </Paper>
     </Box>
   );

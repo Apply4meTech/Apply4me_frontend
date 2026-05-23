@@ -62,6 +62,7 @@ import Tooltip from '@mui/material/Tooltip';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import ViewDataModal from '../../../../components/employee/ViewDataModal';
+import PlanQuotaChip from '../../../../components/employee/PlanQuotaChip';
 import NotesModal from '../../../../components/employee/NotesModal';
 import CreateEmployeeModal from '../../../../components/employee/CreateEmployeeModal';
 import AllEmployeesModal from '../../../../components/employee/AllEmployeesModal';
@@ -869,6 +870,11 @@ export default function EmployeeDashboard() {
                       >
                         <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#f8fafc', lineHeight: 1.3 }}>
                           {c.name}
+                          {c.planQuota?.display && (
+                            <Box component="span" sx={{ ml: 1, color: '#93c5fd', fontWeight: 500 }}>
+                              ({c.planQuota.display})
+                            </Box>
+                          )}
                         </Typography>
                         <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', wordBreak: 'break-all' }}>
                           {c.email}
@@ -963,7 +969,7 @@ export default function EmployeeDashboard() {
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, flexWrap: 'wrap' }}>
             <TextField
               fullWidth
-              placeholder="Search by company, job title..."
+              placeholder="Search by customer name, email, company, or job title..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -1029,7 +1035,9 @@ export default function EmployeeDashboard() {
                     )}
                   </Box>
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>User Name</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Customer</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }} align="center">Plan usage</TableCell>
+                <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Source</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Company Name</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Link</TableCell>
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>Status</TableCell>
@@ -1046,7 +1054,7 @@ export default function EmployeeDashboard() {
             <TableBody>
               {                dashboardData.jobs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={isSuperAdmin ? 12 : 11} sx={{ textAlign: 'center', py: 6 }}>
+                  <TableCell colSpan={isSuperAdmin ? 14 : 13} sx={{ textAlign: 'center', py: 6 }}>
                     <Typography sx={{ color: '#64748b' }}>No jobs found</Typography>
                   </TableCell>
                 </TableRow>
@@ -1098,6 +1106,28 @@ export default function EmployeeDashboard() {
                             job.userName || job.applicant || 'N/A'
                           )}
                         </Box>
+                      </TableCell>
+                      <TableCell align="center" sx={{ color: '#64748b', fontSize: '0.875rem' }}>
+                        {job.userId ? (
+                          <PlanQuotaChip planQuota={job.planQuota} />
+                        ) : (
+                          '—'
+                        )}
+                      </TableCell>
+                      <TableCell sx={{ fontSize: '0.8rem', color: '#64748b', maxWidth: 180 }}>
+                        <Tooltip title={job.submissionSourceLabel || 'Unknown'}>
+                          <Typography
+                            sx={{
+                              fontSize: '0.75rem',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              maxWidth: 160,
+                            }}
+                          >
+                            {job.submissionSourceLabel || '—'}
+                          </Typography>
+                        </Tooltip>
                       </TableCell>
                       <TableCell sx={{ color: '#0f172a', fontSize: '0.875rem', fontWeight: 600 }}>
                         {job.company}

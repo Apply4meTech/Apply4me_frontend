@@ -21,6 +21,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import LinkIcon from '@mui/icons-material/Link';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import LinearProgress from '@mui/material/LinearProgress';
+import PlanQuotaChip from './PlanQuotaChip';
 
 const formatBool = (value) => {
   if (value === true) return 'Yes';
@@ -114,8 +117,27 @@ const ConsentRow = ({ label, agreed }) => (
   </Box>
 );
 
-export default function CustomerOnboardingDetail({ user }) {
+const JourneyStepRow = ({ step }) => (
+  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+    {step.completed ? (
+      <CheckCircleIcon sx={{ color: '#16a34a', fontSize: 20 }} />
+    ) : (
+      <RadioButtonUncheckedIcon sx={{ color: '#cbd5e1', fontSize: 20 }} />
+    )}
+    <Typography sx={{ fontSize: '0.875rem', color: step.completed ? '#0f172a' : '#64748b' }}>
+      {step.step}. {step.name}
+    </Typography>
+  </Box>
+);
+
+export default function CustomerOnboardingDetail({ user, recentApplications = [] }) {
   if (!user) return null;
+
+  const journey = user.onboardingJourney;
+  const journeyProgress =
+    journey && journey.totalSteps > 0
+      ? Math.round((journey.completedCount / journey.totalSteps) * 100)
+      : 0;
 
   const hasJobPrefs =
     (user.primaryJobTitles?.length > 0) ||
@@ -129,6 +151,112 @@ export default function CustomerOnboardingDetail({ user }) {
 
   return (
     <Box>
+      <Paper
+        elevation={0}
+        sx={{ p: 2.5, mb: 3, borderRadius: '12px', border: '1px solid #e2e8f0', bgcolor: '#f8fafc' }}
+      >
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={4}>
+            <Typography sx={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', mb: 0.5 }}>
+              Plan usage
+            </Typography>
+            <Box sx={{ mb: 0.5 }}>
+              <PlanQuotaChip planQuota={user.planQuota} size="medium" showProgress />
+            </Box>
+            <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+              Total jobs: {user.applicationsCount ?? 0}
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Typography sx={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', mb: 0.5 }}>
+              Payment date
+            </Typography>
+            <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
+              {formatDate(user.payment?.completedAt || user.subscription?.startDate)}
+            </Typography>
+            {user.payment?.planName && (
+              <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                {user.payment.planName}
+                {user.payment.amount != null ? ` · ${user.payment.currency || ''} ${user.payment.amount}` : ''}
+              </Typography>
+            )}
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Typography sx={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', mb: 0.5 }}>
+              Onboarding finished
+            </Typography>
+            <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
+              {formatDate(journey?.completedAt || user.onboardingCompletedAt)}
+            </Typography>
+          </Grid>
+        </Grid>
+      </Paper>
+
+      {journey && (
+        <Box sx={{ mb: 3 }}>
+          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', mb: 1 }}>
+            Onboarding journey
+          </Typography>
+          <Typography sx={{ fontSize: '0.8rem', color: '#64748b', mb: 1 }}>
+            {journey.completedCount} of {journey.totalSteps} sections completed
+            {journey.isComplete ? ' · Marked complete' : ''}
+          </Typography>
+          <LinearProgress
+            variant="determinate"
+            value={journeyProgress}
+            sx={{ height: 8, borderRadius: 4, mb: 2, bgcolor: '#e2e8f0', '& .MuiLinearProgress-bar': { bgcolor: '#2463eb' } }}
+          />
+          <Paper elevation={0} sx={{ p: 2, borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+            {journey.steps.map((step) => (
+              <JourneyStepRow key={step.key} step={step} />
+            ))}
+          </Paper>
+          <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', mt: 1 }}>
+            Registered {formatDate(journey.registeredAt)}
+          </Typography>
+        </Box>
+      )}
+
+      {recentApplications.length > 0 && (
+        <Box sx={{ mb: 3 }}>
+          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', mb: 2 }}>
+            Recent applications (submission source)
+          </Typography>
+          <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '8px' }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ bgcolor: '#f8fafc' }}>
+                  <TableCell sx={{ fontWeight: 600 }}>Job</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Company</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Source</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {recentApplications.map((app) => (
+                  <TableRow key={app.id}>
+                    <TableCell>{app.title || '—'}</TableCell>
+                    <TableCell>{app.company || '—'}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={app.submissionSourceLabel || 'Unknown'}
+                        size="small"
+                        sx={{ fontSize: '0.7rem', maxWidth: 220 }}
+                      />
+                    </TableCell>
+                    <TableCell>{app.status || '—'}</TableCell>
+                    <TableCell>{formatDate(app.createdAt)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      )}
+
+      <Divider sx={{ my: 3 }} />
+
       <Section title="Personal Details">
         <Field label="Full Name" value={user.fullName || user.name} />
         <Field label="Email" value={user.email} />
