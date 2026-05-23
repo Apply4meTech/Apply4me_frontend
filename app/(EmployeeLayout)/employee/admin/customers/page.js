@@ -255,16 +255,16 @@ export default function CustomersPage() {
             <TableContainer>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: '#f8fafc' }}>
+                  <TableRow sx={{ bgcolor: '#f8fafc', textWrap: 'nowrap' }}>
                     <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Email</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Plan</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Journey</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Onboarding</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }} align="center">Jobs given by cx</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }} align="center">Jobs applied</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }} align="center">Jobs pending</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }} align="center">Job token balance</TableCell>
+                    <TableCell sx={{ fontWeight: 600, textWrap: 'nowrap' }}>Jobs given by cx</TableCell>
+                    <TableCell sx={{ fontWeight: 600, textWrap: 'nowrap' }}>Jobs applied</TableCell>
+                    <TableCell sx={{ fontWeight: 600, textWrap: 'nowrap' }}>Jobs pending</TableCell>
+                    <TableCell sx={{ fontWeight: 600, textWrap: 'nowrap' }}>Job token balance</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Joined</TableCell>
                     <TableCell sx={{ fontWeight: 600 }} align="right">
                       Actions
