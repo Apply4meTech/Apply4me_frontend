@@ -810,7 +810,6 @@ export default function Pricing() {
         }}
       >
         <Container maxWidth="lg">
-          {/* Title */}
           <Typography
             component="h2"
             sx={{
