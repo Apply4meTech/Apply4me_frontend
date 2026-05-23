@@ -73,7 +73,26 @@ export const OnboardingProvider = ({ children }) => {
     currentLocation: '',
     workRightsInAustralia: '',
     visaType: '',
-    // Step 2: Resume & Documents
+    address: '',
+    houseNumber: '',
+    streetName: '',
+    suburb: '',
+    state: '',
+    postcode: '',
+    // Step 2: Job preferences
+    primaryJobTitles: [],
+    skills: [],
+    minAcceptableSalary: '',
+    totalYearsExperience: '',
+    seniorityLevel: '',
+    jobTypes: [],
+    workLocation: '',
+    locationPreference: '',
+    remoteOnly: false,
+    preferredSalaryMin: '',
+    preferredSalaryMax: '',
+    equityPreference: false,
+    // Step 3: Resume & Documents
     resume_details: null,
     cv_details: null,
     academicTranscripts_details: null,
@@ -113,9 +132,6 @@ export const OnboardingProvider = ({ children }) => {
     consentSubmitApplications: false,
     consentAccountCreation: false,
     consentTermsAndPrivacy: false,
-    // Legacy (backward compat)
-    primaryJobTitles: [],
-    address: '',
     github: '',
     personalBlog: '',
   });
@@ -180,7 +196,7 @@ export const OnboardingProvider = ({ children }) => {
   };
 
   const nextStep = () => {
-    if (currentStep < 8) {
+    if (currentStep < 9) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -192,7 +208,7 @@ export const OnboardingProvider = ({ children }) => {
   };
 
   const goToStep = (step) => {
-    if (step >= 1 && step <= 8) {
+    if (step >= 1 && step <= 9) {
       setCurrentStep(step);
     }
   };

@@ -105,7 +105,7 @@ export default function OnboardingStep2() {
     let value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     
     // Prevent negative values for salary fields
-    if (['preferredSalaryMin', 'preferredSalaryMax'].includes(field)) {
+    if (['preferredSalaryMin', 'preferredSalaryMax', 'minAcceptableSalary'].includes(field)) {
       const numValue = parseFloat(value);
       if (!isNaN(numValue) && numValue < 0) {
         value = 0;
@@ -388,6 +388,28 @@ export default function OnboardingStep2() {
           }}
         />
 
+        <TextField
+          fullWidth
+          label="Minimum Acceptable Salary *"
+          type="number"
+          value={formData.minAcceptableSalary}
+          onChange={handleChange('minAcceptableSalary')}
+          required
+          error={!!errors.minAcceptableSalary}
+          helperText={errors.minAcceptableSalary}
+          placeholder="e.g. 85000"
+          inputProps={{ min: 1 }}
+          InputProps={{
+            startAdornment: <Typography sx={{ mr: 1, color: '#64748b' }}>$</Typography>,
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '24px',
+              '& fieldset': { borderColor: '#d1d5db' },
+            },
+          }}
+        />
+
         {/* Preferred Salary Range */}
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
@@ -458,7 +480,7 @@ export default function OnboardingStep2() {
         {/* Skills */}
         <Box>
           <Typography sx={{ fontSize: '0.875rem', color: '#64748b', mb: 1 }}>
-            Skills
+            Skills <span style={{ color: '#dc2626' }}>*</span>
           </Typography>
           <Autocomplete
             freeSolo
@@ -472,6 +494,8 @@ export default function OnboardingStep2() {
               <TextField
                 {...params}
                 placeholder="Enter skills and press Enter"
+                error={!!errors.skills}
+                helperText={errors.skills}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '24px',

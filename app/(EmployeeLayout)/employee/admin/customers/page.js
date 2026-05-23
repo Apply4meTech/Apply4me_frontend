@@ -32,7 +32,6 @@ import Link from 'next/link';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import CloseIcon from '@mui/icons-material/Close';
 import CustomerOnboardingDetail from '../../../../../components/employee/CustomerOnboardingDetail';
-import PlanQuotaChip from '../../../../../components/employee/PlanQuotaChip';
 
 const getApiBase = () => {
   const url = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
@@ -45,6 +44,8 @@ export default function CustomersPage() {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [onboardingFilter, setOnboardingFilter] = useState('');
+  const [journeyFilter, setJourneyFilter] = useState('');
+  const [purchaseFilter, setPurchaseFilter] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [total, setTotal] = useState(0);
@@ -70,6 +71,8 @@ export default function CustomersPage() {
       });
       if (search.trim()) params.set('search', search.trim());
       if (onboardingFilter) params.set('onboarding', onboardingFilter);
+      if (journeyFilter) params.set('journey', journeyFilter);
+      if (purchaseFilter) params.set('purchase', purchaseFilter);
 
       const res = await fetch(`${getApiBase()}/api/employee/customers?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -86,7 +89,26 @@ export default function CustomersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, rowsPerPage, search, onboardingFilter]);
+  }, [page, rowsPerPage, search, onboardingFilter, journeyFilter, purchaseFilter]);
+
+  const journeyChipSx = (status) => {
+    const map = {
+      converted: { bgcolor: '#dcfce7', color: '#16a34a' },
+      onboarded_unpaid: { bgcolor: '#fef3c7', color: '#b45309' },
+      paid_incomplete_onboarding: { bgcolor: '#e0e7ff', color: '#4338ca' },
+      incomplete: { bgcolor: '#fee2e2', color: '#dc2626' },
+    };
+    return map[status] || { bgcolor: '#f1f5f9', color: '#64748b' };
+  };
+
+  const formatTokenBalance = (c) => {
+    if (c.planQuota?.limit != null) {
+      const remaining = c.jobTokenBalance ?? c.planQuota.remaining ?? 0;
+      return `${remaining} / ${c.planQuota.limit}`;
+    }
+    if (c.jobTokenBalance != null) return String(c.jobTokenBalance);
+    return '—';
+  };
 
   useEffect(() => {
     fetchCustomers();
@@ -134,7 +156,7 @@ export default function CustomersPage() {
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a' }}>
-          Customer Database
+          Customers
         </Typography>
         <Button
           startIcon={<RefreshIcon />}
@@ -147,7 +169,7 @@ export default function CustomersPage() {
       </Box>
 
       <Typography sx={{ color: '#64748b', fontSize: '0.875rem', mb: 3 }}>
-        Browse all customers, application counts, payment dates, and full onboarding profiles.
+        View every field customers submit during onboarding — personal details, documents, employment history, compliance, and consent. Track job activity, plan tokens, and who completed signup and purchase.
       </Typography>
 
       {error && (
@@ -190,6 +212,38 @@ export default function CustomersPage() {
             <MenuItem value="complete">Complete</MenuItem>
             <MenuItem value="incomplete">Incomplete</MenuItem>
           </TextField>
+          <TextField
+            select
+            size="small"
+            label="Signup & purchase"
+            value={journeyFilter}
+            onChange={(e) => {
+              setJourneyFilter(e.target.value);
+              setPage(0);
+            }}
+            sx={{ minWidth: 200, bgcolor: 'white', '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
+          >
+            <MenuItem value="">All journeys</MenuItem>
+            <MenuItem value="converted">Onboarded & purchased</MenuItem>
+            <MenuItem value="onboarded_unpaid">Onboarded, no purchase</MenuItem>
+            <MenuItem value="incomplete">Signup incomplete</MenuItem>
+            <MenuItem value="paid_incomplete_onboarding">Paid, onboarding incomplete</MenuItem>
+          </TextField>
+          <TextField
+            select
+            size="small"
+            label="Payment"
+            value={purchaseFilter}
+            onChange={(e) => {
+              setPurchaseFilter(e.target.value);
+              setPage(0);
+            }}
+            sx={{ minWidth: 140, bgcolor: 'white', '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="paid">Purchased</MenuItem>
+            <MenuItem value="unpaid">Not purchased</MenuItem>
+          </TextField>
         </Box>
 
         {loading ? (
@@ -204,10 +258,13 @@ export default function CustomersPage() {
                   <TableRow sx={{ bgcolor: '#f8fafc' }}>
                     <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Email</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }} align="center">Plan usage</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Plan</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Payment</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Journey</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Onboarding</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }} align="center">Jobs given by cx</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }} align="center">Jobs applied</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }} align="center">Jobs pending</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }} align="center">Job token balance</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Joined</TableCell>
                     <TableCell sx={{ fontWeight: 600 }} align="right">
                       Actions
@@ -217,7 +274,7 @@ export default function CustomersPage() {
                 <TableBody>
                   {customers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} sx={{ textAlign: 'center', py: 6, color: '#64748b' }}>
+                      <TableCell colSpan={11} sx={{ textAlign: 'center', py: 6, color: '#64748b' }}>
                         No customers found
                       </TableCell>
                     </TableRow>
@@ -238,9 +295,6 @@ export default function CustomersPage() {
                           </Box>
                         </TableCell>
                         <TableCell>{c.email}</TableCell>
-                        <TableCell align="center">
-                          <PlanQuotaChip planQuota={c.planQuota} />
-                        </TableCell>
                         <TableCell>
                           {c.subscription?.planName ? (
                             <Chip label={c.subscription.planName} size="small" sx={{ bgcolor: '#eff6ff', color: '#2463eb' }} />
@@ -248,7 +302,13 @@ export default function CustomersPage() {
                             '—'
                           )}
                         </TableCell>
-                        <TableCell>{formatDate(c.paymentCompletedAt)}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={c.journeyLabel || '—'}
+                            size="small"
+                            sx={journeyChipSx(c.journeyStatus)}
+                          />
+                        </TableCell>
                         <TableCell>
                           <Chip
                             label={c.isOnboardingComplete ? 'Complete' : 'Incomplete'}
@@ -258,6 +318,12 @@ export default function CustomersPage() {
                               color: c.isOnboardingComplete ? '#16a34a' : '#dc2626',
                             }}
                           />
+                        </TableCell>
+                        <TableCell align="center">{c.jobsGivenByCustomer ?? 0}</TableCell>
+                        <TableCell align="center">{c.jobsApplied ?? 0}</TableCell>
+                        <TableCell align="center">{c.jobsPending ?? 0}</TableCell>
+                        <TableCell align="center" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                          {formatTokenBalance(c)}
                         </TableCell>
                         <TableCell>{formatDate(c.createdAt)}</TableCell>
                         <TableCell align="right">

@@ -184,6 +184,50 @@ export default function OnboardingStep1() {
           ))}
         </TextField>
 
+        <TextField
+          fullWidth
+          label="Residential Address *"
+          value={formData.address}
+          onChange={handleChange('address')}
+          required
+          error={!!errors.address}
+          helperText={errors.address || 'Street, suburb, state and postcode'}
+          placeholder="e.g. 12 Smith St, Sydney NSW 2000"
+          multiline
+          minRows={2}
+          sx={inputSx}
+        />
+
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+          <TextField
+            fullWidth
+            label="Suburb"
+            value={formData.suburb}
+            onChange={handleChange('suburb')}
+            error={!!errors.suburb}
+            helperText={errors.suburb}
+            sx={inputSx}
+          />
+          <TextField
+            fullWidth
+            label="State"
+            value={formData.state}
+            onChange={handleChange('state')}
+            error={!!errors.state}
+            helperText={errors.state}
+            sx={inputSx}
+          />
+          <TextField
+            fullWidth
+            label="Postcode"
+            value={formData.postcode}
+            onChange={handleChange('postcode')}
+            error={!!errors.postcode}
+            helperText={errors.postcode}
+            sx={inputSx}
+          />
+        </Box>
+
         {/* Visa Type (shown only when Visa Holder selected) */}
         <TextField
           fullWidth
