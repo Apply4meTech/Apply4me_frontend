@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -18,11 +18,21 @@ import {
   MenuItem,
   Pagination,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  Select,
+  Snackbar,
+  InputAdornment,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 const getApiBase = () => {
   const url = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
@@ -36,12 +46,23 @@ const EXPERIENCE_OPTIONS = [
   { value: '6', label: '6+ years (Senior)' },
 ];
 
+const COUNTRY_OPTIONS = [
+  { value: 'au', label: 'Australia' },
+  { value: 'gb', label: 'United Kingdom' },
+  { value: 'us', label: 'United States' },
+  { value: 'ca', label: 'Canada' },
+  { value: 'nz', label: 'New Zealand' },
+  { value: 'in', label: 'India' },
+  { value: 'sg', label: 'Singapore' },
+];
+
 export default function JobFinderPage() {
   const [filters, setFilters] = useState({
     jobTitle: '',
     skills: '',
     experience: '',
     location: '',
+    country: 'au',
   });
   const [appliedFilters, setAppliedFilters] = useState(null);
   const [jobs, setJobs] = useState([]);
@@ -51,6 +72,15 @@ export default function JobFinderPage() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [provider, setProvider] = useState('');
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [jobToAssign, setJobToAssign] = useState(null);
+  const [customers, setCustomers] = useState([]);
+  const [customerSearch, setCustomerSearch] = useState('');
+  const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [loadingCustomers, setLoadingCustomers] = useState(false);
+  const [assigning, setAssigning] = useState(false);
+  const [assignedJobIds, setAssignedJobIds] = useState({});
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   const fetchJobs = async (searchFilters, pageNum = 1) => {
     try {
@@ -69,6 +99,7 @@ export default function JobFinderPage() {
         ...(searchFilters.skills && { skills: searchFilters.skills }),
         ...(searchFilters.experience && { experience: searchFilters.experience }),
         ...(searchFilters.location && { location: searchFilters.location }),
+        ...(searchFilters.country && { country: searchFilters.country }),
       });
 
       const res = await fetch(`${getApiBase()}/api/employee/job-scraper/search?${params}`, {
@@ -112,13 +143,118 @@ export default function JobFinderPage() {
       ? new Date(d).toLocaleDateString('en-AU', { year: 'numeric', month: 'short', day: 'numeric' })
       : null;
 
+  const fetchAssignableCustomers = async (search = '') => {
+    try {
+      setLoadingCustomers(true);
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const params = new URLSearchParams({ limit: '50' });
+      if (search.trim()) params.set('search', search.trim());
+
+      const res = await fetch(`${getApiBase()}/api/employee/assignable-customers?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setCustomers(data.customers || []);
+      } else {
+        throw new Error(data.error || 'Failed to load customers');
+      }
+    } catch (err) {
+      setSnackbar({ open: true, message: err.message, severity: 'error' });
+    } finally {
+      setLoadingCustomers(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!assignDialogOpen) return undefined;
+    const timer = setTimeout(() => {
+      fetchAssignableCustomers(customerSearch);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [assignDialogOpen, customerSearch]);
+
+  const openAssignDialog = (job) => {
+    setJobToAssign(job);
+    setSelectedCustomerId('');
+    setCustomerSearch('');
+    setAssignDialogOpen(true);
+  };
+
+  const handleAssignJob = async () => {
+    if (!jobToAssign || !selectedCustomerId) return;
+
+    try {
+      setAssigning(true);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setSnackbar({ open: true, message: 'Authentication required', severity: 'error' });
+        return;
+      }
+
+      const res = await fetch(`${getApiBase()}/api/employee/jobs/from-search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: jobToAssign.title,
+          company: jobToAssign.company,
+          location: jobToAssign.location,
+          jobUrl: jobToAssign.jobUrl,
+          platform: jobToAssign.platform || jobToAssign.source || 'adzuna',
+          description: jobToAssign.description,
+          salary: jobToAssign.salary,
+          category: jobToAssign.category,
+          externalId: jobToAssign.id,
+          userId: selectedCustomerId,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to assign job');
+      }
+
+      const customer =
+        data.job?.customer ||
+        customers.find((c) => (c._id || c.id) === selectedCustomerId);
+      const customerName = customer?.name || 'customer';
+
+      setAssignedJobIds((prev) => ({
+        ...prev,
+        [jobToAssign.id]: customerName,
+      }));
+      setAssignDialogOpen(false);
+      setJobToAssign(null);
+      setSelectedCustomerId('');
+      setCustomerSearch('');
+      setSnackbar({
+        open: true,
+        message: data.isExisting
+          ? `Already added for ${customerName}`
+          : data.message || `Added for ${customerName}`,
+        severity: data.isExisting ? 'info' : 'success',
+      });
+    } catch (err) {
+      setSnackbar({ open: true, message: err.message, severity: 'error' });
+    } finally {
+      setAssigning(false);
+    }
+  };
+
   return (
     <Box>
       <Typography variant="h4" sx={{ fontWeight: 700, color: '#0f172a', mb: 1 }}>
         Job Finder
       </Typography>
       <Typography sx={{ color: '#64748b', fontSize: '0.875rem', mb: 3 }}>
-        Search external job listings by title, skills, and experience. Results come from the configured job scraper API.
+        Search live job listings via Adzuna, then add any result to a customer job list.
       </Typography>
 
       <Grid container spacing={3}>
@@ -176,6 +312,21 @@ export default function JobFinderPage() {
             </TextField>
             <TextField
               fullWidth
+              select
+              size="small"
+              label="Country"
+              value={filters.country}
+              onChange={(e) => setFilters((f) => ({ ...f, country: e.target.value }))}
+              sx={{ mb: 2 }}
+            >
+              {COUNTRY_OPTIONS.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              fullWidth
               size="small"
               label="Location (optional)"
               placeholder="e.g. Sydney"
@@ -197,7 +348,7 @@ export default function JobFinderPage() {
 
             {provider && (
               <Typography sx={{ fontSize: '0.7rem', color: '#94a3b8', mt: 2, textAlign: 'center' }}>
-                Source: {provider}
+                Source: {provider === 'adzuna' ? 'Adzuna' : provider}
               </Typography>
             )}
           </Paper>
@@ -217,7 +368,10 @@ export default function JobFinderPage() {
           )}
           {appliedFilters && !loading && jobs.length > 0 && provider && (
             <Typography sx={{ fontSize: '0.75rem', color: '#94a3b8', mb: 2 }}>
-              Results via {provider}
+              Results via {provider === 'adzuna' ? 'Adzuna' : provider}
+              {appliedFilters.country
+                ? ` · ${COUNTRY_OPTIONS.find((c) => c.value === appliedFilters.country)?.label || appliedFilters.country}`
+                : ''}
             </Typography>
           )}
 
@@ -274,6 +428,17 @@ export default function JobFinderPage() {
                         {job.employmentType && (
                           <Chip label={job.employmentType} size="small" variant="outlined" />
                         )}
+                        {job.category && (
+                          <Chip label={job.category} size="small" sx={{ bgcolor: '#f1f5f9', color: '#475569' }} />
+                        )}
+                        {assignedJobIds[job.id] && (
+                          <Chip
+                            icon={<CheckCircleOutlineIcon sx={{ fontSize: '14px !important' }} />}
+                            label={`Added for ${assignedJobIds[job.id]}`}
+                            size="small"
+                            sx={{ bgcolor: '#ecfdf5', color: '#16a34a' }}
+                          />
+                        )}
                       </Box>
                       <Typography sx={{ fontSize: '0.875rem', color: '#475569', mb: 0.5 }}>
                         {job.company}
@@ -307,10 +472,20 @@ export default function JobFinderPage() {
                         </Typography>
                       )}
                     </CardContent>
-                    {job.jobUrl && (
-                      <>
-                        <Divider />
-                        <CardActions sx={{ px: 2, py: 1.5 }}>
+                    <Divider />
+                    <CardActions sx={{ px: 2, py: 1.5, justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          startIcon={<PersonAddOutlinedIcon />}
+                          onClick={() => openAssignDialog(job)}
+                          disabled={!!assignedJobIds[job.id]}
+                          sx={{ textTransform: 'none', borderRadius: '8px' }}
+                        >
+                          {assignedJobIds[job.id] ? 'Added' : 'Add for customer'}
+                        </Button>
+                        {job.jobUrl && (
                           <Button
                             size="small"
                             component={MuiLink}
@@ -322,9 +497,9 @@ export default function JobFinderPage() {
                           >
                             View job
                           </Button>
-                        </CardActions>
-                      </>
-                    )}
+                        )}
+                      </Box>
+                    </CardActions>
                   </Card>
                 ))}
               </Box>
@@ -342,6 +517,121 @@ export default function JobFinderPage() {
           )}
         </Grid>
       </Grid>
+
+      <Dialog
+        open={assignDialogOpen}
+        onClose={() => {
+          if (!assigning) {
+            setAssignDialogOpen(false);
+            setJobToAssign(null);
+            setSelectedCustomerId('');
+            setCustomerSearch('');
+          }
+        }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Add job for customer</DialogTitle>
+        <DialogContent>
+          {jobToAssign && (
+            <Box sx={{ mb: 2, mt: 1, p: 2, bgcolor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <Typography sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.95rem' }}>
+                {jobToAssign.title}
+              </Typography>
+              <Typography sx={{ fontSize: '0.8rem', color: '#64748b', mt: 0.5 }}>
+                {jobToAssign.company} · {jobToAssign.location}
+              </Typography>
+            </Box>
+          )}
+          <TextField
+            fullWidth
+            size="small"
+            placeholder="Search by name or email"
+            value={customerSearch}
+            onChange={(e) => setCustomerSearch(e.target.value)}
+            sx={{ mb: 2 }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ fontSize: 18, color: '#94a3b8' }} />
+                </InputAdornment>
+              ),
+            }}
+          />
+          {loadingCustomers ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress size={28} />
+            </Box>
+          ) : (
+            <FormControl fullWidth>
+              <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', mb: 1 }}>
+                Select customer
+              </Typography>
+              <Select
+                value={selectedCustomerId}
+                onChange={(e) => setSelectedCustomerId(e.target.value)}
+                displayEmpty
+                sx={{ borderRadius: '8px' }}
+                renderValue={(value) => {
+                  if (!value) return <em style={{ color: '#94a3b8' }}>Choose a customer</em>;
+                  const customer = customers.find((c) => (c._id || c.id) === value);
+                  return customer ? `${customer.name} (${customer.email})` : value;
+                }}
+              >
+                <MenuItem value="" disabled>
+                  <em>Choose a customer</em>
+                </MenuItem>
+                {customers.length === 0 && (
+                  <MenuItem value="" disabled>
+                    <em>No customers found</em>
+                  </MenuItem>
+                )}
+                {customers.map((customer) => (
+                  <MenuItem key={customer._id || customer.id} value={customer._id || customer.id}>
+                    {customer.name} ({customer.email})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => {
+              setAssignDialogOpen(false);
+              setJobToAssign(null);
+              setSelectedCustomerId('');
+              setCustomerSearch('');
+            }}
+            disabled={assigning}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleAssignJob}
+            disabled={!selectedCustomerId || assigning || loadingCustomers}
+            sx={{ textTransform: 'none', borderRadius: '8px' }}
+          >
+            {assigning ? <CircularProgress size={20} color="inherit" /> : 'Add for customer'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={5000}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
