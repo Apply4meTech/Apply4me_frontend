@@ -280,7 +280,7 @@ export default function CustomersPage() {
                     </TableRow>
                   ) : (
                     customers.map((c) => (
-                      <TableRow key={c.id} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
+                      <TableRow key={c.id} sx={{ textWrap:'nowrap','&:hover': { bgcolor: '#f8fafc' } }}>
                         <TableCell>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                             <Avatar sx={{ width: 32, height: 32, bgcolor: '#2463eb', fontSize: '0.8rem' }}>
