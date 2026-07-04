@@ -157,7 +157,8 @@ export default function Login() {
         
         // Admins from User model -> main dashboard
         if (isAdmin) {
-          router.push(redirectPath || '/dashboard');
+          const adminRedirectPath = redirectPath?.startsWith('/dashboard') ? redirectPath : '/dashboard';
+          router.push(adminRedirectPath);
           return;
         }
         
@@ -848,7 +849,7 @@ export default function Login() {
               {({ values, errors, touched, handleChange, handleBlur }) => (
                 <Form style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '8px' }}>
                   <Typography sx={{ color: '#64748b', fontSize: '0.875rem', mb: 1 }}>
-                    Enter your email address and we'll send you a link to reset your password.
+                    Enter your email address and we&apos;ll send you a link to reset your password.
                   </Typography>
                   
                   <TextField
