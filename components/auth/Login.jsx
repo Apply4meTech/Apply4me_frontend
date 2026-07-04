@@ -32,7 +32,6 @@ const forgotPasswordSchema = yup.object().shape({
     .required('Email is required'),
 });
 
-// Reusable TextField styles
 const getTextFieldStyles = (hasError, size = 'default') => ({
   '& .MuiOutlinedInput-root': {
     borderRadius: '8px',
