@@ -31,6 +31,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import CardMembershipIcon from '@mui/icons-material/CardMembership';
+import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { logout, initializeAuth, updateUser } from '../../store/authSlice';
 
@@ -48,6 +49,7 @@ const getMenuItems = (userRole) => {
   const baseItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Applications', icon: <WorkIcon />, path: '/dashboard/applications' },
+    { text: 'Interview Prep', icon: <RecordVoiceOverIcon />, path: '/dashboard/interview' },
     { text: 'Profile', icon: <PersonIcon />, path: '/dashboard/profile' },
   ];
 

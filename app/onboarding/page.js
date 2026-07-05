@@ -95,6 +95,15 @@ function OnboardingContent() {
         errorMessages.push('Phone Number is required');
         setFieldError('phone', 'Phone Number is required');
       }
+      if (!formData.dateOfBirth) {
+        isValid = false;
+        errorMessages.push('Date of Birth is required');
+        setFieldError('dateOfBirth', 'Date of Birth is required');
+      } else if (Number.isNaN(new Date(formData.dateOfBirth).getTime())) {
+        isValid = false;
+        errorMessages.push('Please enter a valid Date of Birth');
+        setFieldError('dateOfBirth', 'Please enter a valid Date of Birth');
+      }
       if (!formData.currentLocation?.trim()) {
         isValid = false;
         errorMessages.push('Current Location is required');
@@ -141,6 +150,11 @@ function OnboardingContent() {
         isValid = false;
         errorMessages.push('Resume is required');
         setFieldError('resume', 'Resume is required. Please upload your resume.');
+      }
+      if (formData.workRightsInAustralia === 'Visa Holder' && !formData.visaAttachment_details) {
+        isValid = false;
+        errorMessages.push('Visa attachment is required for visa holders');
+        setFieldError('visa_attachment', 'Visa attachment is required for visa holders.');
       }
     }
 
@@ -266,6 +280,7 @@ function OnboardingContent() {
       const onboardingData = {
         // Step 1: Personal Details
         fullName: formData.fullName,
+        dateOfBirth: formData.dateOfBirth || '',
         email: formData.email,
         phoneCode: formData.phoneCode,
         phone: formData.phone,
@@ -295,6 +310,7 @@ function OnboardingContent() {
         cv_details: formData.cv_details || null,
         academicTranscripts_details: formData.academicTranscripts_details || null,
         certifications_details: formData.certifications_details || null,
+        visaAttachment_details: formData.workRightsInAustralia === 'Visa Holder' ? (formData.visaAttachment_details || null) : null,
         // Step 4: Employment History
         ...(() => {
           const rows = Array.isArray(formData.employmentHistory) ? formData.employmentHistory : [];

@@ -56,7 +56,9 @@ export default function OnboardingStep1() {
     updateFormData(field, value);
     if (field === 'workRightsInAustralia' && value !== 'Visa Holder') {
       updateFormData('visaType', '');
+      updateFormData('visaAttachment_details', null);
       setFieldError('visaType', '');
+      setFieldError('visa_attachment', '');
     }
   };
 
@@ -98,6 +100,19 @@ export default function OnboardingStep1() {
           required
           error={!!errors.email}
           helperText={errors.email}
+          sx={inputSx}
+        />
+
+        <TextField
+          fullWidth
+          label="Date of Birth *"
+          type="date"
+          value={formData.dateOfBirth || ''}
+          onChange={handleChange('dateOfBirth')}
+          required
+          error={!!errors.dateOfBirth}
+          helperText={errors.dateOfBirth}
+          InputLabelProps={{ shrink: true }}
           sx={inputSx}
         />
 

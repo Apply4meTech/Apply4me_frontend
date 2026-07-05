@@ -28,6 +28,7 @@ export default function OnboardingStep3() {
   const [uploadingCV, setUploadingCV] = useState(false);
   const [uploadingTranscripts, setUploadingTranscripts] = useState(false);
   const [uploadingCerts, setUploadingCerts] = useState(false);
+  const [uploadingVisa, setUploadingVisa] = useState(false);
 
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
@@ -42,6 +43,7 @@ export default function OnboardingStep3() {
     cv: { type: 'cv', accept: '.pdf,.doc,.docx', maxMB: 10, setLoading: (v) => setUploadingCV(v) },
     academic_transcripts: { type: 'academic_transcripts', accept: '.pdf,.doc,.docx', maxMB: 10, setLoading: (v) => setUploadingTranscripts(v) },
     certifications: { type: 'certifications', accept: '.pdf,.doc,.docx,.png,.jpg,.jpeg,.gif,.webp', maxMB: 10, setLoading: (v) => setUploadingCerts(v) },
+    visa_attachment: { type: 'visa_attachment', accept: '.pdf,.doc,.docx,.png,.jpg,.jpeg,.gif,.webp', maxMB: 10, setLoading: (v) => setUploadingVisa(v) },
   };
 
   const handleFileChange = (field) => async (e) => {
@@ -87,7 +89,16 @@ export default function OnboardingStep3() {
       if (!response.ok) throw new Error(data.error || 'Failed to upload file');
 
       if (data.success && data.fileDetails) {
-        const detailsKey = field === 'resume' ? 'resume_details' : field === 'cv' ? 'cv_details' : field === 'academic_transcripts' ? 'academicTranscripts_details' : 'certifications_details';
+        const detailsKey =
+          field === 'resume'
+            ? 'resume_details'
+            : field === 'cv'
+              ? 'cv_details'
+              : field === 'academic_transcripts'
+                ? 'academicTranscripts_details'
+                : field === 'visa_attachment'
+                  ? 'visaAttachment_details'
+                  : 'certifications_details';
         updateFormData(detailsKey, data.fileDetails);
       } else {
         throw new Error('Invalid response from server');
@@ -106,6 +117,7 @@ export default function OnboardingStep3() {
     cv: { type: 'cv', detailsKey: 'cv_details' },
     academic_transcripts: { type: 'academic_transcripts', detailsKey: 'academicTranscripts_details' },
     certifications: { type: 'certifications', detailsKey: 'certifications_details' },
+    visa_attachment: { type: 'visa_attachment', detailsKey: 'visaAttachment_details' },
   };
 
   const handleRemoveFile = async (field) => {
@@ -146,7 +158,16 @@ export default function OnboardingStep3() {
     const config = UPLOAD_CONFIG[field];
     const map = FILE_FIELD_MAP[field];
     if (!config || !map) return null;
-    const loading = field === 'resume' ? uploadingResume : field === 'cv' ? uploadingCV : field === 'academic_transcripts' ? uploadingTranscripts : uploadingCerts;
+    const loading =
+      field === 'resume'
+        ? uploadingResume
+        : field === 'cv'
+          ? uploadingCV
+          : field === 'academic_transcripts'
+            ? uploadingTranscripts
+            : field === 'visa_attachment'
+              ? uploadingVisa
+              : uploadingCerts;
 
     return (
       <Box>
@@ -227,6 +248,16 @@ export default function OnboardingStep3() {
         <FileUploadBlock field="academic_transcripts" label="Academic Transcripts" required={false} details={formData.academicTranscripts_details} helperText="Optional. If applicable" />
 
         <FileUploadBlock field="certifications" label="Certifications / Licences" required={false} details={formData.certifications_details} helperText="Optional. PDF or image" />
+
+        {formData.workRightsInAustralia === 'Visa Holder' && (
+          <FileUploadBlock
+            field="visa_attachment"
+            label="Visa Attachment"
+            required
+            details={formData.visaAttachment_details}
+            helperText="Required for visa holders. Upload PDF, DOCX, or a clear image scan."
+          />
+        )}
       </Box>
     </Box>
   );

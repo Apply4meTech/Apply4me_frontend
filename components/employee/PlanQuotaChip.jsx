@@ -16,6 +16,9 @@ export default function PlanQuotaChip({ planQuota, size = 'small', showProgress 
 
   const { display, used, limit, percentUsed, planName, isAtLimit } = planQuota;
   const label = display || (limit != null ? `${used}/${limit}` : String(used ?? 0));
+  const tooltip = planName
+    ? `${planName} plan · ${used} of ${limit ?? '∞'} total tokens used · AFM ${planQuota.afmUsed ?? 0}/${planQuota.afmLimit ?? '∞'} · CX ${planQuota.customerProvidedUsed ?? 0}/${planQuota.customerProvidedLimit ?? '∞'}`
+    : `${used} jobs submitted`;
 
   const chip = (
     <Chip
@@ -33,11 +36,7 @@ export default function PlanQuotaChip({ planQuota, size = 'small', showProgress 
   if (!showProgress) {
     return (
       <Tooltip
-        title={
-          planName
-            ? `${planName} plan · ${used} of ${limit ?? '∞'} jobs used`
-            : `${used} jobs submitted`
-        }
+        title={tooltip}
       >
         {chip}
       </Tooltip>
@@ -46,7 +45,7 @@ export default function PlanQuotaChip({ planQuota, size = 'small', showProgress 
 
   return (
     <Box sx={{ minWidth: 100 }}>
-      <Tooltip title={planName ? `${planName}: ${label}` : label}>{chip}</Tooltip>
+      <Tooltip title={tooltip}>{chip}</Tooltip>
       {limit != null && limit > 0 && (
         <LinearProgress
           variant="determinate"

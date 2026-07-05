@@ -17,9 +17,6 @@ import planService from '../../utils/planService';
 import { PRICING_ADDONS } from '../../utils/addonCatalog';
 import Link from 'next/link';
 
-/** Live payment test: charge A$1 for Premium only. Remove or set to null before production launch. */
-const PREMIUM_CHECKOUT_AMOUNT_AUD = 1;
-
 export default function Pricing() {
   const [expandedFaq, setExpandedFaq] = useState(0);
   const [processingPayment, setProcessingPayment] = useState(false);
@@ -184,14 +181,9 @@ export default function Pricing() {
         return;
       }
 
-      const chargeAmount =
-        plan.name === 'Premium' && typeof PREMIUM_CHECKOUT_AMOUNT_AUD === 'number'
-          ? PREMIUM_CHECKOUT_AMOUNT_AUD
-          : price;
-
       // Prepare order data (one-time payment)
       const orderData = {
-        amount: chargeAmount,
+        amount: price,
         customerInfo: {
           name: user?.name || user?.fullName || 'User',
           email: user?.email || '',

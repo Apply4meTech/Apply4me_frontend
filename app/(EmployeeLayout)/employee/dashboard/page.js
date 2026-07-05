@@ -35,6 +35,7 @@ import {
   AccordionSummary,
   AccordionDetails,
   InputAdornment,
+  Checkbox,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -58,6 +59,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import NoteIcon from '@mui/icons-material/Note';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import AddIcon from '@mui/icons-material/Add';
 import Tooltip from '@mui/material/Tooltip';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -97,6 +99,19 @@ export default function EmployeeDashboard() {
   const [autoAssignEnabled, setAutoAssignEnabled] = useState(true);
   const [loadingSettings, setLoadingSettings] = useState(false);
   const [employeeStats, setEmployeeStats] = useState([]);
+  const [selectedJobIds, setSelectedJobIds] = useState([]);
+  const [bulkAssignDialogOpen, setBulkAssignDialogOpen] = useState(false);
+  const [bulkAssigning, setBulkAssigning] = useState(false);
+  const [manualJobDialogOpen, setManualJobDialogOpen] = useState(false);
+  const [creatingManualJob, setCreatingManualJob] = useState(false);
+  const [manualJobForm, setManualJobForm] = useState({
+    userId: '',
+    title: '',
+    company: '',
+    location: '',
+    jobUrl: '',
+    description: '',
+  });
   
   const [dashboardData, setDashboardData] = useState({
     totalJobs: 0,
@@ -111,6 +126,11 @@ export default function EmployeeDashboard() {
   const [searchInput, setSearchInput] = useState('');
   const [filters, setFilters] = useState({ status: 'all', search: '', sortBy: 'title', sortOrder: 'asc' });
   const isSuperAdmin = user?.role === 'super_admin';
+
+  const visibleJobIds = dashboardData.jobs.map((job) => job.id);
+  const visibleSelectedCount = visibleJobIds.filter((id) => selectedJobIds.includes(id)).length;
+  const allVisibleJobsSelected =
+    visibleJobIds.length > 0 && visibleSelectedCount === visibleJobIds.length;
 
   useEffect(() => {
     if (isSuperAdmin) {
@@ -525,6 +545,123 @@ export default function EmployeeDashboard() {
     }
   };
 
+  const handleToggleJobSelection = (jobId) => {
+    setSelectedJobIds((prev) =>
+      prev.includes(jobId) ? prev.filter((id) => id !== jobId) : [...prev, jobId]
+    );
+  };
+
+  const handleToggleVisibleSelection = () => {
+    setSelectedJobIds((prev) => {
+      if (allVisibleJobsSelected) {
+        return prev.filter((id) => !visibleJobIds.includes(id));
+      }
+      return [...new Set([...prev, ...visibleJobIds])];
+    });
+  };
+
+  const openBulkAssignDialog = () => {
+    if (!selectedJobIds.length) {
+      alert('Select at least one job to assign.');
+      return;
+    }
+    fetchEmployees();
+    setBulkAssignDialogOpen(true);
+  };
+
+  const handleBulkAssignJobs = async () => {
+    if (!selectedEmployeeId || selectedJobIds.length === 0) return;
+
+    try {
+      setBulkAssigning(true);
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${getApiUrl()}/api/employee/jobs/bulk-assign`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ jobIds: selectedJobIds, employeeId: selectedEmployeeId })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        alert(data.message || 'Jobs assigned successfully');
+        setBulkAssignDialogOpen(false);
+        setSelectedEmployeeId('');
+        setSelectedJobIds([]);
+        fetchDashboardData();
+        if (isSuperAdmin) fetchEmployeeStats();
+      } else {
+        alert(data.error || 'Failed to bulk assign jobs');
+      }
+    } catch (error) {
+      console.error('Error bulk assigning jobs:', error);
+      alert('Failed to bulk assign jobs');
+    } finally {
+      setBulkAssigning(false);
+    }
+  };
+
+  const handleManualJobFormChange = (field, value) => {
+    setManualJobForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleCreateManualCustomerJob = async () => {
+    if (!manualJobForm.userId || !manualJobForm.title.trim() || !manualJobForm.jobUrl.trim()) {
+      alert('Customer, job title, and job link are required.');
+      return;
+    }
+
+    try {
+      setCreatingManualJob(true);
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`${getApiUrl()}/api/employee/customers/${manualJobForm.userId}/jobs`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: manualJobForm.title,
+          company: manualJobForm.company,
+          location: manualJobForm.location,
+          jobUrl: manualJobForm.jobUrl,
+          metadata: manualJobForm.description ? { description: manualJobForm.description } : {},
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        alert('External job link added for customer');
+        setManualJobDialogOpen(false);
+        setManualJobForm({
+          userId: '',
+          title: '',
+          company: '',
+          location: '',
+          jobUrl: '',
+          description: '',
+        });
+        fetchDashboardData();
+        if (isSuperAdmin) fetchEmployeeStats();
+      } else {
+        alert(data.error || 'Failed to add external job link');
+      }
+    } catch (error) {
+      console.error('Error creating manual customer job:', error);
+      alert('Failed to add external job link');
+    } finally {
+      setCreatingManualJob(false);
+    }
+  };
+
   const fetchSettings = async () => {
     try {
       setLoadingSettings(true);
@@ -613,13 +750,15 @@ export default function EmployeeDashboard() {
       'applied': { bg: '#eff6ff', color: '#2463eb' },
       'response': { bg: '#dcfce7', color: '#16a34a' },
       'rejected': { bg: '#fee2e2', color: '#dc2626' },
-      'completed': { bg: '#dcfce7', color: '#16a34a' }
+      'completed': { bg: '#dcfce7', color: '#16a34a' },
+      'job_expired': { bg: '#f1f5f9', color: '#475569' }
     };
     return statusMap[status] || { bg: '#f1f5f9', color: '#64748b' };
   };
 
   const formatStatus = (status) => {
     if (status === 'in_progress') return 'In Progress';
+    if (status === 'job_expired') return 'JOB EXPIRED';
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
@@ -698,6 +837,52 @@ export default function EmployeeDashboard() {
           {error}
         </Alert>
       )}
+
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          mb: 3,
+          borderRadius: '12px',
+          border: '1px solid #e2e8f0',
+          bgcolor: 'white',
+          display: 'flex',
+          gap: 2,
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Box>
+          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a' }}>
+            Job Operations
+          </Typography>
+          <Typography sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+            Add web-found jobs for customers and assign work in bulk.
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setManualJobDialogOpen(true)}
+            sx={{ bgcolor: '#2463eb', textTransform: 'none', '&:hover': { bgcolor: '#1d4ed8' } }}
+          >
+            Add Customer Job Link
+          </Button>
+          {isSuperAdmin && (
+            <Button
+              variant="outlined"
+              startIcon={<AssignmentIcon />}
+              disabled={selectedJobIds.length === 0}
+              onClick={openBulkAssignDialog}
+              sx={{ textTransform: 'none', borderColor: '#2463eb', color: '#2463eb' }}
+            >
+              Bulk Assign Selected ({selectedJobIds.length})
+            </Button>
+          )}
+        </Box>
+      </Paper>
 
       {/* Auto-Assign Settings (Super Admin Only) */}
       {isSuperAdmin && (
@@ -997,7 +1182,11 @@ export default function EmployeeDashboard() {
                 <MenuItem value="pending">Pending</MenuItem>
                 <MenuItem value="assigned">Assigned</MenuItem>
                 <MenuItem value="in_progress">In Progress</MenuItem>
+                <MenuItem value="applied">Applied</MenuItem>
+                <MenuItem value="response">Response</MenuItem>
+                <MenuItem value="rejected">Rejected</MenuItem>
                 <MenuItem value="completed">Completed</MenuItem>
+                <MenuItem value="job_expired">JOB EXPIRED</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -1010,6 +1199,16 @@ export default function EmployeeDashboard() {
           <Table sx={{ '& .MuiTableCell-root': { whiteSpace: 'nowrap' } }}>
             <TableHead>
               <TableRow sx={{ bgcolor: '#f8fafc' }}>
+                {isSuperAdmin && (
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      size="small"
+                      checked={allVisibleJobsSelected}
+                      indeterminate={visibleSelectedCount > 0 && !allVisibleJobsSelected}
+                      onChange={handleToggleVisibleSelection}
+                    />
+                  </TableCell>
+                )}
                 <TableCell sx={{ fontWeight: 600, color: '#0f172a', fontSize: '0.875rem', width: '60px', whiteSpace: 'nowrap' }}>SR No</TableCell>
                 <TableCell
                   sx={{
@@ -1054,7 +1253,7 @@ export default function EmployeeDashboard() {
             <TableBody>
               {                dashboardData.jobs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={isSuperAdmin ? 14 : 13} sx={{ textAlign: 'center', py: 6 }}>
+                  <TableCell colSpan={isSuperAdmin ? 15 : 13} sx={{ textAlign: 'center', py: 6 }}>
                     <Typography sx={{ color: '#64748b' }}>No jobs found</Typography>
                   </TableCell>
                 </TableRow>
@@ -1070,6 +1269,15 @@ export default function EmployeeDashboard() {
                   
                   return (
                     <TableRow key={job.id} sx={{ '&:hover': { bgcolor: '#f8fafc' } }}>
+                      {isSuperAdmin && (
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            size="small"
+                            checked={selectedJobIds.includes(job.id)}
+                            onChange={() => handleToggleJobSelection(job.id)}
+                          />
+                        </TableCell>
+                      )}
                       <TableCell sx={{ color: '#64748b', fontSize: '0.875rem', fontWeight: 500 }}>
                         {(pagination.page - 1) * pagination.limit + index + 1}
                       </TableCell>
@@ -1184,7 +1392,11 @@ export default function EmployeeDashboard() {
                             <MenuItem value="pending">Pending</MenuItem>
                             <MenuItem value="assigned">Assigned</MenuItem>
                             <MenuItem value="in_progress">In Progress</MenuItem>
+                            <MenuItem value="applied">Applied</MenuItem>
+                            <MenuItem value="response">Response</MenuItem>
+                            <MenuItem value="rejected">Rejected</MenuItem>
                             <MenuItem value="completed">Completed</MenuItem>
+                            <MenuItem value="job_expired">JOB EXPIRED</MenuItem>
                           </Select>
                         </FormControl>
                       </TableCell>
@@ -1490,6 +1702,146 @@ export default function EmployeeDashboard() {
         open={allEmployeesOpen} 
         onClose={() => setAllEmployeesOpen(false)}
       />
+
+      {/* Add External Customer Job Dialog */}
+      <Dialog open={manualJobDialogOpen} onClose={() => setManualJobDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Add Customer Job Link</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+            <FormControl fullWidth>
+              <InputLabel>Customer</InputLabel>
+              <Select
+                label="Customer"
+                value={manualJobForm.userId}
+                onChange={(e) => handleManualJobFormChange('userId', e.target.value)}
+                sx={{ borderRadius: '8px' }}
+              >
+                <MenuItem value="" disabled>Select a customer</MenuItem>
+                {dashboardData.customerList.length === 0 && (
+                  <MenuItem value="" disabled>No customers available</MenuItem>
+                )}
+                {dashboardData.customerList.map((customer) => (
+                  <MenuItem key={customer.id} value={customer.id}>
+                    {customer.name} ({customer.email})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              label="Job Title"
+              required
+              value={manualJobForm.title}
+              onChange={(e) => handleManualJobFormChange('title', e.target.value)}
+            />
+            <TextField
+              label="Company"
+              value={manualJobForm.company}
+              onChange={(e) => handleManualJobFormChange('company', e.target.value)}
+            />
+            <TextField
+              label="Location"
+              value={manualJobForm.location}
+              onChange={(e) => handleManualJobFormChange('location', e.target.value)}
+            />
+            <TextField
+              label="Job Link"
+              required
+              value={manualJobForm.jobUrl}
+              onChange={(e) => handleManualJobFormChange('jobUrl', e.target.value)}
+              placeholder="https://..."
+            />
+            <TextField
+              label="Job Description / Notes"
+              multiline
+              minRows={3}
+              value={manualJobForm.description}
+              onChange={(e) => handleManualJobFormChange('description', e.target.value)}
+              helperText="Optional. This will be available in Fill Data."
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setManualJobDialogOpen(false)} disabled={creatingManualJob}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleCreateManualCustomerJob}
+            disabled={creatingManualJob || !manualJobForm.userId || !manualJobForm.title.trim() || !manualJobForm.jobUrl.trim()}
+            startIcon={creatingManualJob ? <CircularProgress size={16} /> : <AddIcon />}
+            sx={{ bgcolor: '#2463eb', textTransform: 'none', '&:hover': { bgcolor: '#1d4ed8' } }}
+          >
+            {creatingManualJob ? 'Adding...' : 'Add Job Link'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Bulk Assign Dialog */}
+      <Dialog open={bulkAssignDialogOpen} onClose={() => {
+        setBulkAssignDialogOpen(false);
+        setSelectedEmployeeId('');
+      }} maxWidth="sm" fullWidth>
+        <DialogTitle>Bulk Assign Jobs</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+            <Alert severity="info">
+              Assigning {selectedJobIds.length} selected job{selectedJobIds.length === 1 ? '' : 's'}.
+            </Alert>
+            {loadingEmployees ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <FormControl fullWidth>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#0f172a', mb: 1 }}>
+                  Select Employee
+                </Typography>
+                <Select
+                  value={selectedEmployeeId}
+                  onChange={(e) => setSelectedEmployeeId(e.target.value)}
+                  displayEmpty
+                  sx={{ borderRadius: '8px', minWidth: '200px' }}
+                  renderValue={(value) => {
+                    if (!value) return <em style={{ color: '#94a3b8' }}>Select an employee</em>;
+                    const emp = employees.find(e => (e._id || e.id) === value);
+                    return emp ? `${emp.name} (${emp.email})` : value;
+                  }}
+                >
+                  <MenuItem value="" disabled>
+                    <em>Select an employee</em>
+                  </MenuItem>
+                  {employees
+                    .filter(emp => emp.role === 'employee' && emp.isActive)
+                    .map((employee) => (
+                      <MenuItem key={employee._id || employee.id} value={employee._id || employee.id}>
+                        {employee.name} ({employee.email})
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setBulkAssignDialogOpen(false); setSelectedEmployeeId(''); }} disabled={bulkAssigning}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleBulkAssignJobs}
+            variant="contained"
+            disabled={!selectedEmployeeId || loadingEmployees || bulkAssigning}
+            startIcon={bulkAssigning ? <CircularProgress size={16} /> : <AssignmentIcon />}
+            sx={{
+              bgcolor: '#2463eb',
+              textTransform: 'none',
+              '&:hover': { bgcolor: '#1d4ed8' },
+              '&:disabled': { bgcolor: '#cbd5e1', color: '#94a3b8' }
+            }}
+          >
+            {bulkAssigning ? 'Assigning...' : 'Assign Selected'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Assign Employee Dialog */}
       <Dialog open={assignDialogOpen} onClose={() => { 

@@ -24,6 +24,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import LinearProgress from '@mui/material/LinearProgress';
 import PlanQuotaChip from './PlanQuotaChip';
+import CustomerInterviewSection from './CustomerInterviewSection';
 
 const formatBool = (value) => {
   if (value === true) return 'Yes';
@@ -255,11 +256,19 @@ export default function CustomerOnboardingDetail({ user, recentApplications = []
         </Box>
       )}
 
+      {user.id && (
+        <>
+          <Divider sx={{ my: 3 }} />
+          <CustomerInterviewSection customerId={user.id} />
+        </>
+      )}
+
       <Divider sx={{ my: 3 }} />
 
       <Section title="Personal Details">
         <Field label="Full Name" value={user.fullName || user.name} />
         <Field label="Email" value={user.email} />
+        <Field label="Date of Birth" value={formatDate(user.dateOfBirth)} />
         <Field label="Phone" value={user.phone ? `${user.phoneCode || ''} ${user.phone}`.trim() : null} />
         <Field label="Current Location" value={user.currentLocation} />
         <Field label="Work Rights in Australia" value={user.workRightsInAustralia} />
@@ -294,6 +303,9 @@ export default function CustomerOnboardingDetail({ user, recentApplications = []
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <DocumentCard title="Certifications" doc={user.certifications || user.certifications_details} />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <DocumentCard title="Visa Attachment" doc={user.visaAttachment || user.visaAttachment_details} />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <DocumentCard title="ATS Optimized Resume" doc={user.atsResume} variant="ats" />

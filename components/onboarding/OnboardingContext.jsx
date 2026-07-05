@@ -67,6 +67,7 @@ export const OnboardingProvider = ({ children }) => {
   const getInitialData = () => ({
     // Step 1: Personal Details
     fullName: '',
+    dateOfBirth: '',
     email: '',
     phoneCode: '+61',
     phone: '',
@@ -97,6 +98,7 @@ export const OnboardingProvider = ({ children }) => {
     cv_details: null,
     academicTranscripts_details: null,
     certifications_details: null,
+    visaAttachment_details: null,
     // Step 3: Employment History (structured rows + legacy strings filled on submit)
     currentRole: '',
     previousRoles: '',

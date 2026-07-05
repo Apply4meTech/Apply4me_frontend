@@ -207,12 +207,15 @@ export default function DashboardContent() {
       'interview': { bg: '#dcfce7', color: '#16a34a' },
       'rejected': { bg: '#fee2e2', color: '#dc2626' },
       'pending': { bg: '#fef3c7', color: '#d97706' },
-      'assigned': { bg: '#f3e8ff', color: '#9333ea' }
+      'assigned': { bg: '#f3e8ff', color: '#9333ea' },
+      'job_expired': { bg: '#f1f5f9', color: '#475569' }
     };
     return statusMap[status] || { bg: '#f1f5f9', color: '#64748b' };
   };
 
   const formatStatus = (status) => {
+    if (status === 'job_expired') return 'JOB EXPIRED';
+    if (status === 'in_progress') return 'In Progress';
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
@@ -402,6 +405,8 @@ export default function DashboardContent() {
                 <MenuItem value="applied">Applied</MenuItem>
                 <MenuItem value="response">Response</MenuItem>
                 <MenuItem value="rejected">Rejected</MenuItem>
+                <MenuItem value="completed">Completed</MenuItem>
+                <MenuItem value="job_expired">JOB EXPIRED</MenuItem>
               </Select>
             </FormControl>
             <FormControl sx={{ minWidth: { xs: '100%', md: 160 } }}>
