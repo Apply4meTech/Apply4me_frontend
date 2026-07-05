@@ -177,6 +177,7 @@ function OnboardingContent() {
 
     if (step === 5) {
       // Compliance & Checks - no required fields
+      // testing comment.s
     }
 
     if (step === 6) {
