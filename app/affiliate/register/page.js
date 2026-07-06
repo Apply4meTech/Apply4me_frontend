@@ -41,6 +41,8 @@ export default function AffiliateRegisterPage() {
     }
   };
 
+  //testing comments
+
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
       <Paper sx={{ p: 4, maxWidth: 400, width: '100%', borderRadius: '12px' }}>
