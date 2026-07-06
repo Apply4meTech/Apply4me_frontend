@@ -134,6 +134,50 @@ class StripeService {
       errors
     };
   }
+
+  async validateCoupon({ code, payment_intent_id, planName }, token) {
+    try {
+      const response = await fetch(`${this.apiBase}/api/payments/coupon/validate`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code, payment_intent_id, planName }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return { success: false, message: data.message || 'Invalid coupon code' };
+      }
+      return { success: true, data: data.data };
+    } catch (error) {
+      return { success: false, message: 'Failed to validate coupon' };
+    }
+  }
+
+  async redeemCoupon({ code, payment_intent_id }, token) {
+    try {
+      const response = await fetch(`${this.apiBase}/api/payments/coupon/redeem`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code, payment_intent_id }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return { success: false, message: data.message || 'Failed to apply coupon' };
+      }
+      return {
+        success: true,
+        data: data.data,
+        redirect_url: data.redirect_url,
+      };
+    } catch (error) {
+      return { success: false, message: 'Failed to apply coupon' };
+    }
+  }
 }
 
 // Create and export a singleton instance

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Suspense, useState, useEffect } from 'react';
-import { Box, Container, Typography, Button, CircularProgress, Dialog, DialogContent } from '@mui/material';
+import { Box, Container, Typography, Button, CircularProgress, TextField, Alert } from '@mui/material';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -12,6 +12,144 @@ import stripeService from '../../../utils/stripeService';
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51SxLXK2Rp5kvhBdCpK4srBsylbANEUbN5O8BaP55FSJW57A6ZSXI3F2sWJx8Z3qaAqVwL4GIQvxzJBrNECMc5lpF00CJBNvuG2'
 );
+
+function CouponSection({ paymentIntentId, token, onFullDiscountApplied }) {
+  const [couponCode, setCouponCode] = useState('');
+  const [couponMessage, setCouponMessage] = useState(null);
+  const [couponError, setCouponError] = useState(null);
+  const [isApplying, setIsApplying] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setIsApplying(true);
+    setCouponError(null);
+    setCouponMessage(null);
+
+    const result = await stripeService.validateCoupon(
+      { code: couponCode.trim(), payment_intent_id: paymentIntentId },
+      token
+    );
+
+    setIsApplying(false);
+
+    if (!result.success) {
+      setCouponError(result.message);
+      setAppliedCoupon(null);
+      return;
+    }
+
+    if (result.data?.isFullDiscount) {
+      setAppliedCoupon(result.data.code);
+      setCouponMessage('100% off applied — no payment required.');
+      onFullDiscountApplied(result.data.code);
+    } else {
+      setCouponError('Only 100% off coupons are supported at checkout.');
+      setAppliedCoupon(null);
+    }
+  };
+
+  return (
+    <Box sx={{ marginBottom: '2rem' }}>
+      <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: '#1E293B', marginBottom: '0.75rem' }}>
+        Have a coupon code?
+      </Typography>
+      <Box sx={{ display: 'flex', gap: '0.75rem' }}>
+        <TextField
+          fullWidth
+          size="small"
+          placeholder="Enter coupon code"
+          value={couponCode}
+          onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+          disabled={!!appliedCoupon || isApplying}
+          sx={{ '& .MuiOutlinedInput-root': { borderRadius: '0.5rem' } }}
+        />
+        <Button
+          variant="outlined"
+          onClick={handleApplyCoupon}
+          disabled={!couponCode.trim() || !!appliedCoupon || isApplying}
+          sx={{ textTransform: 'none', whiteSpace: 'nowrap', borderRadius: '0.5rem' }}
+        >
+          {isApplying ? <CircularProgress size={20} /> : 'Apply'}
+        </Button>
+      </Box>
+      {couponMessage && (
+        <Alert severity="success" sx={{ marginTop: '0.75rem' }}>
+          {couponMessage}
+        </Alert>
+      )}
+      {couponError && (
+        <Alert severity="error" sx={{ marginTop: '0.75rem' }}>
+          {couponError}
+        </Alert>
+      )}
+    </Box>
+  );
+}
+
+function FreeCheckoutForm({ paymentIntentId, couponCode, returnTo }) {
+  const router = useRouter();
+  const { token } = useSelector((state) => state.auth);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const handleActivate = async () => {
+    setIsProcessing(true);
+    setErrorMessage(null);
+
+    const result = await stripeService.redeemCoupon(
+      { code: couponCode, payment_intent_id: paymentIntentId },
+      token
+    );
+
+    if (result.success) {
+      const qs = returnTo ? `&return_to=${returnTo}` : '';
+      router.push(`/payment/success?payment_intent=${paymentIntentId}${qs}`);
+    } else {
+      setErrorMessage(result.message || 'Failed to activate plan.');
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <Box>
+      <Typography sx={{ color: '#64748B', marginBottom: '1.5rem', fontSize: '0.95rem' }}>
+        Your coupon covers the full amount. Click below to activate your plan — no card needed.
+      </Typography>
+      {errorMessage && (
+        <Typography sx={{ color: '#EF4444', marginBottom: '1rem', fontSize: '0.875rem' }}>
+          {errorMessage}
+        </Typography>
+      )}
+      <Button
+        onClick={handleActivate}
+        disabled={isProcessing}
+        variant="contained"
+        fullWidth
+        sx={{
+          backgroundColor: '#16A34A',
+          color: '#FFFFFF',
+          padding: '0.75rem 2rem',
+          borderRadius: '0.5rem',
+          fontSize: '1rem',
+          fontWeight: 600,
+          textTransform: 'none',
+          '&:hover': { backgroundColor: '#15803D' },
+          '&:disabled': { backgroundColor: '#94A3B8' },
+        }}
+      >
+        {isProcessing ? (
+          <>
+            <CircularProgress size={20} sx={{ marginRight: '0.5rem', color: '#FFFFFF' }} />
+            Activating...
+          </>
+        ) : (
+          'Activate Plan (Free)'
+        )}
+      </Button>
+    </Box>
+  );
+}
 
 function CheckoutForm({ clientSecret, paymentIntentId, returnTo }) {
   const stripe = useStripe();
@@ -136,10 +274,12 @@ function CheckoutForm({ clientSecret, paymentIntentId, returnTo }) {
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { token } = useSelector((state) => state.auth);
   const [clientSecret, setClientSecret] = useState(null);
   const [paymentIntentId, setPaymentIntentId] = useState(null);
   const [returnTo, setReturnTo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [appliedCouponCode, setAppliedCouponCode] = useState(null);
 
   useEffect(() => {
     const paymentIntent = searchParams.get('payment_intent');
@@ -230,12 +370,28 @@ function CheckoutContent() {
                 fontFamily: 'inherit',
               }}
             >
-              Please enter your payment details to complete your subscription.
+              {appliedCouponCode
+                ? 'Apply your coupon to activate your plan for free.'
+                : 'Please enter your payment details to complete your subscription.'}
             </Typography>
 
-            <Elements options={options} stripe={stripePromise}>
-              <CheckoutForm clientSecret={clientSecret} paymentIntentId={paymentIntentId} returnTo={returnTo} />
-            </Elements>
+            <CouponSection
+              paymentIntentId={paymentIntentId}
+              token={token}
+              onFullDiscountApplied={setAppliedCouponCode}
+            />
+
+            {appliedCouponCode ? (
+              <FreeCheckoutForm
+                paymentIntentId={paymentIntentId}
+                couponCode={appliedCouponCode}
+                returnTo={returnTo}
+              />
+            ) : (
+              <Elements options={options} stripe={stripePromise}>
+                <CheckoutForm clientSecret={clientSecret} paymentIntentId={paymentIntentId} returnTo={returnTo} />
+              </Elements>
+            )}
           </Box>
         </Container>
       </Box>
