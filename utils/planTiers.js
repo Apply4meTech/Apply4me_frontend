@@ -13,28 +13,25 @@ export function isActiveUnexpiredSubscription(subscription) {
 export function canPurchaseMainPlan(subscription, newPlanName) {
   const newRank = getPlanRank(newPlanName);
   if (newRank < 0) {
-    return { allowed: false, isUpgrade: false, message: 'Invalid plan' };
+    return { allowed: false, isUpgrade: false, isRepurchase: false, message: 'Invalid plan' };
   }
 
   if (!isActiveUnexpiredSubscription(subscription)) {
-    return { allowed: true, isUpgrade: false };
+    return { allowed: true, isUpgrade: false, isRepurchase: false };
   }
 
   const currentRank = getPlanRank(subscription.planName);
   if (newRank === currentRank) {
-    return {
-      allowed: false,
-      isUpgrade: false,
-      message: `You already have an active plan (${subscription.planName}).`
-    };
+    return { allowed: true, isUpgrade: false, isRepurchase: true };
   }
   if (newRank < currentRank) {
     return {
       allowed: false,
       isUpgrade: false,
+      isRepurchase: false,
       message: `You already have a higher plan (${subscription.planName}). Downgrades are not available.`
     };
   }
 
-  return { allowed: true, isUpgrade: true };
+  return { allowed: true, isUpgrade: true, isRepurchase: false };
 }

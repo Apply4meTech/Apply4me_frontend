@@ -436,7 +436,7 @@ export default function Pricing() {
                 {userPlan.subscription.endDate && (
                   <> It expires on {new Date(userPlan.subscription.endDate).toLocaleDateString()}.</>
                 )}
-                {' '}You can upgrade to a higher plan, or view details in your{' '}
+                {' '}You can buy the same plan again (leftover jobs carry over) or upgrade. View details in your{' '}
                 <Link href="/dashboard/plan" style={{ color: '#2563EB', textDecoration: 'underline' }}>
                   dashboard
                 </Link>.
@@ -701,6 +701,7 @@ export default function Pricing() {
                     const isUserPlan = userPlan && userPlan.subscription && userPlan.subscription.planName === plan.name;
                     const purchaseCheck = canPurchaseMainPlan(userPlan?.subscription, plan.name);
                     const isUpgrade = purchaseCheck.isUpgrade;
+                    const isRepurchase = purchaseCheck.isRepurchase;
                     const isDisabled = processingPayment || !purchaseCheck.allowed;
                     
                     // Determine button colors based on plan state
@@ -761,6 +762,8 @@ export default function Pricing() {
                             <CircularProgress size={16} sx={{ color: 'inherit' }} />
                             Processing...
                           </>
+                        ) : isRepurchase ? (
+                          'BUY AGAIN →'
                         ) : isUserPlan ? (
                           'Your Plan'
                         ) : isUpgrade ? (
