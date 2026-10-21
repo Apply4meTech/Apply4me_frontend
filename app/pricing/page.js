@@ -15,6 +15,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import stripeService from '../../utils/stripeService';
 import planService from '../../utils/planService';
 import { PRICING_ADDONS } from '../../utils/addonCatalog';
+import { canPurchaseMainPlan, isActiveUnexpiredSubscription } from '../../utils/planTiers';
 import Link from 'next/link';
 
 export default function Pricing() {
@@ -119,8 +120,9 @@ export default function Pricing() {
       router.push('/login?redirect=/pricing');
       return;
     }
-    if (userPlan?.subscription?.status === 'active') {
-      alert(`You already have an active plan.`);
+    const fakePurchaseCheck = canPurchaseMainPlan(userPlan?.subscription, plan.name);
+    if (!fakePurchaseCheck.allowed) {
+      alert(fakePurchaseCheck.message || 'You already have an active plan.');
       return;
     }
     setProcessingPayment(true);
@@ -157,10 +159,12 @@ export default function Pricing() {
       return;
     }
 
-    // Check if user already has an active plan (subscription packages only)
-    if (userPlan && userPlan.subscription && userPlan.subscription.status === 'active') {
-      alert(`You already have an active plan (${userPlan.subscription.planName}). Please wait for it to expire or contact support to upgrade.`);
-      router.push('/dashboard/plan');
+    const purchaseCheck = canPurchaseMainPlan(userPlan?.subscription, plan.name);
+    if (!purchaseCheck.allowed) {
+      alert(
+        purchaseCheck.message ||
+          `You already have an active plan (${userPlan?.subscription?.planName}).`
+      );
       return;
     }
 
@@ -413,7 +417,7 @@ export default function Pricing() {
       >
         <Container maxWidth="lg">
           {/* Alert if user has active plan */}
-          {userPlan && userPlan.subscription && userPlan.subscription.status === 'active' && (
+          {isActiveUnexpiredSubscription(userPlan?.subscription) && (
             <Box
               sx={{
                 mt: 0,
@@ -428,11 +432,11 @@ export default function Pricing() {
               }}
             >
               <Typography sx={{ color: '#92400E', fontSize: '0.875rem', flex: 1 }}>
-                <strong>You have an active plan:</strong> {userPlan.subscription.planName}. 
+                <strong>You have an active plan:</strong> {userPlan.subscription.planName}.
                 {userPlan.subscription.endDate && (
                   <> It expires on {new Date(userPlan.subscription.endDate).toLocaleDateString()}.</>
                 )}
-                {' '}You can view your plan details in your{' '}
+                {' '}You can upgrade to a higher plan, or view details in your{' '}
                 <Link href="/dashboard/plan" style={{ color: '#2563EB', textDecoration: 'underline' }}>
                   dashboard
                 </Link>.
@@ -695,8 +699,9 @@ export default function Pricing() {
                   {/* Get Started Button */}
                   {(() => {
                     const isUserPlan = userPlan && userPlan.subscription && userPlan.subscription.planName === plan.name;
-                    const hasActivePlan = userPlan && userPlan.subscription && userPlan.subscription.status === 'active';
-                    const isDisabled = processingPayment || hasActivePlan;
+                    const purchaseCheck = canPurchaseMainPlan(userPlan?.subscription, plan.name);
+                    const isUpgrade = purchaseCheck.isUpgrade;
+                    const isDisabled = processingPayment || !purchaseCheck.allowed;
                     
                     // Determine button colors based on plan state
                     const getButtonColors = () => {
@@ -758,7 +763,9 @@ export default function Pricing() {
                           </>
                         ) : isUserPlan ? (
                           'Your Plan'
-                        ) : hasActivePlan ? (
+                        ) : isUpgrade ? (
+                          'UPGRADE →'
+                        ) : !purchaseCheck.allowed ? (
                           'Already Have Plan'
                         ) : (
                           'GET STARTED →'
@@ -767,7 +774,7 @@ export default function Pricing() {
                     );
                   })()}
                   {/* Dev: Test Payment button - bypasses Stripe for full flow testing */}
-                  {isDevFakePaymentEnabled && userPlan?.subscription?.status !== 'active' && (
+                  {isDevFakePaymentEnabled && canPurchaseMainPlan(userPlan?.subscription, plan.name).allowed && (
                     <MuiButton
                       size="small"
                       variant="outlined"

@@ -348,7 +348,7 @@ export default function PlanPage() {
               },
             }}
           >
-            More Plans →
+            Upgrade or view more plans →
           </MuiLink>
         </Box>
       </Paper>
