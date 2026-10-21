@@ -69,7 +69,6 @@ function OnboardingContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
 
-  // Validation for each step
   const validateStep = (step) => {
     clearErrors();
     let isValid = true;
